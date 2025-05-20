@@ -48,9 +48,6 @@ interface ApiService {
     @GET("Popular_posts.php")
     suspend fun getPopularPosts(): Response<PostListResponse>
 
-    @POST("Like_post.php")
-    suspend fun likePost(@Body request: LikePostRequest): Response<BasicResponse>
-
     // 🔹 댓글
     @GET("Load_comment.php")
     suspend fun getComments(@Query("post_id") postId: Int): Response<CommentListResponse>
@@ -76,6 +73,10 @@ interface ApiService {
         @Path("reportId") reportId: Int,
         @Body status: String
     ): Response<ReportResponse>
+
+    // 🔹 좋아요
+    @POST("Like_post.php")
+    suspend fun likePost(@Body request: LikePostRequest): Response<BasicResponse>
 
     // 🔹 재료 등록
     @POST("Save_ingredients.php")
