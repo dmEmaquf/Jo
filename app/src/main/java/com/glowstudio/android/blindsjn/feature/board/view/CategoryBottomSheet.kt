@@ -11,6 +11,11 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import com.glowstudio.android.blindsjn.ui.theme.BackgroundWhite
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.alpha
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.BorderStroke
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -21,38 +26,33 @@ fun CategoryBottomSheet(
     onDismiss: () -> Unit
 ) {
     ModalBottomSheet(
-        onDismissRequest = onDismiss
+        onDismissRequest = onDismiss,
+        containerColor = BackgroundWhite
     ) {
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(24.dp)
         ) {
-            // 업종 카테고리
-            item {
-                CategorySection(
-                    title = "업종",
-                    categories = categories.filter { it.group == "업종" },
-                    selectedCategory = selectedCategory,
-                    onCategorySelected = {
-                        onCategorySelected(it)
-                        onDismiss()
-                    }
-                )
-            }
-
-            // 소통 카테고리
-            item {
-                CategorySection(
-                    title = "소통",
-                    categories = categories.filter { it.group == "소통" },
-                    selectedCategory = selectedCategory,
-                    onCategorySelected = {
-                        onCategorySelected(it)
-                        onDismiss()
-                    }
-                )
-            }
+            CategorySection(
+                title = "업종",
+                categories = categories.filter { it.group == "업종" },
+                selectedCategory = selectedCategory,
+                onCategorySelected = {
+                    onCategorySelected(it)
+                    onDismiss()
+                }
+            )
+            CategorySection(
+                title = "소통",
+                categories = categories.filter { it.group == "소통" },
+                selectedCategory = selectedCategory,
+                onCategorySelected = {
+                    onCategorySelected(it)
+                    onDismiss()
+                }
+            )
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
@@ -69,7 +69,6 @@ private fun CategorySection(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(vertical = 8.dp)
         )
         FlowRow(
@@ -78,13 +77,48 @@ private fun CategorySection(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             categories.forEach { category ->
-                CustomFilterChip(
+                CategoryTagChip(
                     text = category.title,
-                    isSelected = selectedCategory?.title == category.title,
+                    selected = selectedCategory?.title == category.title,
+                    enabled = true,
                     onClick = { onCategorySelected(category) }
                 )
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun CategoryTagChip(
+    text: String,
+    selected: Boolean,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    val background = when {
+        !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+        selected -> MaterialTheme.colorScheme.primary
+        else -> Color.White
+    }
+    val contentColor = when {
+        !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+        selected -> Color.White
+        else -> MaterialTheme.colorScheme.primary
+    }
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = background,
+        border = if (!selected && enabled) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
+        modifier = Modifier
+            .alpha(if (enabled) 1f else 0.5f)
+    ) {
+        Text(
+            text = text,
+            color = contentColor,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
     }
 }

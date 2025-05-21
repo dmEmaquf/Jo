@@ -4,5 +4,6 @@
     <style name="Theme.BlindSJN" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">@font/bmjua</item>
         <item name="fontFamily">@font/bmjua</item>
+        <item name="windowNoTitle">true</item>
     </style>
 </resources>

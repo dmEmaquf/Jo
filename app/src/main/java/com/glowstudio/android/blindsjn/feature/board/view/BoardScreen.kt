@@ -86,7 +86,7 @@ fun BoardScreen(navController: NavController) {
 
     // 글쓰기 바텀시트
     if (showSheet) {
-        ModalBottomSheet(onDismissRequest = { showSheet = false }) {
+        ModalBottomSheet(onDismissRequest = { showSheet = false }, containerColor = BackgroundWhite) {
             val tags by postBottomSheetViewModel.tags.collectAsState()
             val enabledTags by postBottomSheetViewModel.enabledTags.collectAsState()
             val selectedTags by postBottomSheetViewModel.selectedTags.collectAsState()

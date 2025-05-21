@@ -1,6 +1,7 @@
 package com.glowstudio.android.blindsjn.feature.board.view
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -14,6 +15,7 @@ import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import com.glowstudio.android.blindsjn.ui.theme.BackgroundWhite
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -29,8 +31,6 @@ fun PostBottomSheet(
             .fillMaxWidth()
             .padding(24.dp)
     ) {
-        Text("태그를 선택하세요", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(16.dp))
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)

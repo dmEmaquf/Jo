@@ -25,6 +25,7 @@ import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.WritePostViewModel
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.glowstudio.android.blindsjn.ui.theme.BackgroundWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,7 +93,8 @@ fun WritePostScreen(
                         )
                         DropdownMenu(
                             expanded = expanded,
-                            onDismissRequest = { expanded = false }
+                            onDismissRequest = { expanded = false },
+                            containerColor = BackgroundWhite
                         ) {
                             categories.forEach { category ->
                                 DropdownMenuItem(
