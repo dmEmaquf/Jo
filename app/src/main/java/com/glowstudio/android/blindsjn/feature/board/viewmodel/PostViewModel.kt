@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.glowstudio.android.blindsjn.feature.board.model.*
 import com.glowstudio.android.blindsjn.feature.board.repository.PostRepository
+import com.glowstudio.android.blindsjn.data.network.Network
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -30,8 +31,10 @@ class PostViewModel : ViewModel() {
             try {
                 val response = PostRepository.loadPosts()
                 if (response.isSuccessful) {
-                    response.body()?.let { postListResponse ->
-                        _posts.value = postListResponse.data
+                    response.body()?.let { apiResponse ->
+                        apiResponse.data?.let { posts ->
+                            _posts.value = posts
+                        }
                     }
                 } else {
                     _statusMessage.value = "불러오기 실패: ${response.message()}"
@@ -59,10 +62,10 @@ class PostViewModel : ViewModel() {
         }
     }
 
-    fun savePost(title: String, content: String, userId: Int, industry: String) {
+    fun savePost(title: String, content: String, userId: Int, industry: String, industryId: Int? = null, phoneNumber: String = "") {
         viewModelScope.launch {
             try {
-                val postRequest = PostRequest(title, content, userId, industry)
+                val postRequest = PostRequest(title, content, userId, industry, industryId, phoneNumber)
                 val response = PostRepository.savePost(postRequest)
                 if (response.isSuccessful) {
                     _statusMessage.value = response.body()?.message
@@ -128,18 +131,59 @@ class PostViewModel : ViewModel() {
     fun toggleLike(postId: Int, userId: Int, onResult: (Boolean, Boolean, Int) -> Unit) {
         viewModelScope.launch {
             try {
+                android.util.Log.d("PostViewModel", "Sending like request for postId: $postId, userId: $userId")
+                // 서버에 좋아요 요청 전송
                 val request = LikePostRequest(post_id = postId, user_id = userId)
                 val response = PostRepository.likePost(request)
+                
+                android.util.Log.d("PostViewModel", "Received response: ${response.isSuccessful}")
+                
                 if (response.isSuccessful) {
-                    // 서버에서 최신 게시글 정보 다시 불러오기
-                    val updatedPost = PostRepository.loadPostById(postId).body()?.data
-                    loadPostById(postId)
-                    loadPosts()
-                    onResult(true, updatedPost?.isLiked ?: false, updatedPost?.likeCount ?: 0)
+                    response.body()?.let { apiResponse ->
+                        android.util.Log.d("PostViewModel", "Response body: $apiResponse")
+                        if (apiResponse.status == "success") {
+                            // 서버에서 받은 liked 상태로 UI 업데이트
+                            val isLiked = apiResponse.liked
+                            android.util.Log.d("PostViewModel", "Like status: $isLiked")
+                            
+                            // 현재 게시글 업데이트
+                            _selectedPost.value?.let { currentPost ->
+                                val newLikeCount = if (isLiked) currentPost.likeCount + 1 else currentPost.likeCount - 1
+                                _selectedPost.value = currentPost.copy(
+                                    isLiked = isLiked,
+                                    likeCount = newLikeCount
+                                )
+                                android.util.Log.d("PostViewModel", "Updated post like count: $newLikeCount")
+                            }
+                            
+                            // 게시글 목록 업데이트
+                            _posts.value = _posts.value.map { post ->
+                                if (post.id == postId) {
+                                    val newLikeCount = if (isLiked) post.likeCount + 1 else post.likeCount - 1
+                                    post.copy(
+                                        isLiked = isLiked,
+                                        likeCount = newLikeCount
+                                    )
+                                } else {
+                                    post
+                                }
+                            }
+                            
+                            onResult(true, isLiked, _selectedPost.value?.likeCount ?: 0)
+                        } else {
+                            android.util.Log.e("PostViewModel", "Server returned error status: ${apiResponse.status}")
+                            onResult(false, _selectedPost.value?.isLiked ?: false, _selectedPost.value?.likeCount ?: 0)
+                        }
+                    } ?: run {
+                        android.util.Log.e("PostViewModel", "Response body is null")
+                        onResult(false, _selectedPost.value?.isLiked ?: false, _selectedPost.value?.likeCount ?: 0)
+                    }
                 } else {
+                    android.util.Log.e("PostViewModel", "Request failed with code: ${response.code()}")
                     onResult(false, _selectedPost.value?.isLiked ?: false, _selectedPost.value?.likeCount ?: 0)
                 }
             } catch (e: Exception) {
+                android.util.Log.e("PostViewModel", "Error during like request", e)
                 onResult(false, _selectedPost.value?.isLiked ?: false, _selectedPost.value?.likeCount ?: 0)
             }
         }
@@ -151,12 +195,8 @@ class PostViewModel : ViewModel() {
                 val request = ReportRequest(postId, userId, reason)
                 val response = PostRepository.reportPost(request)
                 if (response.isSuccessful) {
-                    response.body()?.let { reportResponse ->
-                        if (reportResponse.success) {
-                            _reportResult.value = reportResponse.message ?: "신고가 접수되었습니다."
-                        } else {
-                            _reportResult.value = reportResponse.error ?: "신고 접수 실패"
-                        }
+                    response.body()?.let { apiResponse ->
+                        _reportResult.value = apiResponse.message ?: "신고가 접수되었습니다."
                     } ?: run {
                         _reportResult.value = "서버 응답이 비어있습니다."
                     }

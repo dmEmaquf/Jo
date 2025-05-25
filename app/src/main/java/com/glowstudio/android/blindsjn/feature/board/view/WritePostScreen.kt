@@ -25,16 +25,23 @@ import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.WritePostViewModel
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.platform.LocalContext
+import com.glowstudio.android.blindsjn.data.network.UserManager
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WritePostScreen(
     navController: NavController,
+    industry: String? = null,
     tags: String? = null
 ) {
+    val context = LocalContext.current
     val viewModel: PostViewModel = viewModel()
     val boardViewModel: BoardViewModel = viewModel()
     val writePostViewModel = remember { WritePostViewModel(boardViewModel) }
+    val coroutineScope = rememberCoroutineScope()
     val categories by writePostViewModel.categories.collectAsState()
     val selectedCategory by writePostViewModel.selectedCategory.collectAsState()
     var title by remember { mutableStateOf("") }
@@ -42,9 +49,10 @@ fun WritePostScreen(
     var isAnonymous by remember { mutableStateOf(false) }
     var isQuestion by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
+    val userId by UserManager.getUserId(context).collectAsState(initial = null)
+    val statusMessage by viewModel.statusMessage.collectAsState()
 
     val contentFocusRequester = remember { FocusRequester() }
-    val statusMessage by viewModel.statusMessage.collectAsState()
 
     LaunchedEffect(statusMessage) {
         statusMessage?.let { message ->
@@ -175,9 +183,16 @@ fun WritePostScreen(
                         if (title.isBlank() || content.isBlank()) {
                             viewModel.setStatusMessage("제목과 내용을 입력하세요.")
                         } else {
-                            val userId = 1
-                            val industry = "카페"
-                            viewModel.savePost(title, content, userId, industry)
+                            userId?.let { id ->
+                                viewModel.savePost(
+                                    title = title,
+                                    content = content,
+                                    userId = id,
+                                    industry = industry ?: selectedCategory.title
+                                )
+                            } ?: run {
+                                viewModel.setStatusMessage("사용자 정보를 찾을 수 없습니다.")
+                            }
                         }
                     },
                     modifier = Modifier.align(Alignment.End)

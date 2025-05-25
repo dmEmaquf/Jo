@@ -39,16 +39,23 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
+import com.glowstudio.android.blindsjn.data.network.UserManager
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostDetailScreen(navController: NavController, postId: String) {
+    val context = LocalContext.current
     val postViewModel: PostViewModel = viewModel()
     val commentViewModel: CommentViewModel = viewModel()
     val post by postViewModel.selectedPost.collectAsState()
     val comments by commentViewModel.comments.collectAsState()
     var newComment by remember { mutableStateOf("") }
-    var isLiked by remember { mutableStateOf(false) }
+    var isLiked by remember { mutableStateOf(post?.isLiked ?: false) }
+    var likeCount by remember { mutableIntStateOf(post?.likeCount ?: 0) }
+    var isLiking by remember { mutableStateOf(false) }
     
     // 신고 관련 상태를 상위에서 관리
     var showReportDialog by remember { mutableStateOf(false) }
@@ -56,10 +63,18 @@ fun PostDetailScreen(navController: NavController, postId: String) {
     val reportResult by postViewModel.reportResult.collectAsState()
 
     val safePostId = postId.toIntOrNull() ?: 1
+    val userId by UserManager.getUserId(context).collectAsState(initial = -1)
 
     LaunchedEffect(safePostId) {
         postViewModel.loadPostById(safePostId)
         commentViewModel.loadComments(safePostId)
+    }
+
+    LaunchedEffect(post) {
+        post?.let {
+            isLiked = it.isLiked
+            likeCount = it.likeCount
+        }
     }
 
     Scaffold(
@@ -70,25 +85,46 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                 newComment = newComment,
                 onCommentChange = { newComment = it },
                 onCommentSubmit = {
-                    if (newComment.isNotBlank()) {
+                    if (newComment.isNotBlank() && userId > 0) {
                         commentViewModel.saveComment(
                             postId = safePostId,
-                            userId = 1,
+                            userId = userId,
                             content = newComment
                         )
                         newComment = ""
                     }
                 },
                 isLiked = isLiked,
-                onLikeClick = { isLiked = !isLiked },
+                onLikeClick = {
+                    if (!isLiking && userId > 0) {
+                        isLiking = true
+                        android.util.Log.d("PostDetailScreen", "Sending like request for postId: $safePostId")
+                        postViewModel.toggleLike(safePostId, userId) { success, newIsLiked, newLikeCount ->
+                            android.util.Log.d("PostDetailScreen", "Like response - success: $success, newIsLiked: $newIsLiked, newLikeCount: $newLikeCount")
+                            if (success) {
+                                isLiked = newIsLiked
+                                likeCount = newLikeCount
+                            }
+                            isLiking = false
+                        }
+                    } else {
+                        android.util.Log.d("PostDetailScreen", "Like request skipped - isLiking: $isLiking, userId: $userId")
+                    }
+                },
                 showReportDialog = showReportDialog,
                 onShowReportDialogChange = { showReportDialog = it },
                 reportReason = reportReason,
                 onReportReasonChange = { reportReason = it },
                 onReportSubmit = {
-                    postViewModel.reportPost(postId = safePostId, userId = 1, reason = reportReason)
+                    if (userId > 0) {
+                        postViewModel.reportPost(postId = safePostId, userId = userId, reason = reportReason)
                     showReportDialog = false
                 }
+                },
+                likeCount = likeCount,
+                isLiking = isLiking,
+                userId = userId,
+                modifier = Modifier.padding(paddingValues)
             )
 
             // 신고 결과 알림
@@ -119,15 +155,18 @@ fun PostDetailScreenContent(
     onShowReportDialogChange: (Boolean) -> Unit,
     reportReason: String,
     onReportReasonChange: (String) -> Unit,
-    onReportSubmit: () -> Unit
+    onReportSubmit: () -> Unit,
+    likeCount: Int,
+    isLiking: Boolean,
+    userId: Int?,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
         post?.let {
-
             Spacer(modifier = Modifier.height(8.dp))
             // 작성자 정보
             Row(
@@ -151,10 +190,15 @@ fun PostDetailScreenContent(
                 }
                 OutlinedButton(
                     onClick = onLikeClick,
+                    enabled = !isLiking && userId != null,
                     border = ButtonDefaults.outlinedButtonBorder,
                     shape = MaterialTheme.shapes.small,
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
                     modifier = Modifier.height(32.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         Icons.Default.ThumbUp,
@@ -164,10 +208,11 @@ fun PostDetailScreenContent(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        "${it.likeCount + if (isLiked) 1 else 0}",
+                            likeCount.toString(),
                         color = if (isLiked) Error else DividerGray,
                         style = MaterialTheme.typography.bodySmall
                     )
+                    }
                 }
             }
             Row(
@@ -495,7 +540,10 @@ fun PostDetailScreenPreview() {
         onShowReportDialogChange = { },
         reportReason = "",
         onReportReasonChange = { },
-        onReportSubmit = { }
+        onReportSubmit = { },
+        likeCount = 1,
+        isLiking = false,
+        userId = 1
     )
 }
 

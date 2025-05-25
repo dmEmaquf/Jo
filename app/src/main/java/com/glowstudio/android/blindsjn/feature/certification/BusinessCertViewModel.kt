@@ -7,19 +7,20 @@ import com.glowstudio.android.blindsjn.data.network.BusinessCertRepository
 import kotlinx.coroutines.launch
 
 class BusinessCertViewModel : ViewModel() {
+    private val repository = BusinessCertRepository()
     val resultMessage = mutableStateOf("")
 
     fun onBusinessCertClick(name: String, phoneNumber: String, businessNumber: String) {
         viewModelScope.launch {
             // 1. 이미 인증된 번호인지 확인
-            val isAlreadyCertified = BusinessCertRepository.checkAlreadyCertified(businessNumber)
+            val isAlreadyCertified = repository.checkAlreadyCertified(phoneNumber)
             if (isAlreadyCertified) {
                 resultMessage.value = "이미 인증된 번호입니다."
                 return@launch
             }
 
             // 2. 사업자 등록번호 진위확인 API 호출
-            val isValid = BusinessCertRepository.checkBusinessNumberValidity(businessNumber)
+            val isValid = repository.checkBusinessNumberValidity(businessNumber)
 
             // 3. 결과 메시지 처리
             if (isValid) {

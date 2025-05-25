@@ -28,6 +28,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            buildConfigField("boolean", "DEBUG", "true")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -40,6 +43,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -80,11 +84,11 @@ dependencies {
     // Retrofit and Coroutines
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
-    implementation("com.squareup.okhttp3:okhttp:4.9.3")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // DataStore for auto-login
     implementation("androidx.datastore:datastore-preferences:1.0.0")
@@ -105,4 +109,10 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-pager-indicators:0.32.0")
 
     implementation ("org.jsoup:jsoup:1.15.3")
+
+    // LiveData for Compose
+    implementation("androidx.compose.runtime:runtime-livedata:1.7.8")
+
+    // Compose Runtime
+    implementation("androidx.compose.runtime:runtime:1.7.8")
 }

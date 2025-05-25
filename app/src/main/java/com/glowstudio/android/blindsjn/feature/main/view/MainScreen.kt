@@ -36,6 +36,7 @@ import com.glowstudio.android.blindsjn.feature.foodcost.RegisterIngredientScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.RecipeListScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.EditRecipeScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.IngredientListScreen
+import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
@@ -202,10 +203,13 @@ fun MainScreen(
                         }
                     }
                     composable("businessCertification") {
-                        com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen(
-                            navController = navController,
-                            onConfirm = { phone, certNumber, industry ->
-                                // 인증 완료 후 뒤로가기 또는 원하는 화면 이동
+                        BusinessCertificationScreen(
+                            onConfirm = {
+                                // 인증 완료 후 뒤로가기
+                                navController.popBackStack()
+                            },
+                            onDismiss = {
+                                // 취소 시 뒤로가기
                                 navController.popBackStack()
                             }
                         )

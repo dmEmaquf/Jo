@@ -223,9 +223,13 @@ fun NavGraphBuilder.profileNavGraph(
         composable("certification_screen") {
             topBarViewModel.setDetailBar("사업자 인증")
             BusinessCertificationScreen(
-                navController = navController,
-                onConfirm = { phone, certNumber, industry ->
-                    navController.navigate("someNextRoute")
+                onConfirm = {
+                    // 인증 완료 후 뒤로가기
+                    navController.popBackStack()
+                },
+                onDismiss = {
+                    // 취소 시 뒤로가기
+                    navController.popBackStack()
                 }
             )
         }
