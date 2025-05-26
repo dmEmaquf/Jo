@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 
     // Kotlin serialization plugin for type safe routes and navigation arguments
     kotlin("plugin.serialization") version "2.0.21"
@@ -105,4 +107,14 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-pager-indicators:0.32.0")
 
     implementation ("org.jsoup:jsoup:1.15.3")
+
+    // Hilt
+    implementation("com.google.dagger:hilt-android:2.48")
+    kapt("com.google.dagger:hilt-android-compiler:2.48")
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+}
+
+// Allow references to generated code
+kapt {
+    correctErrorTypes = true
 }

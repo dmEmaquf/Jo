@@ -11,7 +11,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.ui.navigation.AppNavHost
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
