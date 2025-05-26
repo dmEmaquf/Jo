@@ -70,7 +70,7 @@ object NaverNewsServer {
 // 내부 서버
 object InternalServer {
 
-    private const val BASE_URL = "http://wonrdc.duckdns.org/"
+    private const val BASE_URL = "http://wonrdc.iptime.org/"
 
     private val client by lazy {
         val logging = HttpLoggingInterceptor().apply {
