@@ -54,6 +54,12 @@ class PayManagementViewModel @Inject constructor(
     private val _showGoalSettingDialog = MutableStateFlow(false)
     val showGoalSettingDialog: StateFlow<Boolean> = _showGoalSettingDialog
 
+    private val _showFixedCostSettingDialog = MutableStateFlow(false)
+    val showFixedCostSettingDialog: StateFlow<Boolean> = _showFixedCostSettingDialog
+
+    private val _fixedCost = MutableStateFlow<Double>(1200000.0) // 기본값 120만원
+    val fixedCost: StateFlow<Double> = _fixedCost
+
     private val _dailyAverage = MutableStateFlow<Double>(0.0)
     val dailyAverage: StateFlow<Double> = _dailyAverage
 
@@ -65,6 +71,7 @@ class PayManagementViewModel @Inject constructor(
         loadWeeklySales()
         loadMonthlyGoal()
         loadDailyAverage()
+        loadFixedCost()
     }
 
     fun setPeriod(period: String) {
@@ -83,6 +90,19 @@ class PayManagementViewModel @Inject constructor(
 
     fun hideGoalSettingDialog() {
         _showGoalSettingDialog.value = false
+    }
+
+    fun showFixedCostSettingDialog() {
+        _showFixedCostSettingDialog.value = true
+    }
+
+    fun hideFixedCostSettingDialog() {
+        _showFixedCostSettingDialog.value = false
+    }
+
+    fun setFixedCost(cost: Double) {
+        repository.saveFixedCost(cost)
+        _fixedCost.value = cost
     }
 
     private fun loadData() {
@@ -261,6 +281,10 @@ class PayManagementViewModel @Inject constructor(
                 _dailyComparison.value = 0.0
             }
         }
+    }
+
+    private fun loadFixedCost() {
+        _fixedCost.value = repository.getFixedCost()
     }
 
     fun refresh() {
