@@ -1,0 +1,337 @@
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AndroidLayouts\">\r\n    <shared>\r\n      <config />\r\n    </shared>\r\n  </component>\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"NONE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"0ed4dd7a-a521-4a82-a468-ac7d90561092\" name=\"Changes\" comment=\"main ui - BoardDetailScreen\">\r\n      <change afterPath=\"$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/WritePostScreen.kt\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.gradle/8.9/executionHistory/executionHistory.bin\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.gradle/8.9/executionHistory/executionHistory.bin\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.gradle/8.9/executionHistory/executionHistory.lock\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.gradle/8.9/executionHistory/executionHistory.lock\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.gradle/8.9/fileHashes/fileHashes.bin\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.gradle/8.9/fileHashes/fileHashes.bin\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.gradle/8.9/fileHashes/fileHashes.lock\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.gradle/8.9/fileHashes/fileHashes.lock\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.gradle/8.9/fileHashes/resourceHashesCache.bin\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.gradle/8.9/fileHashes/resourceHashesCache.bin\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/Navigation.kt\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/Navigation.kt\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/BoardDetailScreen.kt\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/BoardDetailScreen.kt\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"ClangdSettings\">\r\n    <option name=\"formatViaClangd\" value=\"false\" />\r\n  </component>\r\n  <component name=\"ExecutionTargetManager\" SELECTED_TARGET=\"device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\\Users\\gyshi\\.android\\avd\\Pixel_7_API_35.avd)]\" />\r\n  <component name=\"ExternalProjectsData\">\r\n    <projectState path=\"$PROJECT_DIR$\">\r\n      <ProjectState />\r\n    </projectState>\r\n  </component>\r\n  <component name=\"ExternalProjectsManager\">\r\n    <system id=\"GRADLE\">\r\n      <state>\r\n        <task path=\"$PROJECT_DIR$/app\">\r\n          <activation />\r\n        </task>\r\n        <projects_view>\r\n          <tree_state>\r\n            <expand>\r\n              <path>\r\n                <item name=\"\" type=\"6a2764b6:ExternalProjectsStructure$RootNode\" />\r\n                <item name=\"BlindSJN\" type=\"f1a62948:ProjectNode\" />\r\n              </path>\r\n              <path>\r\n                <item name=\"\" type=\"6a2764b6:ExternalProjectsStructure$RootNode\" />\r\n                <item name=\"BlindSJN\" type=\"f1a62948:ProjectNode\" />\r\n                <item name=\"app\" type=\"2d1252cf:ModuleNode\" />\r\n              </path>\r\n              <path>\r\n                <item name=\"\" type=\"6a2764b6:ExternalProjectsStructure$RootNode\" />\r\n                <item name=\"BlindSJN\" type=\"f1a62948:ProjectNode\" />\r\n                <item name=\"app\" type=\"2d1252cf:ModuleNode\" />\r\n                <item name=\"Tasks\" type=\"e4a08cd1:TasksNode\" />\r\n              </path>\r\n              <path>\r\n                <item name=\"\" type=\"6a2764b6:ExternalProjectsStructure$RootNode\" />\r\n                <item name=\"BlindSJN\" type=\"f1a62948:ProjectNode\" />\r\n                <item name=\"app\" type=\"2d1252cf:ModuleNode\" />\r\n                <item name=\"Tasks\" type=\"e4a08cd1:TasksNode\" />\r\n                <item name=\"other\" type=\"c8890929:TasksNode$1\" />\r\n              </path>\r\n            </expand>\r\n            <select />\r\n          </tree_state>\r\n        </projects_view>\r\n      </state>\r\n    </system>\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Kotlin Class\" />\r\n        <option value=\"Kotlin File\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\r\n      <map>\r\n        <entry key=\"$PROJECT_DIR$\" value=\"Shim\" />\r\n      </map>\r\n    </option>\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitHubPullRequestSearchHistory\">{\r\n  &quot;lastFilter&quot;: {\r\n    &quot;state&quot;: &quot;OPEN&quot;,\r\n    &quot;assignee&quot;: &quot;Ordinary702&quot;\r\n  }\r\n}</component>\r\n  <component name=\"GithubPullRequestsUISettings\">{\r\n  &quot;selectedUrlAndAccountId&quot;: {\r\n    &quot;url&quot;: &quot;https://github.com/heakbomb/GrowStudio.git&quot;,\r\n    &quot;accountId&quot;: &quot;82eecfa8-5624-4e55-b7b8-cb692e61e84e&quot;\r\n  }\r\n}</component>\r\n  <component name=\"ProblemsViewState\">\r\n    <option name=\"selectedTabId\" value=\"ProjectErrors\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 2\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2pvwqS6cZAQY8Lt6zJMHzWcTvtV\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"ASKED_SHARE_PROJECT_CONFIGURATION_FILES\": \"true\",\r\n    \"Android App.app.executor\": \"Run\",\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"RunOnceActivity.cidr.known.project.marker\": \"true\",\r\n    \"RunOnceActivity.readMode.enableVisualFormatting\": \"true\",\r\n    \"ToolWindow.Running Devices.ShowToolbar\": \"false\",\r\n    \"cf.first.check.clang-format\": \"false\",\r\n    \"cidr.known.project.marker\": \"true\",\r\n    \"com.android.tools.idea.streaming.emulator.frame.visible\": \"false\",\r\n    \"com.android.tools.idea.streaming.zoom.toolbar.visible\": \"false\",\r\n    \"git-widget-placeholder\": \"main\",\r\n    \"kotlin-language-version-configured\": \"true\",\r\n    \"project.structure.last.edited\": \"Modules\",\r\n    \"project.structure.proportion\": \"0.17\",\r\n    \"project.structure.side.proportion\": \"0.2\",\r\n    \"settings.editor.selected.configurable\": \"preferences.pluginManager\"\r\n  }\r\n}]]></component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\gyshi\\AndroidStudioProjects\\BlindSJN\\app\\src\\main\\java\\com\\glowstudio\\android\\blindsjn\\ui\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"app\" type=\"AndroidRunConfigurationType\" factoryName=\"Android App\" activateToolWindowBeforeRun=\"false\">\r\n      <module name=\"BlindSJN.app.main\" />\r\n      <option name=\"DEPLOY\" value=\"true\" />\r\n      <option name=\"DEPLOY_APK_FROM_BUNDLE\" value=\"false\" />\r\n      <option name=\"DEPLOY_AS_INSTANT\" value=\"false\" />\r\n      <option name=\"ARTIFACT_NAME\" value=\"\" />\r\n      <option name=\"PM_INSTALL_OPTIONS\" value=\"\" />\r\n      <option name=\"ALL_USERS\" value=\"false\" />\r\n      <option name=\"ALWAYS_INSTALL_WITH_PM\" value=\"false\" />\r\n      <option name=\"CLEAR_APP_STORAGE\" value=\"false\" />\r\n      <option name=\"DYNAMIC_FEATURES_DISABLED_LIST\" value=\"\" />\r\n      <option name=\"ACTIVITY_EXTRA_FLAGS\" value=\"\" />\r\n      <option name=\"MODE\" value=\"default_activity\" />\r\n      <option name=\"RESTORE_ENABLED\" value=\"false\" />\r\n      <option name=\"RESTORE_FILE\" value=\"\" />\r\n      <option name=\"CLEAR_LOGCAT\" value=\"false\" />\r\n      <option name=\"SHOW_LOGCAT_AUTOMATICALLY\" value=\"false\" />\r\n      <option name=\"TARGET_SELECTION_MODE\" value=\"DEVICE_AND_SNAPSHOT_COMBO_BOX\" />\r\n      <option name=\"SELECTED_CLOUD_MATRIX_CONFIGURATION_ID\" value=\"-1\" />\r\n      <option name=\"SELECTED_CLOUD_MATRIX_PROJECT_ID\" value=\"\" />\r\n      <option name=\"DEBUGGER_TYPE\" value=\"Auto\" />\r\n      <Auto>\r\n        <option name=\"USE_JAVA_AWARE_DEBUGGER\" value=\"false\" />\r\n        <option name=\"SHOW_STATIC_VARS\" value=\"true\" />\r\n        <option name=\"WORKING_DIR\" value=\"\" />\r\n        <option name=\"TARGET_LOGGING_CHANNELS\" value=\"lldb process:gdb-remote packets\" />\r\n        <option name=\"SHOW_OPTIMIZED_WARNING\" value=\"true\" />\r\n        <option name=\"ATTACH_ON_WAIT_FOR_DEBUGGER\" value=\"false\" />\r\n        <option name=\"DEBUG_SANDBOX_SDK\" value=\"false\" />\r\n      </Auto>\r\n      <Hybrid>\r\n        <option name=\"USE_JAVA_AWARE_DEBUGGER\" value=\"false\" />\r\n        <option name=\"SHOW_STATIC_VARS\" value=\"true\" />\r\n        <option name=\"WORKING_DIR\" value=\"\" />\r\n        <option name=\"TARGET_LOGGING_CHANNELS\" value=\"lldb process:gdb-remote packets\" />\r\n        <option name=\"SHOW_OPTIMIZED_WARNING\" value=\"true\" />\r\n        <option name=\"ATTACH_ON_WAIT_FOR_DEBUGGER\" value=\"false\" />\r\n        <option name=\"DEBUG_SANDBOX_SDK\" value=\"false\" />\r\n      </Hybrid>\r\n      <Java>\r\n        <option name=\"ATTACH_ON_WAIT_FOR_DEBUGGER\" value=\"false\" />\r\n        <option name=\"DEBUG_SANDBOX_SDK\" value=\"false\" />\r\n      </Java>\r\n      <Native>\r\n        <option name=\"USE_JAVA_AWARE_DEBUGGER\" value=\"false\" />\r\n        <option name=\"SHOW_STATIC_VARS\" value=\"true\" />\r\n        <option name=\"WORKING_DIR\" value=\"\" />\r\n        <option name=\"TARGET_LOGGING_CHANNELS\" value=\"lldb process:gdb-remote packets\" />\r\n        <option name=\"SHOW_OPTIMIZED_WARNING\" value=\"true\" />\r\n        <option name=\"ATTACH_ON_WAIT_FOR_DEBUGGER\" value=\"false\" />\r\n        <option name=\"DEBUG_SANDBOX_SDK\" value=\"false\" />\r\n      </Native>\r\n      <Profilers>\r\n        <option name=\"ADVANCED_PROFILING_ENABLED\" value=\"false\" />\r\n        <option name=\"STARTUP_PROFILING_ENABLED\" value=\"false\" />\r\n        <option name=\"STARTUP_CPU_PROFILING_ENABLED\" value=\"false\" />\r\n        <option name=\"STARTUP_CPU_PROFILING_CONFIGURATION_NAME\" value=\"Java/Kotlin Method Sample (legacy)\" />\r\n        <option name=\"STARTUP_NATIVE_MEMORY_PROFILING_ENABLED\" value=\"false\" />\r\n        <option name=\"NATIVE_MEMORY_SAMPLE_RATE_BYTES\" value=\"2048\" />\r\n      </Profilers>\r\n      <option name=\"DEEP_LINK\" value=\"\" />\r\n      <option name=\"ACTIVITY_CLASS\" value=\"\" />\r\n      <option name=\"SEARCH_ACTIVITY_IN_GLOBAL_SCOPE\" value=\"false\" />\r\n      <option name=\"SKIP_ACTIVITY_VALIDATION\" value=\"false\" />\r\n      <method v=\"2\">\r\n        <option name=\"Android.Gradle.BeforeRunTask\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"0ed4dd7a-a521-4a82-a468-ac7d90561092\" name=\"Changes\" comment=\"\" />\r\n      <created>1733660048495</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1733660048495</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"Network.kt 주석 작성\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1733660546323</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1733660546323</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"일부 주석 수정\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1733893038445</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1733893038445</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"main ui - BoardScreen\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1736649890122</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1736649890122</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"main ui - BoardDetailScreen\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1736651996166</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1736651996166</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"5\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State>\r\n              <option name=\"FILTERS\">\r\n                <map>\r\n                  <entry key=\"branch\">\r\n                    <value>\r\n                      <list>\r\n                        <option value=\"HEAD\" />\r\n                      </list>\r\n                    </value>\r\n                  </entry>\r\n                </map>\r\n              </option>\r\n            </State>\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"UI-서버 작업 시작\" />\r\n    <MESSAGE value=\"Network.kt 주석 작성\" />\r\n    <MESSAGE value=\"일부 주석 수정\" />\r\n    <MESSAGE value=\"main ui - BoardScreen\" />\r\n    <MESSAGE value=\"main ui - BoardDetailScreen\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"main ui - BoardDetailScreen\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 36192a684fc4487b15973ed810ba82ae7b196a13)
++++ b/.idea/workspace.xml	(date 1736833546814)
+@@ -9,8 +9,7 @@
+     <option name="autoReloadType" value="NONE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="0ed4dd7a-a521-4a82-a468-ac7d90561092" name="Changes" comment="main ui - BoardDetailScreen">
+-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/WritePostScreen.kt" afterDir="false" />
++    <list default="true" id="0ed4dd7a-a521-4a82-a468-ac7d90561092" name="Changes" comment="main ui - WritePostScreen">
+       <change beforePath="$PROJECT_DIR$/.gradle/8.9/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.9/executionHistory/executionHistory.bin" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.gradle/8.9/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.9/executionHistory/executionHistory.lock" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.gradle/8.9/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.9/fileHashes/fileHashes.bin" afterDir="false" />
+@@ -18,9 +17,12 @@
+       <change beforePath="$PROJECT_DIR$/.gradle/8.9/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.9/fileHashes/resourceHashesCache.bin" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/Navigation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/Navigation.kt" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/BoardDetailScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/BoardDetailScreen.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/PopularScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/PopularScreen.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/WritePostScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/WritePostScreen.kt" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -103,7 +105,8 @@
+   }
+ }</component>
+   <component name="ProblemsViewState">
+-    <option name="selectedTabId" value="ProjectErrors" />
++    <option name="selectedTabId" value="CurrentFile" />
++    <option name="showPreview" value="true" />
+   </component>
+   <component name="ProjectColorInfo">{
+   &quot;associatedIndex&quot;: 2
+@@ -114,32 +117,35 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent"><![CDATA[{
+-  "keyToString": {
+-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+-    "Android App.app.executor": "Run",
+-    "RunOnceActivity.ShowReadmeOnStart": "true",
+-    "RunOnceActivity.cidr.known.project.marker": "true",
+-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+-    "ToolWindow.Running Devices.ShowToolbar": "false",
+-    "cf.first.check.clang-format": "false",
+-    "cidr.known.project.marker": "true",
+-    "com.android.tools.idea.streaming.emulator.frame.visible": "false",
+-    "com.android.tools.idea.streaming.zoom.toolbar.visible": "false",
+-    "git-widget-placeholder": "main",
+-    "kotlin-language-version-configured": "true",
+-    "project.structure.last.edited": "Modules",
+-    "project.structure.proportion": "0.17",
+-    "project.structure.side.proportion": "0.2",
+-    "settings.editor.selected.configurable": "preferences.pluginManager"
++  <component name="PropertiesComponent">{
++  &quot;keyToString&quot;: {
++    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
++    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
++    &quot;Compose Preview.PreviewWritePostScreen.executor&quot;: &quot;Run&quot;,
++    &quot;Compose Preview.WritePostScreen.executor&quot;: &quot;Run&quot;,
++    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
++    &quot;ToolWindow.Running Devices.ShowToolbar&quot;: &quot;false&quot;,
++    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
++    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
++    &quot;com.android.tools.idea.streaming.emulator.frame.visible&quot;: &quot;false&quot;,
++    &quot;com.android.tools.idea.streaming.zoom.toolbar.visible&quot;: &quot;false&quot;,
++    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
++    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
++    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
++    &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
++    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
++    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
++    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+   }
+-}]]></component>
++}</component>
+   <component name="RecentsManager">
+     <key name="MoveFile.RECENT_KEYS">
+       <recent name="C:\Users\gyshi\AndroidStudioProjects\BlindSJN\app\src\main\java\com\glowstudio\android\blindsjn\ui" />
+     </key>
+   </component>
+-  <component name="RunManager">
++  <component name="RunManager" selected="Android App.app">
+     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
+       <module name="BlindSJN.app.main" />
+       <option name="DEPLOY" value="true" />
+@@ -208,6 +214,150 @@
+         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+       </method>
+     </configuration>
++    <configuration name="PreviewWritePostScreen" type="ComposePreviewRunConfiguration" temporary="true">
++      <module name="BlindSJN.app" />
++      <option name="DEPLOY" value="true" />
++      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
++      <option name="DEPLOY_AS_INSTANT" value="false" />
++      <option name="ARTIFACT_NAME" value="" />
++      <option name="PM_INSTALL_OPTIONS" value="" />
++      <option name="ALL_USERS" value="false" />
++      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
++      <option name="CLEAR_APP_STORAGE" value="false" />
++      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
++      <option name="ACTIVITY_EXTRA_FLAGS" value="--es composable com.glowstudio.android.blindsjn.ui.screens.WritePostScreenKt.PreviewWritePostScreen" />
++      <option name="MODE" value="specific_activity" />
++      <option name="RESTORE_ENABLED" value="false" />
++      <option name="RESTORE_FILE" value="" />
++      <option name="CLEAR_LOGCAT" value="false" />
++      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
++      <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
++      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
++      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
++      <option name="DEBUGGER_TYPE" value="Auto" />
++      <Auto>
++        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
++        <option name="SHOW_STATIC_VARS" value="true" />
++        <option name="WORKING_DIR" value="" />
++        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
++        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
++        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
++        <option name="DEBUG_SANDBOX_SDK" value="false" />
++      </Auto>
++      <Hybrid>
++        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
++        <option name="SHOW_STATIC_VARS" value="true" />
++        <option name="WORKING_DIR" value="" />
++        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
++        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
++        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
++        <option name="DEBUG_SANDBOX_SDK" value="false" />
++      </Hybrid>
++      <Java>
++        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
++        <option name="DEBUG_SANDBOX_SDK" value="false" />
++      </Java>
++      <Native>
++        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
++        <option name="SHOW_STATIC_VARS" value="true" />
++        <option name="WORKING_DIR" value="" />
++        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
++        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
++        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
++        <option name="DEBUG_SANDBOX_SDK" value="false" />
++      </Native>
++      <Profilers>
++        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
++        <option name="STARTUP_PROFILING_ENABLED" value="false" />
++        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
++        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Java/Kotlin Method Sample (legacy)" />
++        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
++        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
++      </Profilers>
++      <option name="DEEP_LINK" value="" />
++      <option name="ACTIVITY_CLASS" value="androidx.compose.ui.tooling.PreviewActivity" />
++      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="true" />
++      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
++      <compose-preview-run-configuration composable-fqn="com.glowstudio.android.blindsjn.ui.screens.WritePostScreenKt.PreviewWritePostScreen" />
++      <method v="2">
++        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
++      </method>
++    </configuration>
++    <configuration name="WritePostScreen" type="ComposePreviewRunConfiguration" temporary="true">
++      <module name="BlindSJN.app" />
++      <option name="DEPLOY" value="true" />
++      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
++      <option name="DEPLOY_AS_INSTANT" value="false" />
++      <option name="ARTIFACT_NAME" value="" />
++      <option name="PM_INSTALL_OPTIONS" value="" />
++      <option name="ALL_USERS" value="false" />
++      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
++      <option name="CLEAR_APP_STORAGE" value="false" />
++      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
++      <option name="ACTIVITY_EXTRA_FLAGS" value="--es composable com.glowstudio.android.blindsjn.ui.screens.WritePostScreenKt.WritePostScreen" />
++      <option name="MODE" value="specific_activity" />
++      <option name="RESTORE_ENABLED" value="false" />
++      <option name="RESTORE_FILE" value="" />
++      <option name="CLEAR_LOGCAT" value="false" />
++      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
++      <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
++      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
++      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
++      <option name="DEBUGGER_TYPE" value="Auto" />
++      <Auto>
++        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
++        <option name="SHOW_STATIC_VARS" value="true" />
++        <option name="WORKING_DIR" value="" />
++        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
++        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
++        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
++        <option name="DEBUG_SANDBOX_SDK" value="false" />
++      </Auto>
++      <Hybrid>
++        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
++        <option name="SHOW_STATIC_VARS" value="true" />
++        <option name="WORKING_DIR" value="" />
++        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
++        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
++        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
++        <option name="DEBUG_SANDBOX_SDK" value="false" />
++      </Hybrid>
++      <Java>
++        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
++        <option name="DEBUG_SANDBOX_SDK" value="false" />
++      </Java>
++      <Native>
++        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
++        <option name="SHOW_STATIC_VARS" value="true" />
++        <option name="WORKING_DIR" value="" />
++        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
++        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
++        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
++        <option name="DEBUG_SANDBOX_SDK" value="false" />
++      </Native>
++      <Profilers>
++        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
++        <option name="STARTUP_PROFILING_ENABLED" value="false" />
++        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
++        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Java/Kotlin Method Sample (legacy)" />
++        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
++        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
++      </Profilers>
++      <option name="DEEP_LINK" value="" />
++      <option name="ACTIVITY_CLASS" value="androidx.compose.ui.tooling.PreviewActivity" />
++      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="true" />
++      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
++      <compose-preview-run-configuration composable-fqn="com.glowstudio.android.blindsjn.ui.screens.WritePostScreenKt.WritePostScreen" />
++      <method v="2">
++        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
++      </method>
++    </configuration>
++    <recent_temporary>
++      <list>
++        <item itemvalue="Compose Preview.PreviewWritePostScreen" />
++        <item itemvalue="Compose Preview.WritePostScreen" />
++      </list>
++    </recent_temporary>
+   </component>
+   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+   <component name="TaskManager">
+@@ -250,7 +400,15 @@
+       <option name="project" value="LOCAL" />
+       <updated>1736651996166</updated>
+     </task>
+-    <option name="localTasksCounter" value="5" />
++    <task id="LOCAL-00005" summary="main ui - WritePostScreen">
++      <option name="closed" value="true" />
++      <created>1736656537604</created>
++      <option name="number" value="00005" />
++      <option name="presentableId" value="LOCAL-00005" />
++      <option name="project" value="LOCAL" />
++      <updated>1736656537604</updated>
++    </task>
++    <option name="localTasksCounter" value="6" />
+     <servers />
+   </component>
+   <component name="Vcs.Log.Tabs.Properties">
+@@ -282,6 +440,7 @@
+     <MESSAGE value="일부 주석 수정" />
+     <MESSAGE value="main ui - BoardScreen" />
+     <MESSAGE value="main ui - BoardDetailScreen" />
+-    <option name="LAST_COMMIT_MESSAGE" value="main ui - BoardDetailScreen" />
++    <MESSAGE value="main ui - WritePostScreen" />
++    <option name="LAST_COMMIT_MESSAGE" value="main ui - WritePostScreen" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/BoardDetailScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.ui.screens\r\n\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.clickable\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.lazy.LazyColumn\r\nimport androidx.compose.foundation.lazy.LazyRow\r\nimport androidx.compose.foundation.lazy.items\r\nimport androidx.compose.material3.*\r\nimport androidx.compose.runtime.*\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.navigation.NavController\r\nimport androidx.compose.material.icons.Icons\r\nimport androidx.compose.material.icons.filled.Edit\r\n\r\n\r\n// TODO: 서버 API의 JSON 응답 필드와 맞게 수정해야 함\r\ndata class Post(\r\n    val title: String, // 게시글 제목\r\n    val content: String, // 게시글 내용 미리보기\r\n    val category: String, // 게시글 카테고리\r\n    val experience: String, // 작성자 경력\r\n    val time: String, // 게시글 작성 시간\r\n    val commentCount: Int // 댓글 수\r\n)\r\n\r\n@Composable\r\nfun BoardDetailScreen(navController: NavController, title: String) {\r\n    // 현재 선택된 카테고리 상태\r\n    // TODO: 서버에서 게시글을 가져올 때 이 값을 파라미터로 사용해야 함\r\n    var selectedCategory by remember { mutableStateOf(\"모든 분야\") }\r\n\r\n    // 카테고리와 게시글 데이터\r\n    // TODO: 아래는 더미 데이터. 서버 연동 시 API 호출로 대체 필요\r\n    val categories = listOf(\"모든 분야\", \"카페\", \"식당\", \"배달 전문\", \"패스트푸드\", \"호텔\")\r\n    val posts = listOf(\r\n        Post(\"비수기네요...\", \"요즘 장사가 잘 안 되네요.\", \"카페\", \"/2년\", \"17분 전\", 18),\r\n        Post(\"오늘도 화이팅입니다.\", \"손님 줄어든 게 너무 힘드네요.\", \"식당\", \"/1년\", \"57분 전\", 3),\r\n        Post(\"봉어빵 메뉴 잘 나가나요?\", \"겨울 한정 메뉴를 추가하려 합니다.\", \"카페\", \"/1년\", \"11:27\", 8),\r\n        Post(\"배달 플랫폼 수수료 또 오른다네요;\", \"수수료 때문에 고민입니다.\", \"배달 전문\", \"/5년\", \"8:29\", 48)\r\n    )\r\n\r\n\r\n    Scaffold(\r\n        floatingActionButton = {\r\n            // 글쓰기 화면으로 이동\r\n            FloatingActionButton(\r\n                onClick = {\r\n                    navController.navigate(\"writePost\") // 글쓰기 화면으로 이동\r\n                },\r\n                containerColor = MaterialTheme.colorScheme.primary\r\n            ) {\r\n                Icon(Icons.Filled.Edit, contentDescription = \"글쓰기\")\r\n            }\r\n        },\r\n        content = { paddingValues ->\r\n            Column(\r\n                modifier = Modifier\r\n                    .fillMaxSize()\r\n                    .padding(paddingValues)\r\n            ) {\r\n                // 카테고리 필터\r\n                CategoryFilterRow(\r\n                    categories = categories,\r\n                    selectedCategory = selectedCategory,\r\n                    onCategorySelected = { selectedCategory = it }\r\n                )\r\n\r\n                // 게시글 리스트\r\n                // TODO: 서버 연동 시, 아래 필터링 로직 대신 서버 쿼리에서 처리하는 방식 검토\r\n                val filteredPosts = posts.filter { post ->\r\n                    selectedCategory == \"모든 분야\" || post.category.contains(selectedCategory)\r\n                }\r\n                PostList(posts = filteredPosts)\r\n            }\r\n        }\r\n    )\r\n}\r\n\r\n@Composable\r\nfun CategoryFilterRow(\r\n    categories: List<String>,\r\n    selectedCategory: String,\r\n    onCategorySelected: (String) -> Unit\r\n) {\r\n    // 가로 스크롤 가능한 카테고리 필터\r\n    LazyRow(\r\n        modifier = Modifier\r\n            .fillMaxWidth()\r\n            .padding(horizontal = 8.dp, vertical = 8.dp),\r\n        horizontalArrangement = Arrangement.spacedBy(8.dp)\r\n    ) {\r\n        items(categories) { category ->\r\n            FilterChip(\r\n                text = category,\r\n                isSelected = category == selectedCategory,\r\n                onClick = { onCategorySelected(category) }\r\n            )\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun FilterChip(\r\n    text: String,\r\n    isSelected: Boolean,\r\n    onClick: () -> Unit\r\n) {\r\n    // 선택된 카테고리를 강조하는 버튼\r\n    Box(\r\n        modifier = Modifier\r\n            .background(\r\n                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,\r\n                shape = MaterialTheme.shapes.small\r\n            )\r\n            .clickable(onClick = onClick)\r\n            .padding(horizontal = 16.dp, vertical = 8.dp),\r\n        contentAlignment = Alignment.Center\r\n    ) {\r\n        Text(\r\n            text = text,\r\n            style = MaterialTheme.typography.bodySmall,\r\n            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface\r\n        )\r\n    }\r\n}\r\n\r\n@Composable\r\nfun PostList(posts: List<Post>) {\r\n    // 게시글 리스트\r\n    LazyColumn(\r\n        modifier = Modifier.fillMaxSize(),\r\n        verticalArrangement = Arrangement.spacedBy(8.dp),\r\n        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)\r\n    ) {\r\n        items(posts) { post ->\r\n            PostItem(post = post)\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun PostItem(post: Post) {\r\n    Column(\r\n        modifier = Modifier\r\n            .fillMaxWidth()\r\n            .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)\r\n            .clickable { /* TODO: 게시글 상세로 이동 */ }\r\n            .padding(16.dp)\r\n    ) {\r\n        // 게시글 제목\r\n        Text(text = post.title, style = MaterialTheme.typography.titleMedium)\r\n        Spacer(modifier = Modifier.height(4.dp))\r\n\r\n        // 게시글 내용\r\n        Text(\r\n            text = post.content,\r\n            style = MaterialTheme.typography.bodySmall,\r\n            color = MaterialTheme.colorScheme.onSurfaceVariant,\r\n            maxLines = 2\r\n        )\r\n        Spacer(modifier = Modifier.height(8.dp))\r\n\r\n        // 카테고리, 작성자 경력, 시간, 댓글 수\r\n        Row(\r\n            modifier = Modifier.fillMaxWidth(),\r\n            horizontalArrangement = Arrangement.SpaceBetween,\r\n            verticalAlignment = Alignment.CenterVertically\r\n        ) {\r\n            // 카테고리와 계정 데이터\r\n            Text(\r\n                text = \"${post.category} ${post.experience}\",\r\n                style = MaterialTheme.typography.bodySmall,\r\n                color = MaterialTheme.colorScheme.onSurfaceVariant\r\n            )\r\n            // 시간과 댓글 수\r\n            Text(\r\n                text = \"${post.time}   댓글 ${post.commentCount}\",\r\n                style = MaterialTheme.typography.bodySmall,\r\n                color = MaterialTheme.colorScheme.onSurfaceVariant\r\n            )\r\n        }\r\n    }\r\n}\r\n\r\n
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/BoardDetailScreen.kt b/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/BoardDetailScreen.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/BoardDetailScreen.kt	(revision 36192a684fc4487b15973ed810ba82ae7b196a13)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/BoardDetailScreen.kt	(date 1736658883840)
+@@ -48,7 +48,12 @@
+             // 글쓰기 화면으로 이동
+             FloatingActionButton(
+                 onClick = {
+-                    navController.navigate("writePost") // 글쓰기 화면으로 이동
++                    println("FloatingActionButton clicked!")
++                    try {
++                        navController.navigate("writePost")
++                    } catch (e: Exception) {
++                        println("Error navigating: ${e.message}")
++                    }
+                 },
+                 containerColor = MaterialTheme.colorScheme.primary
+             ) {
+Index: app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/WritePostScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.ui.screens\r\n\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.clickable\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.text.KeyboardActions\r\nimport androidx.compose.foundation.text.KeyboardOptions\r\nimport androidx.compose.material.icons.Icons\r\nimport androidx.compose.material.icons.filled.AttachFile\r\nimport androidx.compose.material.icons.filled.CameraAlt\r\nimport androidx.compose.material3.*\r\nimport androidx.compose.runtime.*\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.focus.FocusRequester\r\nimport androidx.compose.ui.focus.focusRequester\r\nimport androidx.compose.ui.text.input.ImeAction\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.navigation.NavController\r\n\r\n@Composable\r\nfun WritePostScreen(navController: NavController) {\r\n    // 입력 필드 상태\r\n    var title by remember { mutableStateOf(\"\") }\r\n    var content by remember { mutableStateOf(\"\") }\r\n\r\n    // 체크박스 상태\r\n    var isAnonymous by remember { mutableStateOf(false) }\r\n    var isQuestion by remember { mutableStateOf(false) }\r\n\r\n    // 포커스 요청자\r\n    val contentFocusRequester = remember { FocusRequester() }\r\n\r\n    Scaffold(\r\n        content = { paddingValues ->\r\n            Column(\r\n                modifier = Modifier\r\n                    .fillMaxSize()\r\n                    .padding(paddingValues)\r\n                    .padding(horizontal = 16.dp)\r\n            ) {\r\n                // 제목 입력 필드\r\n                OutlinedTextField(\r\n                    value = title,\r\n                    onValueChange = { title = it },\r\n                    placeholder = { Text(\"제목을 입력해주세요.\") },\r\n                    singleLine = true,\r\n                    modifier = Modifier\r\n                        .fillMaxWidth()\r\n                        .padding(vertical = 8.dp),\r\n                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),\r\n                    keyboardActions = KeyboardActions(\r\n                        onNext = { contentFocusRequester.requestFocus() } // 포커스를 내용 입력 필드로 이동\r\n                    )\r\n                )\r\n\r\n                // 내용 입력 필드\r\n                OutlinedTextField(\r\n                    value = content,\r\n                    onValueChange = { content = it },\r\n                    placeholder = { Text(\"학교 친구들과 자유롭게 얘기해보세요.\\n#수강신청 #취업\") },\r\n                    modifier = Modifier\r\n                        .fillMaxWidth()\r\n                        .weight(1f)\r\n                        .padding(vertical = 8.dp)\r\n                        .focusRequester(contentFocusRequester), // 포커스 요청자 연결\r\n                    maxLines = Int.MAX_VALUE\r\n                )\r\n\r\n                // 하단 버튼들\r\n                Row(\r\n                    modifier = Modifier\r\n                        .fillMaxWidth()\r\n                        .padding(vertical = 16.dp),\r\n                    horizontalArrangement = Arrangement.SpaceBetween,\r\n                    verticalAlignment = Alignment.CenterVertically\r\n                ) {\r\n                    // 이미지 및 파일 첨부 버튼\r\n                    Row {\r\n                        IconButton(onClick = { /* TODO: 이미지 업로드 동작 */ }) {\r\n                            Icon(\r\n                                imageVector = Icons.Default.CameraAlt,\r\n                                contentDescription = \"이미지 첨부\"\r\n                            )\r\n                        }\r\n                        Spacer(modifier = Modifier.width(8.dp)) // 버튼 간 간격 추가\r\n                        IconButton(onClick = { /* TODO: 파일 업로드 동작 */ }) {\r\n                            Icon(\r\n                                imageVector = Icons.Default.AttachFile,\r\n                                contentDescription = \"파일 첨부\"\r\n                            )\r\n                        }\r\n                    }\r\n\r\n                    // 익명 및 질문 체크박스\r\n                    Row {\r\n                        Row(\r\n                            verticalAlignment = Alignment.CenterVertically,\r\n                            modifier = Modifier.clickable { isQuestion = !isQuestion }\r\n                        ) {\r\n                            Checkbox(checked = isQuestion, onCheckedChange = null)\r\n                            Text(\"질문\")\r\n                        }\r\n                        Spacer(modifier = Modifier.width(16.dp))\r\n                        Row(\r\n                            verticalAlignment = Alignment.CenterVertically,\r\n                            modifier = Modifier.clickable { isAnonymous = !isAnonymous }\r\n                        ) {\r\n                            Checkbox(checked = isAnonymous, onCheckedChange = null)\r\n                            Text(\"익명\")\r\n                        }\r\n                    }\r\n                }\r\n\r\n                // 완료 버튼\r\n                Button(\r\n                    onClick = {\r\n                        if (title.isBlank() || content.isBlank()) {\r\n                            // TODO: 제목 또는 내용이 비어 있을 경우 처리\r\n                            println(\"제목과 내용을 모두 입력해야 합니다.\")\r\n                        } else {\r\n                            // TODO: 입력 데이터 서버로 전송\r\n                            navController.navigateUp() // 완료 후 이전 화면으로 이동\r\n                        }\r\n                    },\r\n                    modifier = Modifier.align(Alignment.End)\r\n                ) {\r\n                    Text(\"완료\")\r\n                }\r\n            }\r\n        }\r\n    )\r\n}\r\n
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/WritePostScreen.kt b/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/WritePostScreen.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/WritePostScreen.kt	(revision 36192a684fc4487b15973ed810ba82ae7b196a13)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/WritePostScreen.kt	(date 1736658490848)
+@@ -130,4 +130,4 @@
+             }
+         }
+     )
+-}
++}
+\ No newline at end of file
+Index: .idea/deploymentTargetSelector.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"deploymentTargetSelector\">\r\n    <selectionStates>\r\n      <SelectionState runConfigName=\"app\">\r\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\r\n        <DropdownSelection timestamp=\"2024-12-06T04:34:26.434823600Z\">\r\n          <Target type=\"DEFAULT_BOOT\">\r\n            <handle>\r\n              <DeviceId pluginId=\"LocalEmulator\" identifier=\"path=C:\\Users\\gyshi\\.android\\avd\\Pixel_9_API_34.avd\" />\r\n            </handle>\r\n          </Target>\r\n        </DropdownSelection>\r\n        <DialogSelection />\r\n      </SelectionState>\r\n    </selectionStates>\r\n  </component>\r\n</project>
+===================================================================
+diff --git a/.idea/deploymentTargetSelector.xml b/.idea/deploymentTargetSelector.xml
+--- a/.idea/deploymentTargetSelector.xml	(revision 36192a684fc4487b15973ed810ba82ae7b196a13)
++++ b/.idea/deploymentTargetSelector.xml	(date 1736658314948)
+@@ -13,6 +13,12 @@
+         </DropdownSelection>
+         <DialogSelection />
+       </SelectionState>
++      <SelectionState runConfigName="WritePostScreen">
++        <option name="selectionMode" value="DROPDOWN" />
++      </SelectionState>
++      <SelectionState runConfigName="PreviewWritePostScreen">
++        <option name="selectionMode" value="DROPDOWN" />
++      </SelectionState>
+     </selectionStates>
+   </component>
+ </project>
+\ No newline at end of file
