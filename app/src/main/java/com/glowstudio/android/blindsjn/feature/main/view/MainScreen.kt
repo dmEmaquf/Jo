@@ -29,7 +29,7 @@ import com.google.gson.Gson
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
 import com.glowstudio.android.blindsjn.data.model.Article
-import com.glowstudio.android.blindsjn.feature.paymanagement.PayManagementScreen
+import com.glowstudio.android.blindsjn.feature.paymanagement.view.PayManagementScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.FoodCostScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterRecipeScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterIngredientScreen
@@ -69,7 +69,7 @@ fun MainScreen(
                     currentRoute?.startsWith("postDetail/") == true -> "게시글"
                     currentRoute?.startsWith("boardDetail/") == true -> "게시판"
                     currentRoute?.startsWith("editRecipe/") == true -> "레시피 수정"
-                    else -> "상세"
+                    else -> ""
                 }
                 topBarViewModel.setDetailBar(
                     title = title,
@@ -97,13 +97,14 @@ fun MainScreen(
             Box(modifier = Modifier.padding(paddingValues)) {
                 NavHost(
                     navController = navController,
-                    startDestination = "main_nav"
+                    startDestination = "home"
                 ) {
                     composable("home") { HomeScreen(navController) }
                     composable("board") { BoardScreen(navController) }
                     composable("paymanagement") {
                         PayManagementScreen(
-                            onNavigateToFoodCost = { navController.navigate("foodcoast") }
+                            onNavigateToFoodCost = { navController.navigate("foodcoast") },
+                            onNavigateToOcr = { navController.navigate("ocr") }
                         )
                     }
                     composable("message") { MessageScreen(navController) }
@@ -209,6 +210,9 @@ fun MainScreen(
                                 navController.popBackStack()
                             }
                         )
+                    }
+                    composable("ocr") {
+                        com.glowstudio.android.blindsjn.feature.paymanagement.view.OcrScreen()
                     }
                     mainNavGraph(
                         navController = navController,
