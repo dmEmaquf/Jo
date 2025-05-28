@@ -85,10 +85,13 @@ fun NaverNewsSection(navController: NavHostController) {
                             overflow = TextOverflow.Ellipsis,
                             color = MaterialTheme.colorScheme.primary
                         )
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "주제 선택",
-                            modifier = Modifier.size(20.dp)
+                        Text(
+                            text = "▾",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
 
