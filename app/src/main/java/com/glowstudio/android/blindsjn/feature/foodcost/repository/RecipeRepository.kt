@@ -10,8 +10,13 @@ object RecipeRepository {
     suspend fun registerRecipe(request: RecipeRequest): Response<BasicResponse> {
         return com.glowstudio.android.blindsjn.data.network.InternalServer.api.registerRecipe(request)
     }
-    
     suspend fun getRecipeList(businessId: Int): Response<RecipeListResponse> {
         return com.glowstudio.android.blindsjn.data.network.InternalServer.api.getRecipeList(businessId)
     }
-} 
+}
+
+// Response wrapper for list
+data class RecipeListResponse(
+    val status: String,
+    val data: List<Recipe>
+) 
