@@ -15,8 +15,8 @@ import com.glowstudio.android.blindsjn.data.model.Article
 import com.glowstudio.android.blindsjn.feature.board.view.PostDetailScreen
 import com.glowstudio.android.blindsjn.feature.calendar.MessageScreen
 import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
-import com.glowstudio.android.blindsjn.feature.home.HomeScreen
-import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
+import com.glowstudio.android.blindsjn.feature.home.view.HomeScreen
+import com.glowstudio.android.blindsjn.feature.home.view.NewsDetailScreen
 import com.glowstudio.android.blindsjn.feature.home.NewsListScreen
 import com.glowstudio.android.blindsjn.feature.popular.PopularScreen
 import com.glowstudio.android.blindsjn.feature.profile.ProfileScreen
@@ -71,7 +71,7 @@ fun NavGraphBuilder.mainNavGraph(
             val topic = backStackEntry.arguments?.getString("topic") ?: "자영업"
 
             topBarViewModel.setDetailBar(
-                title = "뉴스 목록",
+                title = "",
                 onBackClick = { navController.navigateUp() },
                 onSearchClick = { /* 검색 기능 */ },
                 onMoreClick = { /* 더보기 메뉴 */ }
