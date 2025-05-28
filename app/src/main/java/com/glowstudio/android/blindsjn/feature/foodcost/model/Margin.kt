@@ -1,5 +1,7 @@
 package com.glowstudio.android.blindsjn.feature.foodcost.model
 
+import androidx.compose.ui.graphics.Color
+
 data class MarginSummaryResponse(
     val status: String,
     val data: MarginData

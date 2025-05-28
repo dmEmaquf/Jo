@@ -38,6 +38,9 @@ import com.glowstudio.android.blindsjn.feature.foodcost.view.EditRecipeScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.IngredientListScreen
 import com.glowstudio.android.blindsjn.feature.main.model.NavigationState
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.BottomBarViewModel
+import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
@@ -194,39 +197,15 @@ fun MainScreen(
                         )
                     }
                     composable("news_detail/{articleJson}") { backStackEntry ->
-                        val articleJson = backStackEntry.arguments?.getString("articleJson")
-                        val article = try {
-                            Gson().fromJson(URLDecoder.decode(articleJson, "UTF-8"), Article::class.java)
-                        } catch (e: Exception) {
-                            null
-                        }
-
-                        if (article != null) {
-                            NewsDetailScreen(
-                                title = article.title ?: "제목 없음",
-                                content = article.content,
-                                description = article.description,
-                                imageUrl = article.urlToImage,
-                                link = article.link
-                            )
-                        }
+                        val articleJson = backStackEntry.arguments?.getString("articleJson") ?: ""
+                        val article = Gson().fromJson(articleJson, Article::class.java)
+                        NewsDetailScreen(article = article)
                     }
                     composable("businessCertification") {
-                        com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen(
-                            navController = navController,
-                            onConfirm = { phone, certNumber, industry ->
-                                // 인증 완료 후 뒤로가기 또는 원하는 화면 이동
-                                navController.popBackStack()
-                            }
+                        BusinessCertificationScreen(
+                            onBackClick = { navController.navigateUp() }
                         )
                     }
-                    composable("ocr") {
-                        com.glowstudio.android.blindsjn.feature.paymanagement.view.OcrScreen()
-                    }
-                    mainNavGraph(
-                        navController = navController,
-                        topBarViewModel = topBarViewModel
-                    )
                 }
             }
         }

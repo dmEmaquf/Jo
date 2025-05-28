@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -40,13 +41,17 @@ import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostBottomSheetVi
 import com.glowstudio.android.blindsjn.utils.TimeUtils
 import androidx.compose.ui.text.style.TextOverflow
 import com.glowstudio.android.blindsjn.feature.board.view.CategoryBottomSheet
-
+import com.glowstudio.android.blindsjn.data.network.UserManager
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun BoardScreen(navController: NavController) {
+    val context = LocalContext.current
     val boardViewModel: BoardViewModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
+    val coroutineScope = rememberCoroutineScope()
     val boardCategories by boardViewModel.boardCategories.collectAsState()
     val posts by postViewModel.posts.collectAsState()
     val statusMessage by postViewModel.statusMessage.collectAsState()
@@ -55,9 +60,11 @@ fun BoardScreen(navController: NavController) {
     // 글쓰기 바텀시트 상태
     var showSheet by remember { mutableStateOf(false) }
     val postBottomSheetViewModel: PostBottomSheetViewModel = viewModel()
+    var userId by remember { mutableStateOf<Int?>(null) }
 
-    // 실제 로그인 유저 id로 교체 필요
-    val userId = 1234 // 예시: 실제 로그인 유저 id로 대체
+    LaunchedEffect(Unit) {
+        userId = UserManager.getUserId(context).first()
+    }
 
     // 게시글 항상 불러오기
     LaunchedEffect(Unit) {
@@ -168,7 +175,9 @@ fun BoardScreen(navController: NavController) {
                         modifier = Modifier.padding(16.dp)
                     )
                 }
-                PostList(navController, filteredPosts, postViewModel, userId)
+                if (userId != null) {
+                    PostList(navController, filteredPosts, postViewModel, userId!!)
+                }
             }
         }
     )
@@ -254,6 +263,61 @@ fun BoardCategoryItemPreview() {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun PostListPreview() {
+    BlindSJNTheme {
+        val navController = rememberNavController()
+        val viewModel: PostViewModel = viewModel()
+        val previewPosts = listOf(
+            Post(
+                id = 1,
+                title = "샘플 게시글 1",
+                content = "이것은 샘플 게시글의 내용입니다.",
+                category = "자유게시판",
+                time = "2024-03-20 14:30:00",
+                commentCount = 5,
+                likeCount = 10,
+                isLiked = false,
+                userId = 1
+            ),
+            Post(
+                id = 2,
+                title = "샘플 게시글 2",
+                content = "두 번째 샘플 게시글의 내용입니다.",
+                category = "질문게시판",
+                time = "2024-03-20 15:00:00",
+                commentCount = 3,
+                likeCount = 7,
+                isLiked = true,
+                userId = 2
+            )
+        )
+        PostList(navController = navController, posts = previewPosts, viewModel = viewModel, userId = 1)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PostItemPreview() {
+    BlindSJNTheme {
+        val navController = rememberNavController()
+        val viewModel: PostViewModel = viewModel()
+        val previewPost = Post(
+            id = 1,
+            title = "샘플 게시글",
+            content = "이것은 샘플 게시글의 내용입니다. 미리보기에서 확인할 수 있습니다.",
+            category = "자유게시판",
+            time = "2024-03-20 14:30:00",
+            commentCount = 5,
+            likeCount = 10,
+            isLiked = false,
+            userId = 1
+        )
+        PostItem(navController = navController, post = previewPost, viewModel = viewModel, userId = 1)
+    }
+}
+
 @Composable
 fun PostItem(
     navController: NavController,
@@ -314,18 +378,7 @@ fun PostItem(
             // 좋아요
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .clickable(enabled = !isLiking) {
-                        isLiking = true
-                        viewModel.toggleLike(post.id, userId) { success, newIsLiked, newLikeCount ->
-                            if (success) {
-                                isLiked = newIsLiked
-                                likeCount = newLikeCount
-                            }
-                            isLiking = false
-                        }
-                    }
-                    .alignByBaseline()
+                modifier = Modifier.alignByBaseline()
             ) {
                 Icon(
                     imageVector = Icons.Default.ThumbUp,

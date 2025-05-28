@@ -18,6 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BlindSJN"
         android:usesCleartextTraffic="true"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="31">
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"

@@ -11,5 +11,6 @@ data class Post(
     @SerializedName("time") val time: String,  // ← 이게 있어야 합니다
     @SerializedName("commentCount") val commentCount: Int,
     @SerializedName("likeCount") val likeCount: Int,
-    @SerializedName("isLiked") val isLiked: Boolean = false
+    @SerializedName("isLiked") val isLiked: Boolean = false,
+    @SerializedName("user_id") val userId: Int? = null
 )

@@ -40,11 +40,22 @@ interface NaverNewsApiService {
     ): Response<NaverNewsResponse>
 }
 
-// 네이버 뉴스 서버용 Retrofit 인스턴스
-object NaverNewsServer {
-    private const val BASE_URL = "https://openapi.naver.com/"
+// 공통 네트워크 설정
+object NetworkConfig {
+    const val INTERNAL_BASE_URL = "http://wonrdc.iptime.org/"
+    const val NAVER_BASE_URL = "https://openapi.naver.com/"
+    const val PUBLIC_API_BASE_URL = "https://api.odcloud.kr/api/"
 
-    private val client = OkHttpClient.Builder()
+    private val defaultClient = OkHttpClient.Builder()
+        .addInterceptor(HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        })
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
+
+    private val naverClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
             val request = chain.request().newBuilder()
                 .addHeader("X-Naver-Client-Id", "ztMJBFDCJqlNxnax0Hrj")
@@ -57,56 +68,42 @@ object NaverNewsServer {
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    val apiService: NaverNewsApiService by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(NaverNewsApiService::class.java)
-    }
+    val defaultClientInstance: OkHttpClient
+        get() = defaultClient
+
+    val naverClientInstance: OkHttpClient
+        get() = naverClient
+}
+
+// 네이버 뉴스 서버용 Retrofit 인스턴스
+object NaverNewsServer {
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(NetworkConfig.NAVER_BASE_URL)
+        .client(NetworkConfig.naverClientInstance)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val apiService: NaverNewsApiService = retrofit.create(NaverNewsApiService::class.java)
 }
 
 // 내부 서버
 object InternalServer {
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(NetworkConfig.INTERNAL_BASE_URL)
+        .client(NetworkConfig.defaultClientInstance)
+        .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
+        .build()
 
-    private const val BASE_URL = "http://wonrdc.iptime.org/"
-
-    private val client by lazy {
-        val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
-
-        OkHttpClient.Builder()
-            .addInterceptor(logging)
-            .build()
-    }
-
-    private val retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create())) // ← 중요!
-            .build()
-    }
-
-    val api: ApiService by lazy {
-        retrofit.create(ApiService::class.java)
-    }
+    val api: ApiService = retrofit.create(ApiService::class.java)
 }
 
 // 공공 API 서버용 Retrofit 인스턴스
 object PublicApiRetrofitInstance {
-    private const val BASE_URL = "https://api.odcloud.kr/api/" // 공공 API URL
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(NetworkConfig.PUBLIC_API_BASE_URL)
+        .client(NetworkConfig.defaultClientInstance)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
 
-    private val retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    val api: BusinessApiService by lazy {
-        retrofit.create(BusinessApiService::class.java)
-    }
+    val api: ApiService = retrofit.create(ApiService::class.java)
 }
