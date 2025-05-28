@@ -7,12 +7,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.RecipeViewModel
+import com.glowstudio.android.blindsjn.feature.foodcost.model.RecipeIngredient
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun RegisterRecipeScreen() {
     var title by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
     var recipeItems by remember { mutableStateOf(listOf(RecipeItem())) }
+    val viewModel: RecipeViewModel = viewModel()
+    val registerResult by viewModel.registerResult.collectAsState()
 
     Column(Modifier.padding(16.dp)) {
         OutlinedTextField(
@@ -79,10 +85,26 @@ fun RegisterRecipeScreen() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        if (registerResult != null) {
+            Text(registerResult ?: "", color = MaterialTheme.colorScheme.primary)
+        }
+
         CommonButton(
             text = "등록",
             onClick = {
-                // TODO: 레시피 저장 로직 구현
+                val ingredients = recipeItems.mapNotNull {
+                    val n = it.name.trim()
+                    val g = it.grams.toDoubleOrNull() ?: 0.0
+                    if (n.isNotEmpty() && g > 0) RecipeIngredient(n, g) else null
+                }
+                val recipeTitle = title.trim()
+                val recipePrice = price.toLongOrNull() ?: 0L
+                val businessId = 1 // TODO: 실제 앱에서는 로그인 정보에서 받아야 함
+                if (recipeTitle.isNotEmpty() && recipePrice > 0 && ingredients.isNotEmpty()) {
+                    viewModel.registerRecipe(recipeTitle, recipePrice, businessId, ingredients)
+                }
+                // 성공 시 폼 초기화 (실제 앱에서는 성공 콜백에서 처리 권장)
+                // title = "" ; price = "" ; recipeItems = listOf(RecipeItem())
             },
             modifier = Modifier.fillMaxWidth()
         )
