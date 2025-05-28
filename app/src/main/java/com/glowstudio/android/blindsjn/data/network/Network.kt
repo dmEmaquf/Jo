@@ -48,6 +48,9 @@ interface ApiService {
     @GET("Popular_posts.php")
     suspend fun getPopularPosts(): Response<PostListResponse>
 
+    @POST("Like_post.php")
+    suspend fun likePost(@Body request: LikePostRequest): Response<BasicResponse>
+
     // 🔹 댓글
     @GET("Load_comment.php")
     suspend fun getComments(@Query("post_id") postId: Int): Response<CommentListResponse>
@@ -74,7 +77,23 @@ interface ApiService {
         @Body status: String
     ): Response<ReportResponse>
 
-    // 🔹 좋아요
-    @POST("Like_post.php")
-    suspend fun likePost(@Body request: LikePostRequest): Response<BasicResponse>
+    // 🔹 재료 등록
+    @POST("Save_ingredients.php")
+    suspend fun registerIngredient(@Body request: com.glowstudio.android.blindsjn.feature.foodcost.model.IngredientRequest): Response<BasicResponse>
+
+    // 🔹 레시피 등록
+    @POST("Save_recipe.php")
+    suspend fun registerRecipe(@Body request: com.glowstudio.android.blindsjn.feature.foodcost.model.RecipeRequest): Response<BasicResponse>
+
+    // 🔹 레시피 리스트
+    @GET("Recipe_list.php")
+    suspend fun getRecipeList(@Query("business_id") businessId: Int): Response<com.glowstudio.android.blindsjn.feature.foodcost.model.RecipeListResponse>
+
+    // 🔹 재료 목록 조회
+    @GET("Ingredient_list.php")
+    suspend fun getIngredientsList(): Response<com.glowstudio.android.blindsjn.feature.foodcost.model.IngredientListResponse>
+
+    // 🔹 마진 요약
+    @GET("Recipe_margin_summary.php")
+    suspend fun getMarginSummary(@Query("business_id") businessId: Int): Response<com.glowstudio.android.blindsjn.feature.foodcost.model.MarginSummaryResponse>
 }
