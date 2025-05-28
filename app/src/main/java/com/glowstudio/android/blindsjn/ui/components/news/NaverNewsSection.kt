@@ -70,19 +70,25 @@ fun NaverNewsSection(navController: NavHostController) {
                 )
                 // 주제 선택 콤보박스
                 Box {
-                    OutlinedButton(
-                        onClick = { expanded = true },
-                        modifier = Modifier.width(110.dp)
+                    Row(
+                        modifier = Modifier
+                            .clickable { expanded = true }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Absolute.Left
                     ) {
                         Text(
                             text = selectedTopic,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f)
+                            color = MaterialTheme.colorScheme.primary
                         )
                         Icon(
                             imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "주제 선택"
+                            contentDescription = "주제 선택",
+                            modifier = Modifier.size(20.dp)
                         )
                     }
 
