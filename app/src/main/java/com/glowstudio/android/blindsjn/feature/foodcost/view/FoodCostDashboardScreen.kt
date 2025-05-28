@@ -16,8 +16,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.glowstudio.android.blindsjn.ui.theme.*
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.RecipeViewModel
+import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.IngredientViewModel
 
-/*
 @Composable
 fun FoodCostDashboardScreen(
     onEditRecipeClick: (String) -> Unit = {},
@@ -25,20 +27,14 @@ fun FoodCostDashboardScreen(
     onEditIngredientClick: (String) -> Unit = {},
     onRegisterIngredientClick: () -> Unit = {}
 ) {
-    val recipes = remember {
-        listOf(
-            Triple("빵", 5000, 3600),
-            Triple("떡볶이", 6000, 4000),
-            Triple("김밥", 4500, 3000)
-        )
-    }
-
-    val ingredients = remember {
-        listOf(
-            Triple("밀가루", 2000, 1800),
-            Triple("설탕", 1500, 1200),
-            Triple("소금", 500, 400)
-        )
+    val recipeViewModel: RecipeViewModel = viewModel()
+    val ingredientViewModel: IngredientViewModel = viewModel()
+    val recipeList by recipeViewModel.recipeList.collectAsState()
+    val ingredients by ingredientViewModel.ingredients.collectAsState()
+    
+    LaunchedEffect(Unit) {
+        recipeViewModel.getRecipeList(1)
+        ingredientViewModel.loadIngredients()
     }
 
     LazyColumn(
@@ -49,7 +45,7 @@ fun FoodCostDashboardScreen(
     ) {
         // 상단 마진 요약 카드
         item {
-            MarginSummaryCard(recipes)
+            MarginSummaryCard(recipeList)
             Spacer(Modifier.height(24.dp))
         }
 
@@ -75,16 +71,14 @@ fun FoodCostDashboardScreen(
         }
 
         // 레시피 리스트
-        items(recipes) { (name, price, cost) ->
-            val margin = price - cost
-            val marginRate = if (price > 0) (margin * 100f / price).toInt() else 0
+        items(recipeList) { recipe ->
             RecipeItem(
-                name = name,
-                price = price,
-                cost = cost,
-                margin = margin,
-                marginRate = marginRate,
-                onEditClick = { onEditRecipeClick(name) }
+                name = recipe.title,
+                price = recipe.price,
+                cost = recipe.margin_info.total_ingredient_price.toInt(),
+                margin = recipe.margin_info.margin.toInt(),
+                marginRate = recipe.margin_info.margin_percentage.toInt(),
+                onEditClick = { onEditRecipeClick(recipe.title) }
             )
             Spacer(Modifier.height(4.dp))
         }
@@ -125,12 +119,12 @@ fun FoodCostDashboardScreen(
         }
 
         // 재료 리스트
-        items(ingredients) { (name, price, usage) ->
+        items(ingredients) { ingredient ->
             IngredientItem(
-                name = name,
-                price = price,
-                usage = usage,
-                onEditClick = { onEditIngredientClick(name) }
+                name = ingredient.name,
+                price = ingredient.price,
+                usage = ingredient.grams.toInt(),
+                onEditClick = { onEditIngredientClick(ingredient.name) }
             )
             Spacer(Modifier.height(4.dp))
         }
@@ -151,9 +145,9 @@ fun FoodCostDashboardScreen(
 }
 
 @Composable
-private fun MarginSummaryCard(recipes: List<Triple<String, Int, Int>>) {
-    val totalSales = recipes.sumOf { it.second }
-    val totalCost = recipes.sumOf { it.third }
+private fun MarginSummaryCard(recipes: List<com.glowstudio.android.blindsjn.feature.foodcost.model.Recipe>) {
+    val totalSales = recipes.sumOf { it.price }
+    val totalCost = recipes.sumOf { it.margin_info.total_ingredient_price.toInt() }
     val totalMargin = totalSales - totalCost
     val marginRate = if (totalSales > 0) (totalMargin * 100f / totalSales).toInt() else 0
 
@@ -264,5 +258,4 @@ private fun IngredientItem(
 @Composable
 fun FoodCostDashboardScreenPreview() {
     FoodCostDashboardScreen()
-}
-*/ 
+} 

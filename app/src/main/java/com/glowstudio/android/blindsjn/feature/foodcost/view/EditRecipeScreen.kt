@@ -16,6 +16,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.glowstudio.android.blindsjn.ui.theme.*
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun EditRecipeScreen(
@@ -23,8 +26,10 @@ fun EditRecipeScreen(
     onEditIngredientClick: (String) -> Unit = {},
     onSaveClick: () -> Unit = {}
 ) {
-    val ingredients = remember {
-        listOf("밀가루" to 1000, "물" to 600)
+    val viewModel: com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.IngredientViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val ingredients by viewModel.ingredients.collectAsState()
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.loadIngredients()
     }
     Column(
         modifier = Modifier
@@ -44,7 +49,7 @@ fun EditRecipeScreen(
         }
         Divider(color = DividerGray, thickness = 1.dp)
         Spacer(Modifier.height(8.dp))
-        ingredients.forEach { (name, gram) ->
+        ingredients.forEach { ingredient ->
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -52,9 +57,9 @@ fun EditRecipeScreen(
                     .padding(vertical = 8.dp, horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(name, Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
-                Text("$gram", Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
-                TextButton(onClick = { onEditIngredientClick(name) }) {
+                Text(ingredient.name, Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
+                Text("${ingredient.grams}", Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
+                TextButton(onClick = { onEditIngredientClick(ingredient.name) }) {
                     Text("수정", color = Blue, fontWeight = FontWeight.Bold)
                 }
             }
