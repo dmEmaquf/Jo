@@ -7,10 +7,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.IngredientViewModel
+import com.glowstudio.android.blindsjn.feature.foodcost.model.IngredientRequest
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun RegisterIngredientScreen() {
     var ingredientItems by remember { mutableStateOf(listOf(IngredientItem())) }
+    val viewModel: IngredientViewModel = viewModel()
+    val registerResult by viewModel.registerResult.collectAsState()
 
     Column(Modifier.padding(16.dp)) {
         ingredientItems.forEachIndexed { index, item ->
@@ -72,10 +78,21 @@ fun RegisterIngredientScreen() {
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        if (registerResult != null) {
+            Text(registerResult ?: "", color = MaterialTheme.colorScheme.primary)
+        }
+
         CommonButton(
             text = "등록",
             onClick = {
-                // TODO: 저장 로직 구현 후 이전 화면으로 이동
+                ingredientItems.forEach { item ->
+                    val name = item.name.trim()
+                    val grams = item.grams.toDoubleOrNull() ?: 0.0
+                    val price = item.price.toIntOrNull() ?: 0
+                    if (name.isNotEmpty() && grams > 0 && price > 0) {
+                        viewModel.registerIngredient(IngredientRequest(name, grams, price))
+                    }
+                }
             },
             modifier = Modifier.fillMaxWidth()
         )

@@ -21,7 +21,7 @@ object AuthRepository {
                     val result: ApiResponse? = response.body()
                     Log.d("AuthRepository", "응답 결과: $result")
 
-                    return@withContext if (result?.status == "success") {
+                    return@withContext if (result?.status == "success" && result.userId != null) {
                         // ✅ userId 저장 등 필요한 처리
                         val userId = result.userId
                         Log.d("AuthRepository", "로그인 성공 - userId: $userId")

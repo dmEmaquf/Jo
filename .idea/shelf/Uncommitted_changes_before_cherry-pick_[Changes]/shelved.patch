@@ -1,0 +1,18 @@
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/repository/RecipeRepository.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.foodcost.repository\r\n\r\nimport com.glowstudio.android.blindsjn.feature.foodcost.model.RecipeRequest\r\nimport com.glowstudio.android.blindsjn.feature.foodcost.model.Recipe\r\nimport com.glowstudio.android.blindsjn.data.model.BasicResponse\r\nimport com.glowstudio.android.blindsjn.feature.foodcost.model.RecipeListResponse\r\nimport retrofit2.Response\r\n\r\nobject RecipeRepository {\r\n    suspend fun registerRecipe(request: RecipeRequest): Response<BasicResponse> {\r\n        return com.glowstudio.android.blindsjn.data.network.InternalServer.api.registerRecipe(request)\r\n    }\r\n    suspend fun getRecipeList(businessId: Int): Response<RecipeListResponse> {\r\n        return com.glowstudio.android.blindsjn.data.network.InternalServer.api.getRecipeList(businessId)\r\n    }\r\n}\r\n\r\n// Response wrapper for list\r\ndata class RecipeListResponse(\r\n    val status: String,\r\n    val data: List<Recipe>\r\n) 
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/repository/RecipeRepository.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/repository/RecipeRepository.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/repository/RecipeRepository.kt	(revision 89df4f33664e1350fab789e54eaef65616518fc3)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/repository/RecipeRepository.kt	(date 1748398188278)
+@@ -19,4 +19,4 @@
+ data class RecipeListResponse(
+     val status: String,
+     val data: List<Recipe>
+-) 
+\ No newline at end of file
++)
+\ No newline at end of file

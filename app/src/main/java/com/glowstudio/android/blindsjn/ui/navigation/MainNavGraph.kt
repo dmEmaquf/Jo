@@ -50,7 +50,7 @@ fun NavGraphBuilder.mainNavGraph(
             }
 
             topBarViewModel.setDetailBar(
-                title = "뉴스 상세",
+                title = "",
                 onBackClick = { navController.navigateUp() },
                 onSearchClick = { /* 검색 기능 */ },
                 onMoreClick = { /* 더보기 메뉴 */ }
@@ -69,7 +69,7 @@ fun NavGraphBuilder.mainNavGraph(
 
         composable("news_list/{topic}") { backStackEntry ->
             val topic = backStackEntry.arguments?.getString("topic") ?: "자영업"
-            
+
             topBarViewModel.setDetailBar(
                 title = "뉴스 목록",
                 onBackClick = { navController.navigateUp() },
@@ -82,7 +82,7 @@ fun NavGraphBuilder.mainNavGraph(
                 selectedTopic = topic
             )
         }
-        
+
         // 게시판 네비게이션 그래프
         boardNavGraph(navController, topBarViewModel)
         

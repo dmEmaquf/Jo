@@ -1,0 +1,804 @@
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/IngredientListScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.foodcost.view\r\n\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.shape.RoundedCornerShape\r\nimport androidx.compose.material3.*\r\nimport androidx.compose.runtime.*\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.graphics.Color\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\nimport com.glowstudio.android.blindsjn.ui.theme.*\r\nimport androidx.compose.ui.tooling.preview.Preview\r\nimport androidx.lifecycle.viewmodel.compose.viewModel\r\nimport com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.IngredientViewModel\r\nimport com.glowstudio.android.blindsjn.feature.foodcost.model.Ingredient\r\n\r\n@Composable\r\nfun IngredientListScreen(\r\n    onEditIngredientClick: (String) -> Unit = {},\r\n    onRegisterIngredientClick: () -> Unit = {}\r\n) {\r\n    val viewModel: IngredientViewModel = viewModel()\r\n    val ingredients by viewModel.ingredients.collectAsState()\r\n\r\n    LaunchedEffect(Unit) {\r\n        viewModel.loadIngredients()\r\n    }\r\n\r\n    Column(\r\n        modifier = Modifier\r\n            .fillMaxSize()\r\n            .background(BackgroundWhite)\r\n            .padding(16.dp)\r\n    ) {\r\n        Text(\"재료 리스트\", fontWeight = FontWeight.Bold, fontSize = 28.sp, color = TextPrimary)\r\n        Spacer(Modifier.height(16.dp))\r\n        Row(\r\n            Modifier.fillMaxWidth().padding(bottom = 8.dp),\r\n            horizontalArrangement = Arrangement.SpaceBetween\r\n        ) {\r\n            Text(\"이름\", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)\r\n            Text(\"단위(g)\", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)\r\n            Spacer(Modifier.width(48.dp))\r\n        }\r\n        HorizontalDivider(color = DividerGray, thickness = 1.dp)\r\n        Spacer(Modifier.height(8.dp))\r\n        \r\n        if (ingredients.isEmpty()) {\r\n            Box(\r\n                modifier = Modifier.fillMaxSize(),\r\n                contentAlignment = Alignment.Center\r\n            ) {\r\n                Text(\"등록된 재료가 없습니다.\", color = TextSecondary)\r\n            }\r\n        } else {\r\n            ingredients.forEach { ingredient ->\r\n                Row(\r\n                    Modifier\r\n                        .fillMaxWidth()\r\n                        .background(CardWhite, RoundedCornerShape(8.dp))\r\n                        .padding(vertical = 8.dp, horizontal = 8.dp),\r\n                    verticalAlignment = Alignment.CenterVertically\r\n                ) {\r\n                    Text(ingredient.name, Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)\r\n                    Text(\"${ingredient.grams}\", Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)\r\n                    TextButton(onClick = { onEditIngredientClick(ingredient.name) }) {\r\n                        Text(\"수정\", color = Blue, fontWeight = FontWeight.Bold)\r\n                    }\r\n                }\r\n                Spacer(Modifier.height(4.dp))\r\n            }\r\n        }\r\n        \r\n        Spacer(Modifier.weight(1f))\r\n        Button(\r\n            onClick = onRegisterIngredientClick,\r\n            colors = ButtonDefaults.buttonColors(containerColor = Blue, contentColor = Color.White),\r\n            shape = RoundedCornerShape(12.dp),\r\n            modifier = Modifier.fillMaxWidth().height(48.dp)\r\n        ) {\r\n            Text(\"재료 등록\", fontWeight = FontWeight.Bold, fontSize = 16.sp)\r\n        }\r\n    }\r\n}\r\n\r\n@Preview(showBackground = true)\r\n@Composable\r\nfun IngredientListScreenPreview() {\r\n    IngredientListScreen()\r\n} 
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/IngredientListScreen.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/IngredientListScreen.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/IngredientListScreen.kt	(revision 89df4f33664e1350fab789e54eaef65616518fc3)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/IngredientListScreen.kt	(date 1748398116625)
+@@ -4,7 +4,10 @@
+ import androidx.compose.foundation.layout.*
+ import androidx.compose.foundation.shape.RoundedCornerShape
+ import androidx.compose.material3.*
+-import androidx.compose.runtime.*
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.remember
++import androidx.compose.runtime.mutableStateOf
++import androidx.compose.runtime.getValue
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.graphics.Color
+@@ -14,21 +17,19 @@
+ import com.glowstudio.android.blindsjn.ui.theme.*
+ import androidx.compose.ui.tooling.preview.Preview
+ import androidx.lifecycle.viewmodel.compose.viewModel
+-import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.IngredientViewModel
+-import com.glowstudio.android.blindsjn.feature.foodcost.model.Ingredient
++import androidx.compose.runtime.LaunchedEffect
++import androidx.compose.runtime.collectAsState
+ 
+ @Composable
+ fun IngredientListScreen(
+     onEditIngredientClick: (String) -> Unit = {},
+     onRegisterIngredientClick: () -> Unit = {}
+ ) {
+-    val viewModel: IngredientViewModel = viewModel()
++    val viewModel: com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.IngredientViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+     val ingredients by viewModel.ingredients.collectAsState()
+-
+-    LaunchedEffect(Unit) {
++    androidx.compose.runtime.LaunchedEffect(Unit) {
+         viewModel.loadIngredients()
+     }
+-
+     Column(
+         modifier = Modifier
+             .fillMaxSize()
+@@ -45,35 +46,24 @@
+             Text("단위(g)", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
+             Spacer(Modifier.width(48.dp))
+         }
+-        HorizontalDivider(color = DividerGray, thickness = 1.dp)
++        Divider(color = DividerGray, thickness = 1.dp)
+         Spacer(Modifier.height(8.dp))
+-        
+-        if (ingredients.isEmpty()) {
+-            Box(
+-                modifier = Modifier.fillMaxSize(),
+-                contentAlignment = Alignment.Center
+-            ) {
+-                Text("등록된 재료가 없습니다.", color = TextSecondary)
+-            }
+-        } else {
+-            ingredients.forEach { ingredient ->
+-                Row(
+-                    Modifier
+-                        .fillMaxWidth()
+-                        .background(CardWhite, RoundedCornerShape(8.dp))
+-                        .padding(vertical = 8.dp, horizontal = 8.dp),
+-                    verticalAlignment = Alignment.CenterVertically
+-                ) {
+-                    Text(ingredient.name, Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
+-                    Text("${ingredient.grams}", Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
+-                    TextButton(onClick = { onEditIngredientClick(ingredient.name) }) {
+-                        Text("수정", color = Blue, fontWeight = FontWeight.Bold)
+-                    }
+-                }
+-                Spacer(Modifier.height(4.dp))
+-            }
++        ingredients.forEach { ingredient ->
++            Row(
++                Modifier
++                    .fillMaxWidth()
++                    .background(CardWhite, RoundedCornerShape(8.dp))
++                    .padding(vertical = 8.dp, horizontal = 8.dp),
++                verticalAlignment = Alignment.CenterVertically
++            ) {
++                Text(ingredient.name, Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
++                Text("${ingredient.grams}", Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
++                TextButton(onClick = { onEditIngredientClick(ingredient.name) }) {
++                    Text("수정", color = Blue, fontWeight = FontWeight.Bold)
++                }
++            }
++            Spacer(Modifier.height(4.dp))
+         }
+-        
+         Spacer(Modifier.weight(1f))
+         Button(
+             onClick = onRegisterIngredientClick,
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/MarginListScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.foodcost.view\r\n\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.border\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.shape.RoundedCornerShape\r\nimport androidx.compose.material3.*\r\nimport androidx.compose.runtime.*\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.graphics.Color\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\nimport com.glowstudio.android.blindsjn.ui.theme.*\r\nimport androidx.compose.ui.tooling.preview.Preview\r\nimport androidx.lifecycle.viewmodel.compose.viewModel\r\nimport com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.MarginViewModel\r\nimport com.glowstudio.android.blindsjn.feature.foodcost.model.RecentSale\r\n\r\n@Composable\r\nfun MarginListScreen(\r\n    onRecipeListClick: () -> Unit = {},\r\n    onRegisterRecipeClick: () -> Unit = {},\r\n    onIngredientListClick: () -> Unit = {},\r\n    onRegisterIngredientClick: () -> Unit = {},\r\n    onNavigateToPayManagement: () -> Unit = {},\r\n    onNavigateToMargin: () -> Unit = {},\r\n) {\r\n    val viewModel: MarginViewModel = viewModel()\r\n    val marginData by viewModel.marginData.collectAsState()\r\n    val isLoading by viewModel.isLoading.collectAsState()\r\n    val error by viewModel.error.collectAsState()\r\n\r\n    LaunchedEffect(Unit) {\r\n        viewModel.loadMarginData(1) // TODO: 실제 앱에서는 로그인 정보에서 business_id 받아야 함\r\n    }\r\n\r\n    Column(\r\n        modifier = Modifier\r\n            .fillMaxSize()\r\n            .background(BackgroundWhite)\r\n            .padding(16.dp)\r\n    ) {\r\n        // 상단 탭\r\n        Row(\r\n            modifier = Modifier.fillMaxWidth(),\r\n            horizontalArrangement = Arrangement.spacedBy(12.dp)\r\n        ) {\r\n            TabButton(text = \"매출관리\", selected = false, onClick = onNavigateToPayManagement, modifier = Modifier.weight(1f))\r\n            TabButton(text = \"마진관리\", selected = true, onClick = onNavigateToMargin, modifier = Modifier.weight(1f))\r\n        }\r\n        Spacer(Modifier.height(16.dp))\r\n\r\n        if (isLoading) {\r\n            Box(\r\n                modifier = Modifier.fillMaxSize(),\r\n                contentAlignment = Alignment.Center\r\n            ) {\r\n                CircularProgressIndicator(color = Blue)\r\n            }\r\n        } else if (error != null) {\r\n            Box(\r\n                modifier = Modifier.fillMaxSize(),\r\n                contentAlignment = Alignment.Center\r\n            ) {\r\n                Text(error ?: \"오류가 발생했습니다.\", color = Color.Red)\r\n            }\r\n        } else {\r\n            // 요약 정보 표시\r\n            marginData?.summary?.let { summary ->\r\n                Card(\r\n                    modifier = Modifier\r\n                        .fillMaxWidth()\r\n                        .padding(bottom = 16.dp),\r\n                    colors = CardDefaults.cardColors(containerColor = CardWhite)\r\n                ) {\r\n                    Column(\r\n                        modifier = Modifier.padding(16.dp)\r\n                    ) {\r\n                        Text(\"전체 요약\", fontWeight = FontWeight.Bold, fontSize = 18.sp)\r\n                        Spacer(Modifier.height(8.dp))\r\n                        Row(\r\n                            Modifier.fillMaxWidth(),\r\n                            horizontalArrangement = Arrangement.SpaceBetween\r\n                        ) {\r\n                            SummaryItem(\"총 레시피\", \"${summary.total_recipes}개\")\r\n                            SummaryItem(\"총 매출\", \"${summary.total_sales}원\")\r\n                            SummaryItem(\"총 원가\", \"${summary.total_cost}원\")\r\n                        }\r\n                        Spacer(Modifier.height(8.dp))\r\n                        Row(\r\n                            Modifier.fillMaxWidth(),\r\n                            horizontalArrangement = Arrangement.SpaceBetween\r\n                        ) {\r\n                            SummaryItem(\"총 마진\", \"${summary.total_margin}원\")\r\n                            SummaryItem(\"평균 마진율\", \"${summary.avg_margin_percentage}%\")\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n\r\n            // 표 헤더\r\n            Row(\r\n                Modifier\r\n                    .fillMaxWidth()\r\n                    .background(CardWhite, RoundedCornerShape(4.dp))\r\n                    .padding(vertical = 8.dp, horizontal = 8.dp),\r\n                horizontalArrangement = Arrangement.Start\r\n            ) {\r\n                Text(\"이름\", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)\r\n                Text(\"판매가\", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)\r\n                Text(\"원가\", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)\r\n                Text(\"마진\", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)\r\n                Text(\"마진율\", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)\r\n            }\r\n\r\n            // 표 리스트\r\n            Box(\r\n                Modifier\r\n                    .fillMaxWidth()\r\n                    .weight(1f)\r\n                    .border(2.dp, Blue, RoundedCornerShape(4.dp))\r\n                    .background(Color.White)\r\n            ) {\r\n                Column(Modifier.fillMaxSize()) {\r\n                    marginData?.recent_sales?.forEach { sale ->\r\n                        Row(\r\n                            Modifier\r\n                                .fillMaxWidth()\r\n                                .background(CardWhite, RoundedCornerShape(2.dp))\r\n                                .padding(vertical = 6.dp, horizontal = 8.dp),\r\n                            horizontalArrangement = Arrangement.Start\r\n                        ) {\r\n                            Text(sale.title, modifier = Modifier.weight(1f))\r\n                            Text(\"${sale.price}원\", modifier = Modifier.weight(1f))\r\n                            Text(\"${sale.total_ingredient_price}원\", modifier = Modifier.weight(1f))\r\n                            Text(\"${sale.margin.toInt()}원\", modifier = Modifier.weight(1f))\r\n                            val marginPercentage = if (sale.price > 0) {\r\n                                ((sale.margin.toDouble() / sale.price) * 100).toInt()\r\n                            } else 0\r\n                            Text(\"${marginPercentage}%\", modifier = Modifier.weight(1f))\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        }\r\n\r\n        Spacer(Modifier.height(24.dp))\r\n        // 하단 버튼들\r\n        Row(\r\n            Modifier.fillMaxWidth(),\r\n            horizontalArrangement = Arrangement.spacedBy(16.dp)\r\n        ) {\r\n            Column(modifier = Modifier.weight(1f)) {\r\n                MainButton(\"레시피 리스트\", onRecipeListClick)\r\n                Spacer(Modifier.height(12.dp))\r\n                MainButton(\"재료 리스트\", onIngredientListClick)\r\n            }\r\n            Column(modifier = Modifier.weight(1f)) {\r\n                MainButton(\"레시피 등록\", onRegisterRecipeClick)\r\n                Spacer(Modifier.height(12.dp))\r\n                MainButton(\"재료 등록\", onRegisterIngredientClick)\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun SummaryItem(label: String, value: String) {\r\n    Column(horizontalAlignment = Alignment.CenterHorizontally) {\r\n        Text(label, color = TextSecondary, fontSize = 14.sp)\r\n        Text(value, color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)\r\n    }\r\n}\r\n\r\n@Composable\r\nfun TabButton(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {\r\n    Button(\r\n        onClick = onClick,\r\n        colors = ButtonDefaults.buttonColors(\r\n            containerColor = if (selected) Blue else Color.White,\r\n            contentColor = if (selected) Color.White else Blue\r\n        ),\r\n        shape = RoundedCornerShape(16.dp),\r\n        modifier = modifier\r\n    ) {\r\n        Text(text, fontWeight = FontWeight.Bold, fontSize = 18.sp)\r\n    }\r\n}\r\n\r\n@Composable\r\nfun ChartTabButton(text: String, selected: Boolean) {\r\n    Box(\r\n        Modifier\r\n            .padding(end = 8.dp)\r\n            .background(if (selected) Blue else Color.White, RoundedCornerShape(8.dp))\r\n            .border(1.dp, Blue, RoundedCornerShape(8.dp))\r\n            .padding(horizontal = 16.dp, vertical = 6.dp)\r\n    ) {\r\n        Text(text, color = if (selected) Color.White else Blue, fontWeight = FontWeight.Bold)\r\n    }\r\n}\r\n\r\n@Composable\r\nfun BarChartBar(label: String, percent: Float, value: Int) {\r\n    Column(horizontalAlignment = Alignment.CenterHorizontally) {\r\n        Box(\r\n            Modifier\r\n                .width(32.dp)\r\n                .height((100 * percent).dp)\r\n                .background(Blue, RoundedCornerShape(8.dp))\r\n        )\r\n        Spacer(Modifier.height(4.dp))\r\n        Text(label, color = TextSecondary, fontSize = 14.sp)\r\n        Text(\"$value\", color = TextSecondary, fontSize = 14.sp)\r\n    }\r\n}\r\n\r\n@Composable\r\nfun PieChart(percent1: Float, percent2: Float) {\r\n    // 실제 파이차트 대신 원형 Box 2개로 대체 (예시)\r\n    Box(Modifier.size(80.dp), contentAlignment = Alignment.Center) {\r\n        Box(\r\n            Modifier\r\n                .size(80.dp)\r\n                .background(LightBlue, shape = RoundedCornerShape(40.dp))\r\n        )\r\n        Box(\r\n            Modifier\r\n                .size(80.dp * percent1)\r\n                .background(Blue, shape = RoundedCornerShape(40.dp))\r\n        )\r\n    }\r\n}\r\n\r\n@Composable\r\nfun MainButton(text: String, onClick: () -> Unit) {\r\n    Button(\r\n        onClick = onClick,\r\n        colors = ButtonDefaults.buttonColors(containerColor = Blue, contentColor = Color.White),\r\n        shape = RoundedCornerShape(12.dp),\r\n        modifier = Modifier.fillMaxWidth().height(48.dp)\r\n    ) {\r\n        Text(text, fontWeight = FontWeight.Bold, fontSize = 16.sp)\r\n    }\r\n}\r\n\r\ndata class MarginItem(\r\n    val name: String,\r\n    val price: Int,\r\n    val cost: Int,\r\n    val margin: Int,\r\n    val marginRate: Int\r\n)\r\n\r\n@Preview(showBackground = true)\r\n@Composable\r\nfun MarginListScreenPreview() {\r\n    MarginListScreen()\r\n} 
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/MarginListScreen.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/MarginListScreen.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/MarginListScreen.kt	(revision 89df4f33664e1350fab789e54eaef65616518fc3)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/MarginListScreen.kt	(date 1748398120028)
+@@ -5,7 +5,7 @@
+ import androidx.compose.foundation.layout.*
+ import androidx.compose.foundation.shape.RoundedCornerShape
+ import androidx.compose.material3.*
+-import androidx.compose.runtime.*
++import androidx.compose.runtime.Composable
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.graphics.Color
+@@ -14,163 +14,279 @@
+ import androidx.compose.ui.unit.sp
+ import com.glowstudio.android.blindsjn.ui.theme.*
+ import androidx.compose.ui.tooling.preview.Preview
++import com.glowstudio.android.blindsjn.feature.foodcost.model.MarginItem
++import androidx.compose.foundation.lazy.LazyColumn
++import androidx.compose.foundation.lazy.itemsIndexed
++import androidx.compose.foundation.lazy.items
++import androidx.compose.foundation.lazy.LazyRow
++import androidx.compose.foundation.BorderStroke
++import androidx.compose.runtime.*
++import androidx.compose.ui.geometry.Offset
++import com.glowstudio.android.blindsjn.ui.components.common.SectionLayout
++import androidx.compose.ui.text.style.TextAlign
+ import androidx.lifecycle.viewmodel.compose.viewModel
+-import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.MarginViewModel
+-import com.glowstudio.android.blindsjn.feature.foodcost.model.RecentSale
++import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.MarginListViewModel
++import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.IngredientViewModel
+ 
+ @Composable
+ fun MarginListScreen(
+     onRecipeListClick: () -> Unit = {},
+     onRegisterRecipeClick: () -> Unit = {},
+-    onIngredientListClick: () -> Unit = {},
++    onEditRecipeClick: (String) -> Unit = {},
++    onEditIngredientClick: (String) -> Unit = {},
+     onRegisterIngredientClick: () -> Unit = {},
++    onIngredientListClick: () -> Unit = {},
+     onNavigateToPayManagement: () -> Unit = {},
+-    onNavigateToMargin: () -> Unit = {},
++    onNavigateToMargin: () -> Unit = {}
+ ) {
+-    val viewModel: MarginViewModel = viewModel()
+-    val marginData by viewModel.marginData.collectAsState()
+-    val isLoading by viewModel.isLoading.collectAsState()
+-    val error by viewModel.error.collectAsState()
+-
++    val viewModel: MarginListViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
++    val items by viewModel.items.collectAsState()
++    val ingredientViewModel: IngredientViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
++    val ingredients by ingredientViewModel.ingredients.collectAsState()
+     LaunchedEffect(Unit) {
+-        viewModel.loadMarginData(1) // TODO: 실제 앱에서는 로그인 정보에서 business_id 받아야 함
++        viewModel.loadMarginData(1) // businessId는 실제 값으로 대체 필요
++        ingredientViewModel.loadIngredients()
+     }
+ 
+-    Column(
++    LazyColumn(
+         modifier = Modifier
+             .fillMaxSize()
+             .background(BackgroundWhite)
+             .padding(16.dp)
+     ) {
+         // 상단 탭
+-        Row(
+-            modifier = Modifier.fillMaxWidth(),
+-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+-        ) {
+-            TabButton(text = "매출관리", selected = false, onClick = onNavigateToPayManagement, modifier = Modifier.weight(1f))
+-            TabButton(text = "마진관리", selected = true, onClick = onNavigateToMargin, modifier = Modifier.weight(1f))
+-        }
+-        Spacer(Modifier.height(16.dp))
++        item {
++            Row(
++                modifier = Modifier.fillMaxWidth(),
++                horizontalArrangement = Arrangement.spacedBy(12.dp)
++            ) {
++                TabButton(text = "매출관리", selected = false, onClick = onNavigateToPayManagement, modifier = Modifier.weight(1f))
++                TabButton(text = "마진관리", selected = true, onClick = onNavigateToMargin, modifier = Modifier.weight(1f))
++            }
++            Spacer(Modifier.height(16.dp))
++        }
++
++        // 상단 마진 요약 카드
++        item {
++            MarginSummaryCard(items)
++            Spacer(Modifier.height(24.dp))
++        }
+ 
+-        if (isLoading) {
+-            Box(
+-                modifier = Modifier.fillMaxSize(),
+-                contentAlignment = Alignment.Center
++        // 레시피 섹션
++        item {
++            SectionLayout(
++                title = "레시피 관리",
++                onMoreClick = onRecipeListClick
+             ) {
+-                CircularProgressIndicator(color = Blue)
+-            }
+-        } else if (error != null) {
+-            Box(
+-                modifier = Modifier.fillMaxSize(),
+-                contentAlignment = Alignment.Center
+-            ) {
+-                Text(error ?: "오류가 발생했습니다.", color = Color.Red)
++                Card(
++                    shape = RoundedCornerShape(20.dp),
++                    colors = CardDefaults.cardColors(containerColor = CardWhite),
++                    modifier = Modifier.fillMaxWidth()
++                ) {
++                    Column(modifier = Modifier.padding(16.dp)) {
++                        // 레시피 테이블 헤더
++                        Row(
++                            Modifier
++                                .fillMaxWidth()
++                                .padding(vertical = 8.dp, horizontal = 8.dp)
++                                .height(40.dp),
++                            verticalAlignment = Alignment.CenterVertically
++                        ) {
++                            Text("이름", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.Start)
++                            Text("판매가", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
++                            Text("원가", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
++                            Text("마진", Modifier.weight(1.5f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
++                        }
++                        Divider(color = DividerGray, thickness = 1.dp)
++                        Spacer(Modifier.height(8.dp))
++                        // 레시피 리스트
++                        items.forEachIndexed { idx, item ->
++                            val margin = item.price - item.cost
++                            val marginRate = item.marginRate
++                            RecipeItem(
++                                name = item.name,
++                                price = item.price,
++                                cost = item.cost,
++                                margin = margin,
++                                marginRate = marginRate
++                            )
++                            if (idx != items.lastIndex) {
++                                Divider(color = DividerGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
++                            }
++                        }
++                    }
++                }
+             }
+-        } else {
+-            // 요약 정보 표시
+-            marginData?.summary?.let { summary ->
++        }
++
++        // 재료 섹션
++        item {
++            SectionLayout(
++                title = "재료 관리",
++                onMoreClick = onIngredientListClick
++            ) {
+                 Card(
+-                    modifier = Modifier
+-                        .fillMaxWidth()
+-                        .padding(bottom = 16.dp),
+-                    colors = CardDefaults.cardColors(containerColor = CardWhite)
+-                ) {
+-                    Column(
+-                        modifier = Modifier.padding(16.dp)
+-                    ) {
+-                        Text("전체 요약", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+-                        Spacer(Modifier.height(8.dp))
+-                        Row(
+-                            Modifier.fillMaxWidth(),
+-                            horizontalArrangement = Arrangement.SpaceBetween
++                    shape = RoundedCornerShape(20.dp),
++                    colors = CardDefaults.cardColors(containerColor = CardWhite),
++                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
++                ) {
++                    Column(modifier = Modifier.padding(16.dp)) {
++                        // 재료 테이블 헤더
++                        Row(
++                            Modifier
++                                .fillMaxWidth()
++                                .padding(vertical = 8.dp, horizontal = 8.dp)
++                                .height(40.dp),
++                            verticalAlignment = Alignment.CenterVertically
++                        ) {
++                            Text("이름", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.Start)
++                            Text("단위(g)", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
++                            Text("구매가", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
++                        }
++                        Divider(color = DividerGray, thickness = 1.dp)
++                        Spacer(Modifier.height(8.dp))
++                        // 재료 리스트
++                        ingredients.forEachIndexed { idx, ingredient ->
++                            IngredientItem(
++                                name = ingredient.name,
++                                grams = ingredient.grams,
++                                price = ingredient.price
++                            )
++                            if (idx != ingredients.lastIndex) {
++                                Divider(color = DividerGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
++                            }
++                        }
++                    }
++                }
++            }
++        }
++    }
++}
++
++@Composable
++private fun MarginSummaryCard(recipes: List<MarginItem>) {
++    val totalSales = recipes.sumOf { it.price }
++    val totalCost = recipes.sumOf { it.cost }
++    val totalMargin = totalSales - totalCost
++    val marginRate = if (totalSales > 0) (totalMargin * 100f / totalSales).toInt() else 0
++
++    var selectedPeriod by remember { mutableStateOf("일") }
++    val periods = listOf("일", "주", "월")
++
++    Card(
++        modifier = Modifier.fillMaxWidth(),
++        colors = CardDefaults.cardColors(containerColor = CardWhite),
++        shape = RoundedCornerShape(16.dp)
++    ) {
++        Column(
++            modifier = Modifier.padding(16.dp)
++        ) {
++            Row(
++                Modifier.fillMaxWidth(),
++                verticalAlignment = Alignment.CenterVertically
++            ) {
++                Text("전체 마진 현황", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = TextPrimary, modifier = Modifier.weight(1f))
++                Row {
++                    periods.forEachIndexed { idx, period ->
++                        TextButton(
++                            onClick = { selectedPeriod = period },
++                            colors = ButtonDefaults.textButtonColors(
++                                contentColor = if (selectedPeriod == period) Blue else TextSecondary
++                            ),
++                            modifier = Modifier
++                                .height(32.dp)
++                                .width(36.dp),
+                         ) {
+-                            SummaryItem("총 레시피", "${summary.total_recipes}개")
+-                            SummaryItem("총 매출", "${summary.total_sales}원")
+-                            SummaryItem("총 원가", "${summary.total_cost}원")
++                            Text(period, fontWeight = if (selectedPeriod == period) FontWeight.Bold else FontWeight.Normal)
+                         }
+-                        Spacer(Modifier.height(8.dp))
+-                        Row(
+-                            Modifier.fillMaxWidth(),
+-                            horizontalArrangement = Arrangement.SpaceBetween
+-                        ) {
+-                            SummaryItem("총 마진", "${summary.total_margin}원")
+-                            SummaryItem("평균 마진율", "${summary.avg_margin_percentage}%")
+-                        }
+-                    }
+-                }
+-            }
++                        if (idx != periods.lastIndex) {
++                            Spacer(modifier = Modifier.width(2.dp))
++                        }
++                    }
++                }
++            }
++            Spacer(Modifier.height(8.dp))
++            Row(
++                Modifier.fillMaxWidth(),
++                horizontalArrangement = Arrangement.SpaceBetween
++            ) {
++                MarginStatItem("총 매출", totalSales)
++                MarginStatItem("총 원가", totalCost)
++                MarginStatItem("총 마진", totalMargin)
++                MarginStatItem("마진율", marginRate, "%")
++            }
++        }
++    }
++}
+ 
+-            // 표 헤더
+-            Row(
+-                Modifier
+-                    .fillMaxWidth()
+-                    .background(CardWhite, RoundedCornerShape(4.dp))
+-                    .padding(vertical = 8.dp, horizontal = 8.dp),
+-                horizontalArrangement = Arrangement.Start
+-            ) {
+-                Text("이름", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
+-                Text("판매가", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
+-                Text("원가", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
+-                Text("마진", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
+-                Text("마진율", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
+-            }
+-
+-            // 표 리스트
++@Composable
++private fun MarginStatItem(label: String, value: Int, suffix: String = "원") {
++    Column(horizontalAlignment = Alignment.CenterHorizontally) {
++        Text(label, fontSize = 14.sp, color = TextSecondary)
++        Spacer(Modifier.height(4.dp))
++        Text(
++            "${String.format("%,d", value)}$suffix",
++            fontWeight = FontWeight.Bold,
++            fontSize = 16.sp,
++            color = TextPrimary
++        )
++    }
++}
++
++@Composable
++private fun RecipeItem(
++    name: String,
++    price: Int,
++    cost: Int,
++    margin: Int,
++    marginRate: Int
++) {
++    Row(
++        Modifier
++            .fillMaxWidth()
++            .background(CardWhite, RoundedCornerShape(8.dp))
++            .padding(vertical = 8.dp, horizontal = 8.dp),
++        verticalAlignment = Alignment.CenterVertically
++    ) {
++        Text(name, Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.Start)
++        Text("%,d원".format(price), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
++        Text("%,d원".format(cost), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
++        Column(Modifier.weight(1.5f), horizontalAlignment = Alignment.End) {
+             Box(
+                 Modifier
+-                    .fillMaxWidth()
+-                    .weight(1f)
+-                    .border(2.dp, Blue, RoundedCornerShape(4.dp))
+-                    .background(Color.White)
++                    .fillMaxWidth(0.7f)
++                    .height(12.dp)
++                    .background(Color.LightGray.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+             ) {
+-                Column(Modifier.fillMaxSize()) {
+-                    marginData?.recent_sales?.forEach { sale ->
+-                        Row(
+-                            Modifier
+-                                .fillMaxWidth()
+-                                .background(CardWhite, RoundedCornerShape(2.dp))
+-                                .padding(vertical = 6.dp, horizontal = 8.dp),
+-                            horizontalArrangement = Arrangement.Start
+-                        ) {
+-                            Text(sale.title, modifier = Modifier.weight(1f))
+-                            Text("${sale.price}원", modifier = Modifier.weight(1f))
+-                            Text("${sale.total_ingredient_price}원", modifier = Modifier.weight(1f))
+-                            Text("${sale.margin.toInt()}원", modifier = Modifier.weight(1f))
+-                            val marginPercentage = if (sale.price > 0) {
+-                                ((sale.margin.toDouble() / sale.price) * 100).toInt()
+-                            } else 0
+-                            Text("${marginPercentage}%", modifier = Modifier.weight(1f))
+-                        }
+-                    }
+-                }
+-            }
+-        }
+-
+-        Spacer(Modifier.height(24.dp))
+-        // 하단 버튼들
+-        Row(
+-            Modifier.fillMaxWidth(),
+-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+-        ) {
+-            Column(modifier = Modifier.weight(1f)) {
+-                MainButton("레시피 리스트", onRecipeListClick)
+-                Spacer(Modifier.height(12.dp))
+-                MainButton("재료 리스트", onIngredientListClick)
+-            }
+-            Column(modifier = Modifier.weight(1f)) {
+-                MainButton("레시피 등록", onRegisterRecipeClick)
+-                Spacer(Modifier.height(12.dp))
+-                MainButton("재료 등록", onRegisterIngredientClick)
+-            }
+-        }
+-    }
+-}
+-
+-@Composable
+-fun SummaryItem(label: String, value: String) {
+-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+-        Text(label, color = TextSecondary, fontSize = 14.sp)
+-        Text(value, color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
++                Box(
++                    Modifier
++                        .fillMaxHeight()
++                        .fillMaxWidth(marginRate / 100f)
++                        .background(Blue, RoundedCornerShape(6.dp))
++                )
++            }
++            Spacer(Modifier.height(2.dp))
++            Text("${margin}원 (${marginRate}%)", fontSize = 12.sp, color = Blue, textAlign = TextAlign.End)
++        }
++    }
++}
++
++@Composable
++private fun IngredientItem(
++    name: String,
++    grams: Double,
++    price: Int
++) {
++    Row(
++        Modifier
++            .fillMaxWidth()
++            .background(CardWhite, RoundedCornerShape(8.dp))
++            .padding(vertical = 8.dp, horizontal = 8.dp),
++        verticalAlignment = Alignment.CenterVertically
++    ) {
++        Text(name, Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.Start)
++        Text(String.format("%.1f", grams), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
++        Text("%,d원".format(price), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
+     }
+ }
+ 
+@@ -189,51 +305,6 @@
+     }
+ }
+ 
+-@Composable
+-fun ChartTabButton(text: String, selected: Boolean) {
+-    Box(
+-        Modifier
+-            .padding(end = 8.dp)
+-            .background(if (selected) Blue else Color.White, RoundedCornerShape(8.dp))
+-            .border(1.dp, Blue, RoundedCornerShape(8.dp))
+-            .padding(horizontal = 16.dp, vertical = 6.dp)
+-    ) {
+-        Text(text, color = if (selected) Color.White else Blue, fontWeight = FontWeight.Bold)
+-    }
+-}
+-
+-@Composable
+-fun BarChartBar(label: String, percent: Float, value: Int) {
+-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+-        Box(
+-            Modifier
+-                .width(32.dp)
+-                .height((100 * percent).dp)
+-                .background(Blue, RoundedCornerShape(8.dp))
+-        )
+-        Spacer(Modifier.height(4.dp))
+-        Text(label, color = TextSecondary, fontSize = 14.sp)
+-        Text("$value", color = TextSecondary, fontSize = 14.sp)
+-    }
+-}
+-
+-@Composable
+-fun PieChart(percent1: Float, percent2: Float) {
+-    // 실제 파이차트 대신 원형 Box 2개로 대체 (예시)
+-    Box(Modifier.size(80.dp), contentAlignment = Alignment.Center) {
+-        Box(
+-            Modifier
+-                .size(80.dp)
+-                .background(LightBlue, shape = RoundedCornerShape(40.dp))
+-        )
+-        Box(
+-            Modifier
+-                .size(80.dp * percent1)
+-                .background(Blue, shape = RoundedCornerShape(40.dp))
+-        )
+-    }
+-}
+-
+ @Composable
+ fun MainButton(text: String, onClick: () -> Unit) {
+     Button(
+@@ -246,13 +317,57 @@
+     }
+ }
+ 
+-data class MarginItem(
+-    val name: String,
+-    val price: Int,
+-    val cost: Int,
+-    val margin: Int,
+-    val marginRate: Int
+-)
++@Composable
++fun MarginBubble(
++    name: String,
++    sales: Int,
++    cost: Int,
++    marginRate: Int,
++    color: Color,
++    marginColor: Color,
++    modifier: Modifier = Modifier
++) {
++    // 버블 크기 축소: 기본값 60, 매출에 따라 최대 50까지 증가
++    val bubbleSize = (60 + (sales / 30000).coerceAtMost(50)).dp
++    val marginRatio = marginRate / 100f
++    Box(
++        modifier = modifier.size(bubbleSize),
++        contentAlignment = Alignment.TopCenter
++    ) {
++        androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
++            val R = size.minDimension / 2f
++            val r = R * marginRatio
++            drawCircle(
++                color = color,
++                radius = R,
++                center = Offset(R, R)
++            )
++            drawCircle(
++                color = marginColor,
++                radius = r,
++                center = Offset(R, R + (R - r))
++            )
++        }
++        Column(
++            modifier = Modifier
++                .fillMaxSize()
++                .padding(top = 8.dp),
++            horizontalAlignment = Alignment.CenterHorizontally,
++            verticalArrangement = Arrangement.Top
++        ) {
++            Box(
++                modifier = Modifier
++                    .background(Color.Gray.copy(alpha = 0.3f), shape = RoundedCornerShape(1.dp))
++                    .padding(horizontal = 6.dp, vertical = 2.dp)
++            ) {
++                Column(horizontalAlignment = Alignment.CenterHorizontally) {
++                    Text(name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1)
++                    Text("${sales}원", color = Color.White, fontSize = 12.sp)
++                }
++            }
++        }
++    }
++}
+ 
+ @Preview(showBackground = true)
+ @Composable
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/RecipeListScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.foodcost.view\r\n\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.clickable\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.shape.RoundedCornerShape\r\nimport androidx.compose.material3.*\r\nimport androidx.compose.runtime.*\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.graphics.Color\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\nimport com.glowstudio.android.blindsjn.ui.theme.*\r\nimport androidx.compose.ui.tooling.preview.Preview\r\nimport androidx.lifecycle.viewmodel.compose.viewModel\r\nimport com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.RecipeViewModel\r\nimport androidx.compose.runtime.collectAsState\r\nimport androidx.compose.runtime.LaunchedEffect\r\nimport com.glowstudio.android.blindsjn.feature.foodcost.model.Recipe\r\n\r\n@Composable\r\nfun RecipeListScreen(\r\n    onEditRecipeClick: (String) -> Unit = {},\r\n    onRegisterRecipeClick: () -> Unit = {}\r\n) {\r\n    val viewModel: RecipeViewModel = viewModel()\r\n    val recipes by viewModel.recipeList.collectAsState()\r\n    val isLoading by viewModel.isLoading.collectAsState()\r\n    val error by viewModel.error.collectAsState()\r\n\r\n    LaunchedEffect(Unit) {\r\n        viewModel.getRecipeList(1) // TODO: 실제 앱에서는 로그인 정보에서 business_id 받아야 함\r\n    }\r\n\r\n    Column(\r\n        modifier = Modifier\r\n            .fillMaxSize()\r\n            .background(BackgroundWhite)\r\n            .padding(16.dp)\r\n    ) {\r\n        Text(\"레시피\", fontWeight = FontWeight.Bold, fontSize = 28.sp, color = TextPrimary)\r\n        Spacer(Modifier.height(16.dp))\r\n        \r\n        Row(\r\n            Modifier.fillMaxWidth().padding(bottom = 8.dp),\r\n            horizontalArrangement = Arrangement.SpaceBetween\r\n        ) {\r\n            Text(\"이름\", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)\r\n            Text(\"판매가\", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)\r\n            Text(\"마진\", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)\r\n            Spacer(Modifier.width(48.dp))\r\n        }\r\n        HorizontalDivider(color = DividerGray, thickness = 1.dp)\r\n        Spacer(Modifier.height(8.dp))\r\n\r\n        if (isLoading) {\r\n            Box(\r\n                modifier = Modifier.fillMaxSize(),\r\n                contentAlignment = Alignment.Center\r\n            ) {\r\n                CircularProgressIndicator(color = Blue)\r\n            }\r\n        } else if (error != null) {\r\n            Box(\r\n                modifier = Modifier.fillMaxSize(),\r\n                contentAlignment = Alignment.Center\r\n            ) {\r\n                Text(error ?: \"오류가 발생했습니다.\", color = Color.Red)\r\n            }\r\n        } else if (recipes.isEmpty()) {\r\n            Box(\r\n                modifier = Modifier.fillMaxSize(),\r\n                contentAlignment = Alignment.Center\r\n            ) {\r\n                Text(\"등록된 레시피가 없습니다.\", color = TextSecondary)\r\n            }\r\n        } else {\r\n            recipes.forEach { recipe ->\r\n                Row(\r\n                    Modifier\r\n                        .fillMaxWidth()\r\n                        .background(CardWhite, RoundedCornerShape(8.dp))\r\n                        .padding(vertical = 8.dp, horizontal = 8.dp),\r\n                    verticalAlignment = Alignment.CenterVertically\r\n                ) {\r\n                    Text(recipe.title, Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)\r\n                    Text(\"${recipe.price}원\", Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)\r\n                    Text(\r\n                        \"${recipe.margin_info.margin_percentage}%\",\r\n                        Modifier.weight(1f),\r\n                        fontSize = 16.sp,\r\n                        color = if (recipe.margin_info.margin_percentage >= 0) Color.Green else Color.Red\r\n                    )\r\n                    TextButton(onClick = { onEditRecipeClick(recipe.title) }) {\r\n                        Text(\"수정\", color = Blue, fontWeight = FontWeight.Bold)\r\n                    }\r\n                }\r\n                Spacer(Modifier.height(4.dp))\r\n            }\r\n        }\r\n        \r\n        Spacer(Modifier.weight(1f))\r\n        Button(\r\n            onClick = onRegisterRecipeClick,\r\n            colors = ButtonDefaults.buttonColors(containerColor = Blue, contentColor = Color.White),\r\n            shape = RoundedCornerShape(12.dp),\r\n            modifier = Modifier.fillMaxWidth().height(48.dp)\r\n        ) {\r\n            Text(\"레시피 등록\", fontWeight = FontWeight.Bold, fontSize = 16.sp)\r\n        }\r\n    }\r\n}\r\n\r\n@Preview(showBackground = true)\r\n@Composable\r\nfun RecipeListScreenPreview() {\r\n    RecipeListScreen()\r\n} 
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/RecipeListScreen.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/RecipeListScreen.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/RecipeListScreen.kt	(revision 89df4f33664e1350fab789e54eaef65616518fc3)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/foodcost/view/RecipeListScreen.kt	(date 1748398118154)
+@@ -5,7 +5,10 @@
+ import androidx.compose.foundation.layout.*
+ import androidx.compose.foundation.shape.RoundedCornerShape
+ import androidx.compose.material3.*
+-import androidx.compose.runtime.*
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.remember
++import androidx.compose.runtime.mutableStateOf
++import androidx.compose.runtime.getValue
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.graphics.Color
+@@ -15,25 +18,19 @@
+ import com.glowstudio.android.blindsjn.ui.theme.*
+ import androidx.compose.ui.tooling.preview.Preview
+ import androidx.lifecycle.viewmodel.compose.viewModel
+-import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.RecipeViewModel
+-import androidx.compose.runtime.collectAsState
+ import androidx.compose.runtime.LaunchedEffect
+-import com.glowstudio.android.blindsjn.feature.foodcost.model.Recipe
++import androidx.compose.runtime.collectAsState
+ 
+ @Composable
+ fun RecipeListScreen(
+     onEditRecipeClick: (String) -> Unit = {},
+     onRegisterRecipeClick: () -> Unit = {}
+ ) {
+-    val viewModel: RecipeViewModel = viewModel()
+-    val recipes by viewModel.recipeList.collectAsState()
+-    val isLoading by viewModel.isLoading.collectAsState()
+-    val error by viewModel.error.collectAsState()
+-
+-    LaunchedEffect(Unit) {
+-        viewModel.getRecipeList(1) // TODO: 실제 앱에서는 로그인 정보에서 business_id 받아야 함
++    val viewModel: com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.RecipeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
++    val recipeList by viewModel.recipeList.collectAsState()
++    androidx.compose.runtime.LaunchedEffect(Unit) {
++        viewModel.getRecipeList(1) // businessId는 실제 값으로 대체 필요
+     }
+-
+     Column(
+         modifier = Modifier
+             .fillMaxSize()
+@@ -42,65 +39,53 @@
+     ) {
+         Text("레시피", fontWeight = FontWeight.Bold, fontSize = 28.sp, color = TextPrimary)
+         Spacer(Modifier.height(16.dp))
+-        
+         Row(
+             Modifier.fillMaxWidth().padding(bottom = 8.dp),
+             horizontalArrangement = Arrangement.SpaceBetween
+         ) {
+-            Text("이름", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
+-            Text("판매가", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
+-            Text("마진", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
+-            Spacer(Modifier.width(48.dp))
++            Text("레시피 이름", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
++            Text("레시피 가격", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
++            Text("재료 가격", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
++            Text("마진", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
+         }
+-        HorizontalDivider(color = DividerGray, thickness = 1.dp)
++        Divider(color = DividerGray, thickness = 1.dp)
+         Spacer(Modifier.height(8.dp))
+-
+-        if (isLoading) {
+-            Box(
+-                modifier = Modifier.fillMaxSize(),
+-                contentAlignment = Alignment.Center
+-            ) {
+-                CircularProgressIndicator(color = Blue)
+-            }
+-        } else if (error != null) {
+-            Box(
+-                modifier = Modifier.fillMaxSize(),
+-                contentAlignment = Alignment.Center
+-            ) {
+-                Text(error ?: "오류가 발생했습니다.", color = Color.Red)
+-            }
+-        } else if (recipes.isEmpty()) {
+-            Box(
+-                modifier = Modifier.fillMaxSize(),
+-                contentAlignment = Alignment.Center
+-            ) {
+-                Text("등록된 레시피가 없습니다.", color = TextSecondary)
+-            }
+-        } else {
+-            recipes.forEach { recipe ->
+-                Row(
+-                    Modifier
+-                        .fillMaxWidth()
+-                        .background(CardWhite, RoundedCornerShape(8.dp))
+-                        .padding(vertical = 8.dp, horizontal = 8.dp),
+-                    verticalAlignment = Alignment.CenterVertically
+-                ) {
+-                    Text(recipe.title, Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
+-                    Text("${recipe.price}원", Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
+-                    Text(
+-                        "${recipe.margin_info.margin_percentage}%",
+-                        Modifier.weight(1f),
+-                        fontSize = 16.sp,
+-                        color = if (recipe.margin_info.margin_percentage >= 0) Color.Green else Color.Red
+-                    )
+-                    TextButton(onClick = { onEditRecipeClick(recipe.title) }) {
+-                        Text("수정", color = Blue, fontWeight = FontWeight.Bold)
+-                    }
+-                }
+-                Spacer(Modifier.height(4.dp))
+-            }
++        recipeList.forEach { recipe ->
++            val margin = recipe.price - recipe.margin_info.total_ingredient_price.toInt()
++            val marginRate = if (recipe.price > 0) (margin * 100f / recipe.price).toInt() else 0
++            Row(
++                Modifier
++                    .fillMaxWidth()
++                    .background(CardWhite, RoundedCornerShape(8.dp))
++                    .padding(vertical = 8.dp, horizontal = 8.dp),
++                verticalAlignment = Alignment.CenterVertically
++            ) {
++                Text(recipe.title, Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary)
++                Text("%,d원".format(recipe.price), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary)
++                Text("%,d원".format(recipe.margin_info.total_ingredient_price.toInt()), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary)
++                Column(Modifier.weight(2f), horizontalAlignment = Alignment.Start) {
++                    Box(
++                        Modifier
++                            .fillMaxWidth(0.7f)
++                            .height(12.dp)
++                            .background(Color.LightGray.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
++                    ) {
++                        Box(
++                            Modifier
++                                .fillMaxHeight()
++                                .fillMaxWidth(marginRate / 100f)
++                                .background(Blue, RoundedCornerShape(6.dp))
++                        )
++                    }
++                    Spacer(Modifier.height(2.dp))
++                    Text("${margin}원 (${marginRate}%)", fontSize = 12.sp, color = Blue)
++                }
++                TextButton(onClick = { onEditRecipeClick(recipe.title) }) {
++                    Text("수정", color = Blue, fontWeight = FontWeight.Bold)
++                }
++            }
++            Spacer(Modifier.height(4.dp))
+         }
+-        
+         Spacer(Modifier.weight(1f))
+         Button(
+             onClick = onRegisterRecipeClick,

@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.feature.home
+package com.glowstudio.android.blindsjn.feature.home.view
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,7 +11,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 import com.glowstudio.android.blindsjn.ui.components.banner.BannerSection
-import com.glowstudio.android.blindsjn.ui.components.shortcut.ShortcutSection
 import com.glowstudio.android.blindsjn.ui.components.news.NaverNewsSection
 import com.glowstudio.android.blindsjn.ui.components.hotpost.HotPostsSection
 import com.glowstudio.android.blindsjn.ui.components.sales.SalesSection

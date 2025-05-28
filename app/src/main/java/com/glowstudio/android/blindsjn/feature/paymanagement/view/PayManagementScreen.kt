@@ -1,7 +1,6 @@
-package com.glowstudio.android.blindsjn.feature.paymanagement
+package com.glowstudio.android.blindsjn.feature.paymanagement.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -12,18 +11,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import kotlin.math.roundToInt
-import androidx.compose.foundation.border
-import androidx.compose.foundation.BorderStroke
 import com.glowstudio.android.blindsjn.ui.theme.*
-import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.Paint
@@ -32,8 +21,6 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.LazyListScope
 import com.glowstudio.android.blindsjn.ui.components.common.SectionLayout
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.text.KeyboardOptions
@@ -45,10 +32,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesComparisonResponse
 import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesSummaryResponse
 import com.glowstudio.android.blindsjn.feature.paymanagement.viewmodel.PayManagementViewModel
-import com.glowstudio.android.blindsjn.feature.paymanagement.model.TopItem
-import com.glowstudio.android.blindsjn.feature.paymanagement.model.TopItemsResponse
 import java.time.LocalDate
-import kotlin.collections.firstOrNull
+import kotlin.math.cos
+import kotlin.math.sin
 
 @Composable
 private fun GoalSettingDialog(
@@ -139,6 +125,7 @@ fun PayManagementScreen(
     viewModel: PayManagementViewModel = hiltViewModel(),
     onNavigateToFoodCost: () -> Unit = {},
     onNavigateToSalesInput: () -> Unit = {},
+    onNavigateToOcr: () -> Unit = {},
 ) {
     val periodTabs = listOf("일", "주", "월", "연")
     val selectedPeriod by viewModel.selectedPeriod.collectAsState()
@@ -617,12 +604,12 @@ fun PayManagementScreen(
             contentAlignment = Alignment.BottomEnd
         ) {
             FloatingActionButton(
-                onClick = onNavigateToSalesInput,
+                onClick = onNavigateToOcr,
                 containerColor = Blue,
                 contentColor = Color.White,
                 modifier = Modifier.padding(16.dp)
             ) {
-                Icon(Icons.Default.Edit, contentDescription = "오늘의 매출입력")
+                Icon(Icons.Default.Edit, contentDescription = "매출 입력")
             }
         }
     }
@@ -634,7 +621,7 @@ fun PieChart(
     colors: List<Color>,
     modifier: Modifier = Modifier
 ) {
-    androidx.compose.foundation.Canvas(
+    Canvas(
         modifier = modifier.size(140.dp)
     ) {
         var startAngle = -90f
@@ -650,8 +637,8 @@ fun PieChart(
             val angle = startAngle + sweep / 2
             val radius = size.minDimension / 2.5f
             val percent = (proportion * 100).toInt()
-            val x = center.x + radius * kotlin.math.cos(Math.toRadians(angle.toDouble())).toFloat()
-            val y = center.y + radius * kotlin.math.sin(Math.toRadians(angle.toDouble())).toFloat()
+            val x = center.x + radius * cos(Math.toRadians(angle.toDouble())).toFloat()
+            val y = center.y + radius * sin(Math.toRadians(angle.toDouble())).toFloat()
 
             drawIntoCanvas { canvas ->
                 val paint = Paint().asFrameworkPaint().apply {
