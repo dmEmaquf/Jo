@@ -93,48 +93,6 @@ private fun GoalSettingDialog(
 }
 
 @Composable
-private fun FixedCostSettingDialog(
-    currentCost: Double,
-    onDismiss: () -> Unit,
-    onConfirm: (Double) -> Unit
-) {
-    var costText by remember { mutableStateOf((currentCost / 10000).toString()) }
-    
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("월간 고정비 설정") },
-        text = {
-            OutlinedTextField(
-                value = costText,
-                onValueChange = { 
-                    if (it.isEmpty() || it.toFloatOrNull() != null) {
-                        costText = it
-                    }
-                },
-                label = { Text("고정비 금액 (만원)") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val cost = costText.toDoubleOrNull() ?: 120.0
-                    onConfirm(cost * 10000)
-                }
-            ) {
-                Text("확인")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("취소")
-            }
-        }
-    )
-}
-
-@Composable
 fun PayManagementScreen(
     viewModel: PayManagementViewModel = hiltViewModel(),
     onNavigateToFoodCost: () -> Unit = {},
@@ -408,33 +366,13 @@ fun PayManagementScreen(
             item {
                 Card(Modifier.fillMaxWidth().padding(bottom = 16.dp), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = CardWhite)) {
                     Column(Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text("이번달 고정비/순이익", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                            IconButton(
-                                onClick = { viewModel.showFixedCostSettingDialog() }
-                            ) {
-                                Icon(
-                                    Icons.Default.Settings,
-                                    contentDescription = "고정비 설정",
-                                    tint = TextSecondary
-                                )
-                            }
-                        }
+                        Text("이번달 고정비/순이익", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Spacer(Modifier.height(8.dp))
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text("고정비", fontSize = 14.sp, color = TextSecondary)
                                 Spacer(Modifier.height(4.dp))
-                                Text(
-                                    "₩ ${String.format("%,d", viewModel.fixedCost.collectAsState().value.toInt())}",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                    color = TextPrimary
-                                )
+                                Text("₩ 1,200,000", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text("순이익", fontSize = 14.sp, color = TextSecondary)
@@ -594,18 +532,6 @@ fun PayManagementScreen(
                 onConfirm = { goal -> 
                     viewModel.setMonthlyGoal(goal)
                     viewModel.hideGoalSettingDialog()
-                }
-            )
-        }
-
-        // 고정비 설정 다이얼로그 추가
-        if (viewModel.showFixedCostSettingDialog.collectAsState().value) {
-            FixedCostSettingDialog(
-                currentCost = viewModel.fixedCost.collectAsState().value,
-                onDismiss = { viewModel.hideFixedCostSettingDialog() },
-                onConfirm = { cost ->
-                    viewModel.setFixedCost(cost)
-                    viewModel.hideFixedCostSettingDialog()
                 }
             )
         }
