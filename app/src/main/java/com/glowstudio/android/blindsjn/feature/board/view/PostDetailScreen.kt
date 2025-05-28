@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.glowstudio.android.blindsjn.data.network.UserManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.compose.ui.text.style.TextOverflow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -220,11 +221,19 @@ fun PostDetailScreenContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = it.title, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
-
+                Text(
+                    text = it.title ?: "",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = it.content, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = it.content ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = Int.MAX_VALUE
+            )
             Spacer(modifier = Modifier.height(12.dp))
             // 좋아요/댓글 숫자
 
@@ -489,13 +498,13 @@ fun CommentItem(comment: Comment) {
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = comment.content,
+            text = comment.content ?: "",
             style = MaterialTheme.typography.bodySmall,
             color = TextPrimary
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = comment.createdAt,
+            text = comment.createdAt ?: "",
             style = MaterialTheme.typography.bodySmall,
             color = DividerGray
         )

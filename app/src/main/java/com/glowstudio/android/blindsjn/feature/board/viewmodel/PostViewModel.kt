@@ -22,6 +22,15 @@ class PostViewModel : ViewModel() {
     private val _reportResult = MutableStateFlow<String?>(null)
     val reportResult: StateFlow<String?> = _reportResult
 
+    private val _isLoading = MutableStateFlow<Boolean>(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
+    private val _comments = MutableStateFlow<List<Comment>>(emptyList())
+    val comments: StateFlow<List<Comment>> = _comments
+
     fun setStatusMessage(message: String) {
         _statusMessage.value = message
     }
@@ -47,17 +56,67 @@ class PostViewModel : ViewModel() {
 
     fun loadPostById(postId: Int) {
         viewModelScope.launch {
+            _isLoading.value = true
             try {
+                android.util.Log.d("PostViewModel", "Loading post with ID: $postId")
                 val response = PostRepository.loadPostById(postId)
+                android.util.Log.d("PostViewModel", "Response received: ${response.isSuccessful}")
+                
                 if (response.isSuccessful) {
-                    response.body()?.let { postDetailResponse ->
-                        _selectedPost.value = postDetailResponse.data
+                    response.body()?.let { apiResponse ->
+                        android.util.Log.d("PostViewModel", "Response body: $apiResponse")
+                        if (apiResponse.status == "success") {
+                            apiResponse.data?.let { post ->
+                                android.util.Log.d("PostViewModel", "Post data: $post")
+                                _selectedPost.value = post.copy(
+                                    title = post.title ?: "",
+                                    content = post.content ?: "",
+                                    category = post.category ?: "",
+                                    experience = post.experience ?: "",
+                                    time = post.time ?: ""
+                                )
+                                // 댓글 목록도 함께 로드
+                                loadComments(postId)
+                            } ?: run {
+                                android.util.Log.e("PostViewModel", "Post data is null")
+                                _error.value = "게시글 데이터가 없습니다."
+                            }
+                        } else {
+                            android.util.Log.e("PostViewModel", "API error: ${apiResponse.message}")
+                            _error.value = apiResponse.message
+                        }
+                    } ?: run {
+                        android.util.Log.e("PostViewModel", "Response body is null")
+                        _error.value = "서버 응답이 비어있습니다."
                     }
                 } else {
-                    _statusMessage.value = "게시글 조회 실패: ${response.message()}"
+                    android.util.Log.e("PostViewModel", "HTTP error: ${response.code()} - ${response.message()}")
+                    _error.value = "서버 오류: ${response.message()}"
                 }
             } catch (e: Exception) {
-                _statusMessage.value = "게시글 조회 에러: ${e.message}"
+                android.util.Log.e("PostViewModel", "Error loading post", e)
+                _error.value = "게시글을 불러오는데 실패했습니다: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    private fun loadComments(postId: Int) {
+        viewModelScope.launch {
+            try {
+                android.util.Log.d("PostViewModel", "Loading comments for post: $postId")
+                val response = PostRepository.loadComments(postId)
+                if (response.isSuccessful) {
+                    response.body()?.let { apiResponse ->
+                        if (apiResponse.status == "success") {
+                            android.util.Log.d("PostViewModel", "Comments loaded: ${apiResponse.data?.size ?: 0}")
+                            _comments.value = apiResponse.data ?: emptyList()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("PostViewModel", "Error loading comments", e)
             }
         }
     }

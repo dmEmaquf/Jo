@@ -263,6 +263,61 @@ fun BoardCategoryItemPreview() {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun PostListPreview() {
+    BlindSJNTheme {
+        val navController = rememberNavController()
+        val viewModel: PostViewModel = viewModel()
+        val previewPosts = listOf(
+            Post(
+                id = 1,
+                title = "샘플 게시글 1",
+                content = "이것은 샘플 게시글의 내용입니다.",
+                category = "자유게시판",
+                time = "2024-03-20 14:30:00",
+                commentCount = 5,
+                likeCount = 10,
+                isLiked = false,
+                userId = 1
+            ),
+            Post(
+                id = 2,
+                title = "샘플 게시글 2",
+                content = "두 번째 샘플 게시글의 내용입니다.",
+                category = "질문게시판",
+                time = "2024-03-20 15:00:00",
+                commentCount = 3,
+                likeCount = 7,
+                isLiked = true,
+                userId = 2
+            )
+        )
+        PostList(navController = navController, posts = previewPosts, viewModel = viewModel, userId = 1)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PostItemPreview() {
+    BlindSJNTheme {
+        val navController = rememberNavController()
+        val viewModel: PostViewModel = viewModel()
+        val previewPost = Post(
+            id = 1,
+            title = "샘플 게시글",
+            content = "이것은 샘플 게시글의 내용입니다. 미리보기에서 확인할 수 있습니다.",
+            category = "자유게시판",
+            time = "2024-03-20 14:30:00",
+            commentCount = 5,
+            likeCount = 10,
+            isLiked = false,
+            userId = 1
+        )
+        PostItem(navController = navController, post = previewPost, viewModel = viewModel, userId = 1)
+    }
+}
+
 @Composable
 fun PostItem(
     navController: NavController,
