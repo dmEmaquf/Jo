@@ -40,7 +40,7 @@ fun HomeScreen(navController: NavHostController) {
         HotPostsSection(navController)
 
         // 오늘의 매출 관리 섹션
-        SalesSection()
+        // SalesSection()
     }
 }
 

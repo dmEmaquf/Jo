@@ -17,6 +17,7 @@ import com.glowstudio.android.blindsjn.feature.calendar.MessageScreen
 import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
 import com.glowstudio.android.blindsjn.feature.home.HomeScreen
 import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
+import com.glowstudio.android.blindsjn.feature.home.NewsListScreen
 import com.glowstudio.android.blindsjn.feature.popular.PopularScreen
 import com.glowstudio.android.blindsjn.feature.profile.ProfileScreen
 import com.google.gson.Gson
@@ -64,6 +65,22 @@ fun NavGraphBuilder.mainNavGraph(
                     link = article.link
                 )
             }
+        }
+
+        composable("news_list/{topic}") { backStackEntry ->
+            val topic = backStackEntry.arguments?.getString("topic") ?: "자영업"
+            
+            topBarViewModel.setDetailBar(
+                title = "뉴스 목록",
+                onBackClick = { navController.navigateUp() },
+                onSearchClick = { /* 검색 기능 */ },
+                onMoreClick = { /* 더보기 메뉴 */ }
+            )
+
+            NewsListScreen(
+                navController = navController,
+                selectedTopic = topic
+            )
         }
         
         // 게시판 네비게이션 그래프

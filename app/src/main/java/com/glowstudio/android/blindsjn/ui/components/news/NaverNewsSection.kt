@@ -7,10 +7,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -25,24 +23,105 @@ import com.glowstudio.android.blindsjn.ui.NewsViewModel
 import com.glowstudio.android.blindsjn.ui.components.common.SectionLayout
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 import com.glowstudio.android.blindsjn.ui.theme.CardWhite
+import com.glowstudio.android.blindsjn.ui.theme.DividerGray
 import com.google.gson.Gson
 import java.net.URLEncoder
 import androidx.core.text.HtmlCompat
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.ui.platform.LocalContext
+
+// 주제 목록 정의
+private val newsTopics = listOf(
+    "자영업",
+    "음식점",
+    "카페",
+    "소상공인",
+    "창업"
+)
 
 @Composable
 fun NaverNewsSection(navController: NavHostController) {
     val viewModel: NewsViewModel = viewModel()
     val uiState by viewModel.uiState
+    val context = LocalContext.current
+    var selectedTopic by remember { 
+        mutableStateOf(viewModel.loadSelectedTopic(context))
+    }
+    var expanded by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        viewModel.searchNews("자영업")
+    LaunchedEffect(selectedTopic) {
+        viewModel.searchNews(selectedTopic)
     }
 
     Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-        SectionLayout(
-            title = "새로운 소식",
-            onMoreClick = { /* TODO: 네이버 뉴스 더보기 이동 */ }
-        ) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${selectedTopic} 소식",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 주제 선택 콤보박스
+                    Box {
+                        OutlinedButton(
+                            onClick = { expanded = true },
+                            modifier = Modifier.width(120.dp)
+                        ) {
+                            Text(
+                                text = selectedTopic,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = "주제 선택"
+                            )
+                        }
+                        
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            newsTopics.forEach { topic ->
+                                DropdownMenuItem(
+                                    text = { Text(topic) },
+                                    onClick = {
+                                        selectedTopic = topic
+                                        viewModel.saveSelectedTopic(context, topic)
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // 더보기 버튼
+                    IconButton(onClick = { 
+                        navController.navigate("news_list/${selectedTopic}")
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowRight,
+                            contentDescription = "더보기",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
             when {
                 uiState.isLoading -> {
                     CircularProgressIndicator()
@@ -51,47 +130,41 @@ fun NaverNewsSection(navController: NavHostController) {
                     Text(uiState.error ?: "오류", color = Color.Red)
                 }
                 else -> {
-                    Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        tonalElevation = 0.dp,
-                        color = CardWhite,
-                        modifier = Modifier.fillMaxWidth()
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
                     ) {
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
-                        ) {
-                            items(uiState.newsList) { article ->
-                                Box(
+                        items(uiState.newsList) { article ->
+                            Card(
+                                modifier = Modifier
+                                    .width(300.dp)
+                                    .height(120.dp)
+                                    .clickable {
+                                        val articleJson = URLEncoder.encode(Gson().toJson(article), "UTF-8")
+                                        navController.navigate("news_detail/$articleJson")
+                                    },
+                                shape = RoundedCornerShape(12.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                                colors = CardDefaults.cardColors(containerColor = CardWhite)
+                            ) {
+                                Column(
                                     modifier = Modifier
-                                        .width(300.dp)
-                                        .height(120.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(MaterialTheme.colorScheme.surface)
-                                        .clickable {
-                                            val articleJson = URLEncoder.encode(Gson().toJson(article), "UTF-8")
-                                            navController.navigate("news_detail/$articleJson")
-                                        }
+                                        .fillMaxSize()
+                                        .padding(12.dp),
+                                    verticalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(12.dp),
-                                        verticalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(
-                                            text = HtmlCompat.fromHtml(article.title, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
-                                            fontWeight = FontWeight.Bold,
-                                            maxLines = 2,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        Text(
-                                            text = HtmlCompat.fromHtml(article.description, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
-                                            maxLines = 3,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
+                                    Text(
+                                        text = HtmlCompat.fromHtml(article.title, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = HtmlCompat.fromHtml(article.description, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
+                                        maxLines = 3,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
                                 }
                             }
                         }
