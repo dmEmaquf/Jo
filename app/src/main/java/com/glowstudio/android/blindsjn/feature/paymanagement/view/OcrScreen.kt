@@ -24,57 +24,52 @@ import com.glowstudio.android.blindsjn.ui.theme.*
 fun OcrScreen(
     onCaptureClick: () -> Unit = {}
 ) {
-    Column(
+    val verticalPadding = 48.dp
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundWhite),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(BackgroundWhite)
     ) {
-        // 카메라 프레임 (네 모서리만)
+        // 상단에 프레임
         Box(
             modifier = Modifier
-                .size(260.dp)
-                .padding(8.dp)
+                .align(Alignment.TopCenter)
+                .padding(top = verticalPadding)
+                .size(width = 320.dp, height = 520.dp)
         ) {
             Canvas(modifier = Modifier.matchParentSize()) {
                 val strokeWidth = 4.dp.toPx()
-                val length = 32.dp.toPx()
+                val length = 40.dp.toPx()
                 val w = size.width
                 val h = size.height
                 val color = Blue
-                // 왼쪽 위
                 drawLine(color, Offset(0f, 0f), Offset(length, 0f), strokeWidth)
                 drawLine(color, Offset(0f, 0f), Offset(0f, length), strokeWidth)
-                // 오른쪽 위
                 drawLine(color, Offset(w, 0f), Offset(w - length, 0f), strokeWidth)
                 drawLine(color, Offset(w, 0f), Offset(w, length), strokeWidth)
-                // 왼쪽 아래
                 drawLine(color, Offset(0f, h), Offset(0f, h - length), strokeWidth)
                 drawLine(color, Offset(0f, h), Offset(length, h), strokeWidth)
-                // 오른쪽 아래
                 drawLine(color, Offset(w, h), Offset(w - length, h), strokeWidth)
                 drawLine(color, Offset(w, h), Offset(w, h - length), strokeWidth)
             }
+            Text(
+                "문서를 이 영역에 맞춰주세요.",
+                color = TextSecondary,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
-        Spacer(modifier = Modifier.height(32.dp))
-        // 안내 문구
-        Text(
-            "문서를 상단의 영역에 맞춘 뒤\n촬영 버튼을 눌러주세요.",
-            color = TextSecondary,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            lineHeight = 22.sp,
-            modifier = Modifier.padding(bottom = 40.dp),
-            textAlign = TextAlign.Center
-        )
-        // 촬영 버튼
+        // 하단에 버튼
         Button(
             onClick = onCaptureClick,
             shape = CircleShape,
             colors = ButtonDefaults.buttonColors(containerColor = Blue),
             modifier = Modifier
-                .size(64.dp)
+                .align(Alignment.BottomCenter)
+                .padding(bottom = verticalPadding)
+                .size(72.dp)
                 .clip(CircleShape)
         ) {}
     }

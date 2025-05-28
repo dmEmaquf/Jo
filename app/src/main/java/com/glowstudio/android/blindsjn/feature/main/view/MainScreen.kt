@@ -36,6 +36,8 @@ import com.glowstudio.android.blindsjn.feature.foodcost.RegisterIngredientScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.RecipeListScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.EditRecipeScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.IngredientListScreen
+import com.glowstudio.android.blindsjn.feature.main.model.NavigationState
+import com.glowstudio.android.blindsjn.feature.main.viewmodel.BottomBarViewModel
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
@@ -44,7 +46,8 @@ import com.glowstudio.android.blindsjn.feature.foodcost.view.IngredientListScree
 @Composable
 fun MainScreen(
     topBarViewModel: TopBarViewModel = viewModel(),
-    navigationViewModel: NavigationViewModel = viewModel()
+    navigationViewModel: NavigationViewModel = viewModel(),
+    bottomBarViewModel: BottomBarViewModel = viewModel()
 ) {
     // 하나의 NavController 생성
     val navController = rememberNavController()
@@ -58,13 +61,11 @@ fun MainScreen(
     // 라우트가 변경될 때마다 TopBar 상태 업데이트
     LaunchedEffect(currentRoute) {
         when (currentRoute) {
-            "home" -> topBarViewModel.setMainBar()
-            "board" -> topBarViewModel.setMainBar()
-            "paymanagement", "foodcoast" -> topBarViewModel.setMainBar()
-            "message" -> topBarViewModel.setMainBar()
-            "profile" -> topBarViewModel.setMainBar()
+            "home", "board", "paymanagement", "foodcoast", "message", "profile" -> {
+                topBarViewModel.setMainBar()
+                bottomBarViewModel.showBottomBar()
+            }
             else -> {
-                // 상세 화면의 경우 현재 라우트에 따라 적절한 TopBar 설정
                 val title = when {
                     currentRoute?.startsWith("postDetail/") == true -> "게시글"
                     currentRoute?.startsWith("boardDetail/") == true -> "게시판"
@@ -75,9 +76,13 @@ fun MainScreen(
                     title = title,
                     onBackClick = { navController.navigateUp() }
                 )
+                bottomBarViewModel.hideBottomBar()
             }
         }
     }
+
+    val bottomBarRoutes = NavigationState().items.map { it.route }
+    val isBottomBarVisible by bottomBarViewModel.isBottomBarVisible.collectAsState()
 
     Scaffold(
         // 상단바: TopBarViewModel의 상태를 기반으로 동적으로 업데이트됨
@@ -86,10 +91,12 @@ fun MainScreen(
         },
         // 하단 네비게이션 바
         bottomBar = {
-            BottomNavigationBar(
-                navController = navController,
-                viewModel = navigationViewModel
-            )
+            if (isBottomBarVisible) {
+                BottomNavigationBar(
+                    navController = navController,
+                    viewModel = navigationViewModel
+                )
+            }
         },
         // 내부 컨텐츠: NavHost에 navController와 TopBarViewModel 전달
         content = { paddingValues ->
