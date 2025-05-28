@@ -16,7 +16,7 @@ import com.glowstudio.android.blindsjn.feature.board.view.BoardScreen
 import com.glowstudio.android.blindsjn.feature.board.view.BoardDetailScreen
 import com.glowstudio.android.blindsjn.feature.board.view.WritePostScreen
 import com.glowstudio.android.blindsjn.feature.board.view.PostDetailScreen
-import com.glowstudio.android.blindsjn.feature.home.HomeScreen
+import com.glowstudio.android.blindsjn.feature.home.view.HomeScreen
 import com.glowstudio.android.blindsjn.feature.profile.ProfileScreen
 import com.glowstudio.android.blindsjn.feature.calendar.MessageScreen
 import com.glowstudio.android.blindsjn.ui.screens.AddScheduleScreen
@@ -27,7 +27,7 @@ import androidx.navigation.navArgument
 import java.net.URLDecoder
 import com.google.gson.Gson
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
-import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
+import com.glowstudio.android.blindsjn.feature.home.view.NewsDetailScreen
 import com.glowstudio.android.blindsjn.data.model.Article
 import com.glowstudio.android.blindsjn.feature.paymanagement.view.PayManagementScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.FoodCostScreen
@@ -70,6 +70,8 @@ fun MainScreen(
                     currentRoute?.startsWith("postDetail/") == true -> "게시글"
                     currentRoute?.startsWith("boardDetail/") == true -> "게시판"
                     currentRoute?.startsWith("editRecipe/") == true -> "레시피 수정"
+                    currentRoute?.startsWith("news_main/") == true -> "뉴스 메인"
+                    currentRoute?.startsWith("news_detail/") == true -> "뉴스 상세"
                     else -> ""
                 }
                 topBarViewModel.setDetailBar(

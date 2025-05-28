@@ -41,7 +41,7 @@ fun NaverNewsSection(navController: NavHostController) {
     Box(modifier = Modifier.padding(horizontal = 16.dp)) {
         SectionLayout(
             title = "새로운 소식",
-            onMoreClick = { /* TODO: 네이버 뉴스 더보기 이동 */ }
+            onMoreClick = { navController.navigate("news_main") }
         ) {
             when {
                 uiState.isLoading -> {

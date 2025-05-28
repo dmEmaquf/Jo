@@ -5,7 +5,7 @@
 * */
 
 
-package com.glowstudio.android.blindsjn.feature.home
+package com.glowstudio.android.blindsjn.feature.home.view
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
