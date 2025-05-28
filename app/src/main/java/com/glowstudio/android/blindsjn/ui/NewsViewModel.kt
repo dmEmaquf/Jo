@@ -1,5 +1,6 @@
 package com.glowstudio.android.blindsjn.ui
 
+import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -12,17 +13,21 @@ import android.util.Log
 data class NaverNewsUiState(
     val newsList: List<NaverNewsItem> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val selectedTopic: String = "자영업"
 )
 
 class NewsViewModel : ViewModel() {
-
     private val _uiState = mutableStateOf(NaverNewsUiState())
     val uiState: State<NaverNewsUiState> = _uiState
 
     fun searchNews(query: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                error = null,
+                selectedTopic = query
+            )
 
             try {
                 Log.d("NewsViewModel", "네이버 뉴스 요청 시작: $query")
@@ -30,7 +35,7 @@ class NewsViewModel : ViewModel() {
 
                 if (response.isSuccessful) {
                     val items = response.body()?.items ?: emptyList()
-                    _uiState.value = NaverNewsUiState(newsList = items)
+                    _uiState.value = _uiState.value.copy(newsList = items)
                     Log.d("NewsViewModel", "뉴스 요청 성공 - 결과 수: ${items.size}")
                 } else {
                     Log.e(
@@ -47,4 +52,16 @@ class NewsViewModel : ViewModel() {
             }
         }
     }
-}
+
+    fun saveSelectedTopic(context: Context, topic: String) {
+        context.getSharedPreferences("news_prefs", Context.MODE_PRIVATE)
+            .edit()
+            .putString("selected_topic", topic)
+            .apply()
+    }
+
+    fun loadSelectedTopic(context: Context): String {
+        return context.getSharedPreferences("news_prefs", Context.MODE_PRIVATE)
+            .getString("selected_topic", "자영업") ?: "자영업"
+    }
+} 
