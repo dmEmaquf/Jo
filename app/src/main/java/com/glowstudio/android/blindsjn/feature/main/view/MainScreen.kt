@@ -29,7 +29,12 @@ import com.google.gson.Gson
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 import com.glowstudio.android.blindsjn.feature.home.view.NewsDetailScreen
 import com.glowstudio.android.blindsjn.data.model.Article
+import com.glowstudio.android.blindsjn.data.network.Network
+import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementApi
+import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementRepository
+import com.glowstudio.android.blindsjn.feature.paymanagement.viewmodel.PayManagementViewModel
 import com.glowstudio.android.blindsjn.feature.paymanagement.view.PayManagementScreen
+import androidx.compose.ui.platform.LocalContext
 import com.glowstudio.android.blindsjn.feature.foodcost.view.FoodCostScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterRecipeScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterIngredientScreen
@@ -51,6 +56,13 @@ fun MainScreen(
     navigationViewModel: NavigationViewModel = viewModel(),
     bottomBarViewModel: BottomBarViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val payManagementViewModel = remember {
+        val api = Network.payManagementApiService
+        val repository = PayManagementRepository(api, context)
+        PayManagementViewModel(repository)
+    }
+
     // 하나의 NavController 생성
     val navController = rememberNavController()
     // TopBarViewModel에서 상단바 상태를 관찰
@@ -114,7 +126,9 @@ fun MainScreen(
                     composable("board") { BoardScreen(navController) }
                     composable("paymanagement") {
                         PayManagementScreen(
+                            viewModel = payManagementViewModel,
                             onNavigateToFoodCost = { navController.navigate("foodcoast") },
+                            onNavigateToSalesInput = { /* TODO: Implement Sales Input navigation */ },
                             onNavigateToOcr = { navController.navigate("ocr") }
                         )
                     }
