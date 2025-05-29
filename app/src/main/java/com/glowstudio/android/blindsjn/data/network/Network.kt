@@ -3,7 +3,6 @@ package com.glowstudio.android.blindsjn.data.network
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import com.glowstudio.android.blindsjn.BuildConfig
 import com.glowstudio.android.blindsjn.data.model.*
 import com.glowstudio.android.blindsjn.feature.board.model.*
 import com.glowstudio.android.blindsjn.feature.foodcost.model.Recipe
@@ -129,8 +128,8 @@ interface ApiService {
     suspend fun toggleLike(@Body request: LikePostRequest): Response<LikeResponse>
 
     // 🔹 신고
-    @POST("Report_post.php")
-    suspend fun reportPost(@Body request: ReportRequest): Response<ApiResponse<ReportResponse>>
+    @POST("cors.php")
+    suspend fun reportPost(@Body request: ReportRequest): Response<ReportResponse>
 
     // 🔹 산업별 게시판
     @GET("get_industries.php")

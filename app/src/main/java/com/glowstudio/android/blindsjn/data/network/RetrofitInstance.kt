@@ -50,10 +50,10 @@ object NetworkConfig {
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         })
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
-        .build()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
 
     private val naverClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
@@ -78,10 +78,10 @@ object NetworkConfig {
 // 네이버 뉴스 서버용 Retrofit 인스턴스
 object NaverNewsServer {
     private val retrofit = Retrofit.Builder()
-        .baseUrl(NetworkConfig.NAVER_BASE_URL)
+            .baseUrl(NetworkConfig.NAVER_BASE_URL)
         .client(NetworkConfig.naverClientInstance)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
     val apiService: NaverNewsApiService = retrofit.create(NaverNewsApiService::class.java)
 }
@@ -89,10 +89,10 @@ object NaverNewsServer {
 // 내부 서버
 object InternalServer {
     private val retrofit = Retrofit.Builder()
-        .baseUrl(NetworkConfig.INTERNAL_BASE_URL)
+            .baseUrl(NetworkConfig.INTERNAL_BASE_URL)
         .client(NetworkConfig.defaultClientInstance)
-        .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
-        .build()
+            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
+            .build()
 
     val api: ApiService = retrofit.create(ApiService::class.java)
 }
@@ -100,10 +100,10 @@ object InternalServer {
 // 공공 API 서버용 Retrofit 인스턴스
 object PublicApiRetrofitInstance {
     private val retrofit = Retrofit.Builder()
-        .baseUrl(NetworkConfig.PUBLIC_API_BASE_URL)
+            .baseUrl(NetworkConfig.PUBLIC_API_BASE_URL)
         .client(NetworkConfig.defaultClientInstance)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
     val api: ApiService = retrofit.create(ApiService::class.java)
 }

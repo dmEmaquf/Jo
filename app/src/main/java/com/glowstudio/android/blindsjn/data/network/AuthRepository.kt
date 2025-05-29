@@ -46,22 +46,14 @@ object AuthRepository {
                 Log.d(TAG, "서버 에러 본문: ${response.errorBody()?.string()}")
                 
                 if (response.isSuccessful) {
-                    val result = response.body()
-                    Log.d(TAG, "응답 상태: ${result?.status}")
-                    Log.d(TAG, "응답 메시지: ${result?.message}")
-                    
-                    if (result?.status == "success") {
-                        val userId = result.user_id
-                        Log.d(TAG, "로그인 성공 - userId: $userId")
-                        UserManager.saveUserId(context, userId)
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(context, "로그인 성공", Toast.LENGTH_SHORT).show()
-                        }
-                        return@withContext true
-                    } else {
-                        Log.e(TAG, "로그인 실패 - 상태: ${result?.status}, 메시지: ${result?.message}")
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(context, result?.message ?: "로그인에 실패했습니다", Toast.LENGTH_SHORT).show()
+                    response.body()?.let { loginResponse ->
+                        if (loginResponse.status == "success") {
+                            UserManager.saveUserId(context, loginResponse.user_id)
+                            UserManager.savePhoneNumber(context, phoneNumber)
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(context, "로그인 성공", Toast.LENGTH_SHORT).show()
+                            }
+                            return@withContext true
                         }
                     }
                 } else {
@@ -85,7 +77,7 @@ object AuthRepository {
                 }
                 return@withContext false
             } catch (e: Exception) {
-                Log.e(TAG, "로그인 실패: ${e.message}")
+                Log.e(TAG, "로그인 실패", e)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "알 수 없는 오류가 발생했습니다", Toast.LENGTH_SHORT).show()
                 }

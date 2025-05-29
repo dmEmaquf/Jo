@@ -41,50 +41,71 @@ fun NavGraphBuilder.mainNavGraph(
             HomeScreen(navController = navController)
         }
 
-        composable("news_detail/{articleJson}") { backStackEntry ->
-            val articleJson = backStackEntry.arguments?.getString("articleJson")
-            val article = try {
-                Gson().fromJson(URLDecoder.decode(articleJson, "UTF-8"), Article::class.java)
-            } catch (e: Exception) {
-                null
-            }
-
-            topBarViewModel.setDetailBar(
-                title = "",
-                onBackClick = { navController.navigateUp() },
-                onSearchClick = { /* 검색 기능 */ },
-                onMoreClick = { /* 더보기 메뉴 */ }
-            )
-
-            if (article != null) {
-                NewsDetailScreen(
-                    title = article.title ?: "제목 없음",
-                    content = article.content,
-                    description = article.description,
-                    imageUrl = article.urlToImage,
-                    link = article.link
-                )
-            }
-        }
-
-        composable("news_list/{topic}") { backStackEntry ->
-            val topic = backStackEntry.arguments?.getString("topic") ?: "자영업"
-
-            topBarViewModel.setDetailBar(
-                title = "",
-                onBackClick = { navController.navigateUp() },
-                onSearchClick = { /* 검색 기능 */ },
-                onMoreClick = { /* 더보기 메뉴 */ }
-            )
-
-            NewsListScreen(
-                navController = navController,
-                selectedTopic = topic
-            )
-        }
-
         // 게시판 네비게이션 그래프
-        boardNavGraph(navController, topBarViewModel)
+        navigation(
+            startDestination = "board_list_screen",
+            route = "board_root"
+        ) {
+            composable("board_list_screen") {
+                topBarViewModel.setMainBar(
+                    onSearchClick = { /* 검색 */ },
+                    onMoreClick = { /* 더보기 */ },
+                    onNotificationClick = { /* 알림 */ }
+                )
+                BoardScreen(navController = navController)
+            }
+
+            composable(
+                route = "write_post_screen/{category}/{tags}",
+                arguments = listOf(
+                    navArgument("category") {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    },
+                    navArgument("tags") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    }
+                )
+            ) { backStackEntry ->
+                val category = backStackEntry.arguments?.getString("category") ?: ""
+                val tags = backStackEntry.arguments?.getString("tags")
+                topBarViewModel.setDetailBar(
+                    title = "게시글 작성",
+                    onBackClick = { navController.navigateUp() }
+                )
+                WritePostScreen(navController = navController, industry = category, tags = tags)
+            }
+
+            composable("board_detail/{title}") { backStackEntry ->
+                val postTitle = backStackEntry.arguments?.getString("title") ?: "게시글"
+                topBarViewModel.setDetailBar(
+                    title = postTitle,
+                    onBackClick = { navController.navigateUp() },
+                    onSearchClick = { /* 검색 기능 */ },
+                    onMoreClick = { /* 더보기 메뉴 */ }
+                )
+                BoardDetailScreen(navController = navController, title = postTitle)
+            }
+
+            composable(
+                route = "post_detail/{postId}",
+                arguments = listOf(
+                    navArgument("postId") {
+                        type = NavType.StringType
+                        defaultValue = "1"
+                    }
+                )
+            ) { backStackEntry ->
+                val postId = backStackEntry.arguments?.getString("postId") ?: "1"
+                topBarViewModel.setDetailBar(
+                    title = "게시글 상세",
+                    onBackClick = { navController.navigateUp() }
+                )
+                PostDetailScreen(navController = navController, postId = postId)
+            }
+        }
         
         // 인기글 네비게이션 그래프
         popularNavGraph(navController, topBarViewModel)
@@ -94,71 +115,6 @@ fun NavGraphBuilder.mainNavGraph(
         
         // 프로필 네비게이션 그래프
         profileNavGraph(navController, topBarViewModel)
-    }
-}
-
-fun NavGraphBuilder.boardNavGraph(
-    navController: NavHostController,
-    topBarViewModel: TopBarViewModel
-) {
-    navigation(
-        startDestination = "board_list_screen",
-        route = "board_root"
-    ) {
-        composable("board_list_screen") {
-            topBarViewModel.setMainBar(
-                onSearchClick = { /* 검색 */ },
-                onMoreClick = { /* 더보기 */ },
-                onNotificationClick = { /* 알림 */ }
-            )
-            BoardScreen(navController = navController)
-        }
-
-        composable("board_detail/{title}") { backStackEntry ->
-            val postTitle = backStackEntry.arguments?.getString("title") ?: "게시글"
-            topBarViewModel.setDetailBar(
-                title = postTitle,
-                onBackClick = { navController.navigateUp() },
-                onSearchClick = { /* 검색 기능 */ },
-                onMoreClick = { /* 더보기 메뉴 */ }
-            )
-            BoardDetailScreen(navController = navController, title = postTitle)
-        }
-
-        composable(
-            route = "write_post_screen/{tags}",
-            arguments = listOf(
-                navArgument("tags") {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                }
-            )
-        ) { backStackEntry ->
-            val tags = backStackEntry.arguments?.getString("tags")
-            topBarViewModel.setDetailBar(
-                title = "게시글 작성",
-                onBackClick = { navController.navigateUp() }
-            )
-            WritePostScreen(navController = navController, tags = tags)
-        }
-
-        composable(
-            route = "post_detail/{postId}",
-            arguments = listOf(
-                navArgument("postId") {
-                    type = NavType.StringType
-                    defaultValue = "1"
-                }
-            )
-        ) { backStackEntry ->
-            val postId = backStackEntry.arguments?.getString("postId") ?: "1"
-            topBarViewModel.setDetailBar(
-                title = "게시글 상세",
-                onBackClick = { navController.navigateUp() }
-            )
-            PostDetailScreen(navController = navController, postId = postId)
-        }
     }
 }
 

@@ -54,7 +54,7 @@ fun BoardScreen(navController: NavController) {
     val coroutineScope = rememberCoroutineScope()
     val boardCategories by boardViewModel.boardCategories.collectAsState()
     val posts by postViewModel.posts.collectAsState()
-    val statusMessage by postViewModel.statusMessage.collectAsState()
+    val statusMessage by postViewModel.statusMessage.collectAsState(initial = "")
     var showCategorySheet by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<BoardCategory?>(null) }
     // 글쓰기 바텀시트 상태
@@ -102,8 +102,11 @@ fun BoardScreen(navController: NavController) {
                 enabledTags = enabledTags,
                 onDone = {
                     showSheet = false
+                    val encodedCategory = URLEncoder.encode(selectedCategory?.title ?: "누구나", "UTF-8")
                     val encodedTags = URLEncoder.encode(it.joinToString(","), "UTF-8")
-                    navController.navigate("write_post_screen/$encodedTags")
+                    navController.navigate("writePost/$encodedCategory/$encodedTags") {
+                        launchSingleTop = true
+                    }
                     postBottomSheetViewModel.clearSelection()
                 }
             )
@@ -168,9 +171,9 @@ fun BoardScreen(navController: NavController) {
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                if (!statusMessage.isNullOrEmpty()) {
+                if (statusMessage.isNotEmpty()) {
                     Text(
-                        text = statusMessage ?: "",
+                        text = statusMessage,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -333,7 +336,7 @@ fun PostItem(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
-            .clickable { navController.navigate("post_detail/${post.id}") }
+            .clickable { navController.navigate("postDetail/${post.id}") }
             .padding(16.dp)
     ) {
         // 업종(카테고리)

@@ -53,6 +53,8 @@ fun PostDetailScreen(navController: NavController, postId: String) {
     val commentViewModel: CommentViewModel = viewModel()
     val post by postViewModel.selectedPost.collectAsState()
     val comments by commentViewModel.comments.collectAsState()
+    val statusMessage by postViewModel.statusMessage.collectAsState(initial = "")
+    val commentStatusMessage by commentViewModel.statusMessage.collectAsState(initial = "")
     var newComment by remember { mutableStateOf("") }
     var isLiked by remember { mutableStateOf(post?.isLiked ?: false) }
     var likeCount by remember { mutableIntStateOf(post?.likeCount ?: 0) }

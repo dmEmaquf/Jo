@@ -39,8 +39,7 @@ import com.glowstudio.android.blindsjn.feature.foodcost.view.IngredientListScree
 import com.glowstudio.android.blindsjn.feature.main.model.NavigationState
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.BottomBarViewModel
 import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import com.glowstudio.android.blindsjn.feature.home.view.NewsMainScreen
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
@@ -164,8 +163,12 @@ fun MainScreen(
                         BoardDetailScreen(navController, title)
                     }
                     composable(
-                        route = "writePost?tags={tags}",
+                        route = "writePost/{category}/{tags}",
                         arguments = listOf(
+                            navArgument("category") {
+                                type = NavType.StringType
+                                defaultValue = ""
+                            },
                             navArgument("tags") {
                                 type = NavType.StringType
                                 nullable = true
@@ -173,8 +176,9 @@ fun MainScreen(
                             }
                         )
                     ) { backStackEntry ->
+                        val category = backStackEntry.arguments?.getString("category") ?: ""
                         val tags = backStackEntry.arguments?.getString("tags")
-                        WritePostScreen(navController, tags)
+                        WritePostScreen(navController, category, tags)
                     }
                     composable(
                         route = "postDetail/{postId}",
@@ -199,11 +203,18 @@ fun MainScreen(
                     composable("news_detail/{articleJson}") { backStackEntry ->
                         val articleJson = backStackEntry.arguments?.getString("articleJson") ?: ""
                         val article = Gson().fromJson(articleJson, Article::class.java)
-                        NewsDetailScreen(article = article)
+                        NewsDetailScreen(
+                            title = article.title ?: "",
+                            content = article.content,
+                            description = article.description,
+                            imageUrl = article.urlToImage,
+                            link = article.link
+                        )
                     }
                     composable("businessCertification") {
                         BusinessCertificationScreen(
-                            onBackClick = { navController.navigateUp() }
+                            onConfirm = { /* TODO: 인증 성공 처리 */ },
+                            onDismiss = { navController.navigateUp() }
                         )
                     }
                 }

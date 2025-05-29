@@ -29,12 +29,13 @@ import androidx.compose.ui.platform.LocalContext
 import com.glowstudio.android.blindsjn.data.network.UserManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WritePostScreen(
     navController: NavController,
-    industry: String? = null,
+    industry: String = "",
     tags: String? = null
 ) {
     val context = LocalContext.current
@@ -44,21 +45,26 @@ fun WritePostScreen(
     val coroutineScope = rememberCoroutineScope()
     val categories by writePostViewModel.categories.collectAsState()
     val selectedCategory by writePostViewModel.selectedCategory.collectAsState()
+    val selectedTags by writePostViewModel.selectedTags.collectAsState()
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     var isAnonymous by remember { mutableStateOf(false) }
     var isQuestion by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
-    val userId by UserManager.getUserId(context).collectAsState(initial = null)
-    val statusMessage by viewModel.statusMessage.collectAsState()
+    var userId by remember { mutableStateOf<Int?>(null) }
+    var phoneNumber by remember { mutableStateOf<String?>(null) }
+    val statusMessage: String = viewModel.statusMessage.collectAsState(initial = "").value
 
     val contentFocusRequester = remember { FocusRequester() }
 
+    LaunchedEffect(Unit) {
+        userId = UserManager.getUserId(context).first()
+        phoneNumber = UserManager.getPhoneNumber(context)
+    }
+
     LaunchedEffect(statusMessage) {
-        statusMessage?.let { message ->
-            if (message.contains("성공") || message.contains("저장")) {
-                navController.navigateUp()
-            }
+        if (statusMessage.contains("성공") || statusMessage.contains("저장")) {
+            navController.navigateUp()
         }
     }
 
@@ -182,13 +188,17 @@ fun WritePostScreen(
                     onClick = {
                         if (title.isBlank() || content.isBlank()) {
                             viewModel.setStatusMessage("제목과 내용을 입력하세요.")
+                        } else if (phoneNumber == null) {
+                            viewModel.setStatusMessage("전화번호 정보를 찾을 수 없습니다.")
                         } else {
                             userId?.let { id ->
+                                val categoryTitle = if (industry.isNotEmpty()) industry else selectedCategory.title
                                 viewModel.savePost(
                                     title = title,
                                     content = content,
                                     userId = id,
-                                    industry = industry ?: selectedCategory.title
+                                    industry = categoryTitle,
+                                    phoneNumber = phoneNumber!!
                                 )
                             } ?: run {
                                 viewModel.setStatusMessage("사용자 정보를 찾을 수 없습니다.")
@@ -198,9 +208,9 @@ fun WritePostScreen(
                     modifier = Modifier.align(Alignment.End)
                 )
 
-                statusMessage?.let { message ->
+                if (statusMessage.isNotEmpty()) {
                     Text(
-                        text = message,
+                        text = statusMessage,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )

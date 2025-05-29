@@ -31,7 +31,7 @@ fun BoardDetailScreen(navController: NavController, title: String) {
     val context = LocalContext.current
     val viewModel: PostViewModel = viewModel()
     val posts by viewModel.posts.collectAsState()
-    val statusMessage by viewModel.statusMessage.collectAsState()
+    val statusMessage by viewModel.statusMessage.collectAsState(initial = "")
     val coroutineScope = rememberCoroutineScope()
     val userId by UserManager.userId.collectAsState(initial = -1)
 
@@ -90,9 +90,9 @@ fun BoardDetailScreen(navController: NavController, title: String) {
                     selectedCategory == "모든 분야" || post.category.contains(selectedCategory)
                 }
 
-                if (!statusMessage.isNullOrEmpty()) {
+                if (statusMessage.isNotEmpty()) {
                     Text(
-                        text = statusMessage ?: "",
+                        text = statusMessage,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(16.dp)
                     )

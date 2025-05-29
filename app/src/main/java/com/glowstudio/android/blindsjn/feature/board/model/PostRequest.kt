@@ -6,7 +6,8 @@ data class PostRequest(
     @SerializedName("title") val title: String,
     @SerializedName("content") val content: String,
     @SerializedName("user_id") val userId: Int,
-    @SerializedName("category") val category: String,
+    @SerializedName("industry") val category: String,
     @SerializedName("industry_id") val industryId: Int?,
-    @SerializedName("phone_number") val phoneNumber: String
+    @SerializedName("phone_number") val phoneNumber: String,
+    @SerializedName("experience") val experience: String = "신입"
 )

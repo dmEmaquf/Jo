@@ -16,6 +16,7 @@ import com.glowstudio.android.blindsjn.data.model.LikeResponse
 object PostRepository {
 
     suspend fun savePost(request: PostRequest): Response<ApiResponse<BasicResponse>> {
+        android.util.Log.d("PostRepository", "Saving post with request: $request")
         return Network.apiService.savePost(request)
     }
 
@@ -55,7 +56,7 @@ object PostRepository {
         return Network.apiService.toggleLike(request)
     }
 
-    suspend fun reportPost(request: ReportRequest): Response<ApiResponse<ReportResponse>> {
+    suspend fun reportPost(request: ReportRequest): Response<ReportResponse> {
         return Network.apiService.reportPost(request)
     }
 }

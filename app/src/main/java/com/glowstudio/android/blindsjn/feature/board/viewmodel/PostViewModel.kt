@@ -16,8 +16,8 @@ class PostViewModel : ViewModel() {
     private val _selectedPost = MutableStateFlow<Post?>(null)
     val selectedPost: StateFlow<Post?> = _selectedPost
 
-    private val _statusMessage = MutableStateFlow<String?>(null)
-    val statusMessage: StateFlow<String?> = _statusMessage
+    private val _statusMessage = MutableStateFlow("")
+    val statusMessage: StateFlow<String> = _statusMessage
 
     private val _reportResult = MutableStateFlow<String?>(null)
     val reportResult: StateFlow<String?> = _reportResult
@@ -121,13 +121,23 @@ class PostViewModel : ViewModel() {
         }
     }
 
-    fun savePost(title: String, content: String, userId: Int, industry: String, industryId: Int? = null, phoneNumber: String = "") {
+    fun savePost(title: String, content: String, userId: Int, industry: String, industryId: Int? = null, phoneNumber: String, experience: String = "") {
         viewModelScope.launch {
             try {
-                val postRequest = PostRequest(title, content, userId, industry, industryId, phoneNumber)
+                val postRequest = PostRequest(
+                    title = title,
+                    content = content,
+                    userId = userId,
+                    category = industry,
+                    industryId = industryId,
+                    phoneNumber = phoneNumber,
+                    experience = experience
+                )
+                android.util.Log.d("PostViewModel", "Saving post with request: $postRequest")
                 val response = PostRepository.savePost(postRequest)
+                android.util.Log.d("PostViewModel", "Save post response: ${response.body()}")
                 if (response.isSuccessful) {
-                    _statusMessage.value = response.body()?.message
+                    _statusMessage.value = response.body()?.message ?: "게시글이 저장되었습니다."
                     loadPosts()
                 } else {
                     _statusMessage.value = "저장 실패: ${response.message()}"
@@ -144,7 +154,7 @@ class PostViewModel : ViewModel() {
                 val editRequest = EditPostRequest(postId, title, content)
                 val response = PostRepository.editPost(editRequest)
                 if (response.isSuccessful) {
-                    _statusMessage.value = response.body()?.message
+                    _statusMessage.value = response.body()?.message ?: "게시글이 수정되었습니다."
                     loadPostById(postId)
                 } else {
                     _statusMessage.value = "수정 실패: ${response.message()}"
@@ -161,7 +171,7 @@ class PostViewModel : ViewModel() {
                 val deleteRequest = DeleteRequest(postId)
                 val response = PostRepository.deletePost(deleteRequest)
                 if (response.isSuccessful) {
-                    _statusMessage.value = response.body()?.message
+                    _statusMessage.value = response.body()?.message ?: "게시글이 삭제되었습니다."
                     loadPosts()
                 } else {
                     _statusMessage.value = "삭제 실패: ${response.message()}"
@@ -251,18 +261,29 @@ class PostViewModel : ViewModel() {
     fun reportPost(postId: Int, userId: Int, reason: String) {
         viewModelScope.launch {
             try {
+                android.util.Log.d("PostViewModel", "Attempting to report post - postId: $postId, userId: $userId, reason: $reason")
                 val request = ReportRequest(postId, userId, reason)
                 val response = PostRepository.reportPost(request)
+                android.util.Log.d("PostViewModel", "Report response received - success: ${response.isSuccessful}, code: ${response.code()}")
+                
                 if (response.isSuccessful) {
-                    response.body()?.let { apiResponse ->
-                        _reportResult.value = apiResponse.message ?: "신고가 접수되었습니다."
+                    response.body()?.let { reportResponse ->
+                        android.util.Log.d("PostViewModel", "Report response body: $reportResponse")
+                        if (reportResponse.success) {
+                            _reportResult.value = reportResponse.message ?: "신고가 접수되었습니다."
+                        } else {
+                            _reportResult.value = reportResponse.error ?: "신고 처리 중 오류가 발생했습니다."
+                        }
                     } ?: run {
+                        android.util.Log.e("PostViewModel", "Report response body is null")
                         _reportResult.value = "서버 응답이 비어있습니다."
                     }
                 } else {
+                    android.util.Log.e("PostViewModel", "Report request failed with code: ${response.code()}")
                     _reportResult.value = "서버 오류: ${response.code()}"
                 }
             } catch (e: Exception) {
+                android.util.Log.e("PostViewModel", "Error during report request", e)
                 _reportResult.value = "신고 중 오류 발생: ${e.message}"
             }
         }
