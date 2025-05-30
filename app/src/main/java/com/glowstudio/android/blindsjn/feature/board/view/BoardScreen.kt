@@ -390,13 +390,13 @@ fun PostItem(
                 post.tags.take(2).forEach { tag ->
                     Surface(
                         shape = MaterialTheme.shapes.small,
-                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                        color = Color.Gray.copy(alpha = 0.1f),
                         modifier = Modifier.padding(2.dp)
                     ) {
                         Text(
                             text = "#$tag",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.secondary,
+                            color = Color.Gray,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
@@ -405,13 +405,13 @@ fun PostItem(
                 if (post.tags.size > 2) {
                     Surface(
                         shape = MaterialTheme.shapes.small,
-                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                        color = Color.Gray.copy(alpha = 0.1f),
                         modifier = Modifier.padding(2.dp)
                     ) {
                         Text(
                             text = "+${post.tags.size - 2}",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.secondary,
+                            color = Color.Gray,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
@@ -440,7 +440,7 @@ fun PostItem(
                 Icon(
                     imageVector = Icons.Default.ThumbUp,
                     contentDescription = "좋아요",
-                    tint = if (isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    tint = if (isLiked) Error else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
