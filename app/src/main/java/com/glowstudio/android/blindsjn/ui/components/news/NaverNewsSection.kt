@@ -56,7 +56,7 @@ fun NaverNewsSection(navController: NavHostController) {
         viewModel.searchNews(selectedTopic)
     }
 
-    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+    Box(modifier = Modifier.padding(horizontal = 24.dp)) {
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -141,7 +141,7 @@ fun NaverNewsSection(navController: NavHostController) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             when {
                 uiState.isLoading -> {
@@ -152,47 +152,86 @@ fun NaverNewsSection(navController: NavHostController) {
                 }
                 else -> {
                     LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(uiState.newsList) { article ->
-                            Card(
+                            Surface(
                                 modifier = Modifier
-                                    .width(300.dp)
-                                    .height(120.dp)
+                                    .width(280.dp)
                                     .clickable {
-                                        val articleJson =
-                                            URLEncoder.encode(Gson().toJson(article), "UTF-8")
+                                        val articleJson = URLEncoder.encode(Gson().toJson(article), "UTF-8")
                                         navController.navigate("news_detail/$articleJson")
                                     },
-                                shape = RoundedCornerShape(12.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                                colors = CardDefaults.cardColors(containerColor = CardWhite)
+                                shape = RoundedCornerShape(20.dp),
+                                color = CardWhite
                             ) {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding(12.dp),
+                                        .padding(18.dp),
                                     verticalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(
-                                        text = HtmlCompat.fromHtml(article.title, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = HtmlCompat.fromHtml(article.description, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
-                                        maxLines = 3,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
+                                    Column {
+                                        Text(
+                                            text = HtmlCompat.fromHtml(article.title, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = HtmlCompat.fromHtml(article.description, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color.Gray,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.End,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun NewsListItem(
+    title: String,
+    description: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }

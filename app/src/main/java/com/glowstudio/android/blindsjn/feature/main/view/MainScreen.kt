@@ -44,18 +44,44 @@ import com.glowstudio.android.blindsjn.feature.main.model.NavigationState
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.BottomBarViewModel
 import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
 import com.glowstudio.android.blindsjn.feature.home.NewsListScreen
-import com.glowstudio.android.blindsjn.feature.ocr.view.DailySalesScreen
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import com.glowstudio.android.blindsjn.ui.components.search.SearchTagScreen
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
  */
 
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     topBarViewModel: TopBarViewModel = viewModel(),
     navigationViewModel: NavigationViewModel = viewModel(),
     bottomBarViewModel: BottomBarViewModel = viewModel()
 ) {
+    // 상태 변수는 반드시 최상단에 선언
+    var showTagSearchScreen by remember { mutableStateOf(false) }
+    var selectedSearchTags by remember { mutableStateOf<List<String>>(emptyList()) }
+    val allTags = listOf("예비사장님", "알바/직원", "손님", "고민글", "정보", "질문/조언", "후기", "초보사장님", "고수사장님")
+    var searchText by remember { mutableStateOf("") }
+
     val context = LocalContext.current
     val payManagementViewModel = remember {
         val api = Network.payManagementApiService
@@ -76,7 +102,11 @@ fun MainScreen(
     LaunchedEffect(currentRoute) {
         when (currentRoute) {
             "home", "board", "paymanagement", "foodcoast", "message", "profile" -> {
-                topBarViewModel.setMainBar()
+                topBarViewModel.setMainBar(
+                    onSearchClick = { showTagSearchScreen = true },
+                    onMoreClick = { /* 더보기 */ },
+                    onNotificationClick = { /* 알림 */ }
+                )
                 bottomBarViewModel.showBottomBar()
             }
             else -> {
@@ -103,7 +133,9 @@ fun MainScreen(
     Scaffold(
         // 상단바: TopBarViewModel의 상태를 기반으로 동적으로 업데이트됨
         topBar = {
-            TopBar(state = topBarState)
+            Column {
+                TopBar(state = topBarState)
+            }
         },
         // 하단 네비게이션 바
         bottomBar = {
@@ -123,7 +155,14 @@ fun MainScreen(
                     startDestination = "home"
                 ) {
                     composable("home") { HomeScreen(navController) }
-                    composable("board") { BoardScreen(navController) }
+                    composable("board") {
+                        BoardScreen(
+                            navController = navController,
+                            onSearchClick = { showTagSearchScreen = true },
+                            selectedTags = selectedSearchTags,
+                            searchText = searchText
+                        )
+                    }
                     composable("paymanagement") {
                         PayManagementScreen(
                             viewModel = payManagementViewModel,
@@ -245,18 +284,27 @@ fun MainScreen(
                     }
                     composable("ocr") {
                         OcrScreen(
-                            onCaptureClick = { navController.navigate("dailySalesScreen") }
-                        )
-                    }
-                    composable("dailySalesScreen") {
-                        DailySalesScreen(
-                            onBackClick = { navController.navigateUp() }
+                            onCaptureClick = { /* TODO: 카메라 캡처 구현 */ }
                         )
                     }
                 }
             }
         }
     )
+
+    // 태그 검색 전체화면
+    if (showTagSearchScreen) {
+        SearchTagScreen(
+            allTags = allTags,
+            initialSelectedTags = selectedSearchTags,
+            onClose = { showTagSearchScreen = false },
+            onApply = { text, tags ->
+                selectedSearchTags = tags
+                searchText = text
+                showTagSearchScreen = false
+            }
+        )
+    }
 }
 
 @Preview(showBackground = true)
@@ -266,3 +314,5 @@ fun MainScreenPreview() {
         MainScreen()
     }
 }
+
+// SearchTagScreen 컴포저블 삭제 (이제 import로 사용)

@@ -38,7 +38,7 @@ fun SectionLayout(
                 }
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(0.dp)) // 타이틀과 컨텐츠 사이 여백
         content()
         Spacer(modifier = Modifier.height(20.dp)) // 섹션 간 여백
     }

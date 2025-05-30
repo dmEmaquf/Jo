@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.Color
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostViewModel
 import com.glowstudio.android.blindsjn.feature.board.model.Post
@@ -47,7 +48,12 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun BoardScreen(navController: NavController) {
+fun BoardScreen(
+    navController: NavController,
+    onSearchClick: () -> Unit,
+    selectedTags: List<String> = emptyList(),
+    searchText: String = ""
+) {
     val context = LocalContext.current
     val boardViewModel: BoardViewModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
@@ -61,6 +67,7 @@ fun BoardScreen(navController: NavController) {
     var showSheet by remember { mutableStateOf(false) }
     val postBottomSheetViewModel: PostBottomSheetViewModel = viewModel()
     var userId by remember { mutableStateOf<Int?>(null) }
+    var showTagSearchSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         userId = UserManager.getUserId(context).first()
@@ -74,11 +81,26 @@ fun BoardScreen(navController: NavController) {
     // 업종 7개만 추출
     val industryCategories = boardCategories.filter { it.group == "업종" }
 
-    // 카테고리 필터링 + 최신순 정렬
-    val filteredPosts = remember(selectedCategory, posts) {
-        (selectedCategory?.let { cat ->
+    // 카테고리 필터링 + 태그 필터링 + 제목 검색 + 최신순 정렬
+    val filteredPosts = remember(selectedCategory, posts, selectedTags, searchText) {
+        val categoryFiltered = selectedCategory?.let { cat ->
             posts.filter { it.category == cat.title }
-        } ?: posts).sortedByDescending { it.time }
+        } ?: posts
+        val tagFiltered = if (selectedTags.isNotEmpty()) {
+            categoryFiltered.filter { post ->
+                post.tags.any { tag -> selectedTags.contains(tag) }
+            }
+        } else {
+            categoryFiltered
+        }
+        val titleFiltered = if (searchText.isNotBlank()) {
+            tagFiltered.filter { post ->
+                post.title.contains(searchText, ignoreCase = true)
+            }
+        } else {
+            tagFiltered
+        }
+        titleFiltered.sortedByDescending { it.time }
     }
 
     // 카테고리 바텀시트
@@ -113,6 +135,13 @@ fun BoardScreen(navController: NavController) {
                     postBottomSheetViewModel.clearSelection()
                 }
             )
+        }
+    }
+
+    // 태그 검색 바텀시트 (임시 UI)
+    if (showTagSearchSheet) {
+        ModalBottomSheet(onDismissRequest = { showTagSearchSheet = false }) {
+            Text("여기에 태그 검색 UI가 들어갑니다.", modifier = Modifier.padding(24.dp))
         }
     }
 
@@ -255,7 +284,7 @@ fun CustomFilterChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
 fun BoardScreenPreview() {
     BlindSJNTheme {
         val navController = rememberNavController()
-        BoardScreen(navController = navController)
+        BoardScreen(navController = navController, onSearchClick = { })
     }
 }
 
