@@ -1,5 +1,7 @@
 package com.glowstudio.android.blindsjn.ui.components.search
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -13,6 +15,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardActions
@@ -20,6 +24,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
+import com.glowstudio.android.blindsjn.ui.theme.*
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -31,33 +38,34 @@ fun SearchTagScreen(
 ) {
     var selectedTags by remember { mutableStateOf(initialSelectedTags) }
     var searchText by remember { mutableStateOf("") }
+    
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color.White
+        color = BackgroundWhite
     ) {
         Box {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 0.dp) // FAB 공간 없음
+                    .padding(bottom = 0.dp)
             ) {
-                // 1~2. 상단 서치바 + 선택된 태그를 파란색 배경 Column으로 묶음
+                // 상단 검색 영역
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.primary)
+                        .background(Blue)
                 ) {
-                    // 1. 상단 서치바
+                    // 검색바
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 36.dp, bottom = 12.dp, start = 12.dp, end = 12.dp),
+                            .padding(top = 48.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Surface(
-                            shape = RoundedCornerShape(24.dp),
-                            color = Color.White,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                            shape = RoundedCornerShape(28.dp),
+                            color = CardWhite,
+                            border = BorderStroke(1.dp, Blue),
                             modifier = Modifier
                                 .weight(1f)
                                 .height(56.dp)
@@ -69,23 +77,29 @@ fun SearchTagScreen(
                                 Icon(
                                     imageVector = Icons.Filled.Search,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(start = 12.dp)
+                                    tint = Blue,
+                                    modifier = Modifier
+                                        .padding(start = 16.dp)
+                                        .size(24.dp)
                                 )
                                 TextField(
                                     value = searchText,
-                                    onValueChange = { 
-                                        searchText = it
+                                    onValueChange = { searchText = it },
+                                    placeholder = { 
+                                        Text(
+                                            "궁금한 게시글 제목을 입력하세요",
+                                            color = TextSecondary,
+                                            fontSize = 16.sp
+                                        ) 
                                     },
-                                    placeholder = { Text("궁금한 게시글 제목을 입력하세요", color = MaterialTheme.colorScheme.primary) },
                                     colors = TextFieldDefaults.colors(
                                         focusedContainerColor = Color.Transparent,
                                         unfocusedContainerColor = Color.Transparent,
                                         focusedIndicatorColor = Color.Transparent,
                                         unfocusedIndicatorColor = Color.Transparent,
-                                        focusedTextColor = MaterialTheme.colorScheme.primary,
-                                        unfocusedTextColor = MaterialTheme.colorScheme.primary,
-                                        cursorColor = MaterialTheme.colorScheme.primary
+                                        focusedTextColor = TextPrimary,
+                                        unfocusedTextColor = TextPrimary,
+                                        cursorColor = Blue
                                     ),
                                     modifier = Modifier
                                         .weight(1f)
@@ -104,73 +118,97 @@ fun SearchTagScreen(
                                 )
                             }
                         }
-                        // X(닫기) 버튼
+                        
                         IconButton(
                             onClick = {
                                 onApply("", selectedTags)
                                 onClose()
                             },
                             modifier = Modifier
-                                .padding(start = 8.dp)
-                                .size(32.dp)
+                                .padding(start = 12.dp)
+                                .size(40.dp)
                         ) {
-                            Icon(Icons.Filled.Close, contentDescription = "닫기", tint = Color.White)
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = "닫기",
+                                tint = CardWhite,
+                                modifier = Modifier.size(24.dp)
+                            )
                         }
                     }
-                    // 2. 선택된 태그 LazyRow (검색창 바로 아래, 고정 높이)
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    
+                    // 선택된 태그 영역
+                    AnimatedVisibility(
+                        visible = selectedTags.isNotEmpty(),
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
                     ) {
-                        items(selectedTags) { tag ->
-                            Surface(
-                                shape = RoundedCornerShape(16.dp),
-                                color = Color.White,
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(selectedTags) { tag ->
+                                Surface(
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = CardWhite,
+                                    border = BorderStroke(1.dp, Blue),
+                                    modifier = Modifier.animateContentSize()
                                 ) {
-                                    Text(
-                                        text = tag,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                    IconButton(
-                                        onClick = { 
-                                            selectedTags = selectedTags - tag
-                                            // onApply는 호출하지 않음
-                                        },
-                                        modifier = Modifier.size(16.dp)
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Close,
-                                            contentDescription = "태그 삭제",
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(12.dp)
+                                        Text(
+                                            text = tag,
+                                            color = Blue,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontSize = 14.sp
                                         )
+                                        IconButton(
+                                            onClick = { selectedTags = selectedTags - tag },
+                                            modifier = Modifier.size(20.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Close,
+                                                contentDescription = "태그 삭제",
+                                                tint = Blue,
+                                                modifier = Modifier.size(14.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-                // 3. Spacer
-                Spacer(Modifier.height(16.dp))
-                // 4. 전체 태그 FlowRow
+                
+                Spacer(Modifier.height(24.dp))
+                
+                // 전체 태그 영역
                 FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 ) {
                     allTags.forEach { tag ->
                         val selected = selectedTags.contains(tag)
+                        val scale = remember { Animatable(1f) }
+                        
+                        LaunchedEffect(selected) {
+                            scale.animateTo(
+                                targetValue = if (selected) 1.05f else 1f,
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessLow
+                                )
+                            )
+                        }
+                        
                         Surface(
                             onClick = {
                                 if (selected) {
@@ -178,20 +216,21 @@ fun SearchTagScreen(
                                 } else if (!selectedTags.contains(tag)) {
                                     selectedTags = selectedTags + tag
                                 }
-                                // onApply는 호출하지 않음
                             },
-                            shape = RoundedCornerShape(20.dp),
-                            color = Color.White,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                            shape = RoundedCornerShape(24.dp),
+                            color = if (selected) Blue else CardWhite,
+                            border = if (!selected) BorderStroke(1.dp, Blue) else null,
                             modifier = Modifier
+                                .scale(scale.value)
+                                .animateContentSize()
                         ) {
                             Text(
                                 text = tag,
-                                color = if (selected) Color.White else MaterialTheme.colorScheme.primary,
+                                color = if (selected) CardWhite else Blue,
                                 style = MaterialTheme.typography.bodyMedium,
+                                fontSize = 14.sp,
                                 modifier = Modifier
-                                    .background(if (selected) MaterialTheme.colorScheme.primary else Color.White, RoundedCornerShape(20.dp))
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .padding(horizontal = 16.dp, vertical = 10.dp)
                             )
                         }
                     }
@@ -199,4 +238,36 @@ fun SearchTagScreen(
             }
         }
     }
-} 
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+fun SearchTagScreenPreview_Empty() {
+    MaterialTheme {
+        SearchTagScreen(
+            allTags = listOf(
+                "안드로이드", "iOS", "웹", "백엔드", "프론트엔드",
+                "UI/UX", "디자인", "기획", "마케팅", "운영"
+            ),
+            initialSelectedTags = emptyList(),
+            onClose = {},
+            onApply = { _, _ -> }
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+fun SearchTagScreenPreview_WithSelectedTags() {
+    MaterialTheme {
+        SearchTagScreen(
+            allTags = listOf(
+                "안드로이드", "iOS", "웹", "백엔드", "프론트엔드",
+                "UI/UX", "디자인", "기획", "마케팅", "운영"
+            ),
+            initialSelectedTags = listOf("안드로이드", "UI/UX"),
+            onClose = {},
+            onApply = { _, _ -> }
+        )
+    }
+}

@@ -8,6 +8,8 @@ import com.glowstudio.android.blindsjn.feature.main.view.MainScreen
 import com.glowstudio.android.blindsjn.feature.login.view.LoginScreen
 import com.glowstudio.android.blindsjn.feature.login.view.SignupScreen
 // import com.glowstudio.android.blindsjn.feature.forgot.view.ForgotPasswordScreen
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 
 @Composable
 fun AppNavHost(
@@ -17,7 +19,21 @@ fun AppNavHost(
         navController = navController,
         startDestination = "login"
     ) {
-        composable("login") {
+        composable(
+            route = "login",
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
             LoginScreen(
                 onLoginClick = { success -> 
                     if (success) {
@@ -30,7 +46,21 @@ fun AppNavHost(
                 onForgotPasswordClick = { navController.navigate("forgot") }
             )
         }
-        composable("signup") {
+        composable(
+            route = "signup",
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
             SignupScreen(
                 onSignupClick = { _, _ -> 
                     navController.navigate("main") {
@@ -49,7 +79,21 @@ fun AppNavHost(
         }
 */
         // 메인 앱 진입점
-        composable("main") {
+        composable(
+            route = "main",
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
             MainScreen()
         }
     }

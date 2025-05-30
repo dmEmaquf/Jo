@@ -6,6 +6,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import com.glowstudio.android.blindsjn.feature.board.view.BoardDetailScreen
 import com.glowstudio.android.blindsjn.feature.board.view.BoardScreen
 import com.glowstudio.android.blindsjn.feature.board.view.WritePostScreen
@@ -32,7 +34,21 @@ fun NavGraphBuilder.mainNavGraph(
         route = "main_nav"
     ) {
         // 홈 화면
-        composable("home_screen") {
+        composable(
+            route = "home_screen",
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
             topBarViewModel.setMainBar(
                 onSearchClick = { /* 검색 */ },
                 onMoreClick = { /* 더보기 */ },
@@ -49,7 +65,19 @@ fun NavGraphBuilder.mainNavGraph(
                     type = NavType.StringType
                     defaultValue = "자영업"
                 }
-            )
+            ),
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(300)
+                )
+            }
         ) { backStackEntry ->
             val topic = backStackEntry.arguments?.getString("topic") ?: "자영업"
             topBarViewModel.setDetailBar(
@@ -64,7 +92,21 @@ fun NavGraphBuilder.mainNavGraph(
             startDestination = "board_list_screen",
             route = "board_root"
         ) {
-            composable("board_list_screen") {
+            composable(
+                route = "board_list_screen",
+                enterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(300)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(300)
+                    )
+                }
+            ) {
                 topBarViewModel.setMainBar(
                     onSearchClick = { /* 검색 */ },
                     onMoreClick = { /* 더보기 */ },
@@ -85,7 +127,19 @@ fun NavGraphBuilder.mainNavGraph(
                         nullable = true
                         defaultValue = null
                     }
-                )
+                ),
+                enterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(300)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(300)
+                    )
+                }
             ) { backStackEntry ->
                 val category = backStackEntry.arguments?.getString("category") ?: ""
                 val tags = backStackEntry.arguments?.getString("tags")
@@ -96,7 +150,21 @@ fun NavGraphBuilder.mainNavGraph(
                 WritePostScreen(navController = navController, industry = category, tags = tags)
             }
 
-            composable("board_detail/{title}") { backStackEntry ->
+            composable(
+                route = "board_detail/{title}",
+                enterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(300)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(300)
+                    )
+                }
+            ) { backStackEntry ->
                 val postTitle = backStackEntry.arguments?.getString("title") ?: "게시글"
                 topBarViewModel.setDetailBar(
                     title = postTitle,
@@ -114,7 +182,19 @@ fun NavGraphBuilder.mainNavGraph(
                         type = NavType.StringType
                         defaultValue = "1"
                     }
-                )
+                ),
+                enterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(300)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(300)
+                    )
+                }
             ) { backStackEntry ->
                 val postId = backStackEntry.arguments?.getString("postId") ?: "1"
                 topBarViewModel.setDetailBar(
@@ -144,7 +224,21 @@ fun NavGraphBuilder.popularNavGraph(
         startDestination = "popular_list_screen",
         route = "popular_root"
     ) {
-        composable("popular_list_screen") {
+        composable(
+            route = "popular_list_screen",
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
             topBarViewModel.setMainBar(
                 onSearchClick = { /* 검색 */ },
                 onMoreClick = { /* 더보기 */ },
@@ -163,7 +257,21 @@ fun NavGraphBuilder.messageNavGraph(
         startDestination = "calendar_screen",
         route = "message_root"
     ) {
-        composable("calendar_screen") {
+        composable(
+            route = "calendar_screen",
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
             topBarViewModel.setMainBar(
                 onSearchClick = { /* 검색 */ },
                 onMoreClick = { /* 더보기 */ },
@@ -172,7 +280,21 @@ fun NavGraphBuilder.messageNavGraph(
             MessageScreen(navController = navController)
         }
 
-        composable("add_schedule_screen") {
+        composable(
+            route = "add_schedule_screen",
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
             topBarViewModel.setDetailBar("일정 추가")
             AddScheduleScreen(
                 onCancel = { navController.navigateUp() },
@@ -192,7 +314,21 @@ fun NavGraphBuilder.profileNavGraph(
         startDestination = "profile_main_screen",
         route = "profile_root"
     ) {
-        composable("profile_main_screen") {
+        composable(
+            route = "profile_main_screen",
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
             topBarViewModel.setMainBar(
                 onSearchClick = { /* 검색 */ },
                 onMoreClick = { /* 더보기 */ },
@@ -211,21 +347,47 @@ fun NavGraphBuilder.profileNavGraph(
             )
         }
 
-        composable("certification_screen") {
+        composable(
+            route = "certification_screen",
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
             topBarViewModel.setDetailBar("사업자 인증")
             BusinessCertificationScreen(
                 onConfirm = {
-                    // 인증 완료 후 뒤로가기
                     navController.popBackStack()
                 },
                 onDismiss = {
-                    // 취소 시 뒤로가기
                     navController.popBackStack()
                 }
             )
         }
 
-        composable("edit_profile_screen") {
+        composable(
+            route = "edit_profile_screen",
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
             topBarViewModel.setDetailBar("프로필 변경")
             EditProfileScreen(
                 onBackClick = { navController.navigateUp() },
@@ -235,7 +397,21 @@ fun NavGraphBuilder.profileNavGraph(
             )
         }
 
-        composable("edit_contact_screen") {
+        composable(
+            route = "edit_contact_screen",
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
             topBarViewModel.setDetailBar("연락처 변경")
             EditContactScreen(
                 onBackClick = { navController.navigateUp() },
