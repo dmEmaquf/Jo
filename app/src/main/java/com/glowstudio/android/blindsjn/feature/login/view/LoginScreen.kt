@@ -20,7 +20,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.glowstudio.android.blindsjn.data.model.LoginRequest
-import com.glowstudio.android.blindsjn.data.network.InternalServer
+import com.glowstudio.android.blindsjn.data.network.Network
 import com.glowstudio.android.blindsjn.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,7 +32,7 @@ import com.glowstudio.android.blindsjn.ui.components.common.CommonTextField
 // 로그인 함수 (서버 통신)
 suspend fun login(phoneNumber: String, password: String): Boolean {
     val request = LoginRequest(phoneNumber, password)
-    val response = InternalServer.api.login(request)
+    val response = Network.apiService.login(request)
 
     return if (response.isSuccessful) {
         val result = response.body()
@@ -82,7 +82,7 @@ fun LoginScreen(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.login_image),
+                painter = painterResource(id = R.drawable.ic_logo),
                 contentDescription = "Login Image",
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize()

@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import com.glowstudio.android.blindsjn.ui.theme.*
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -28,9 +29,11 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.glowstudio.android.blindsjn.data.network.Network
 import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesComparisonResponse
 import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesSummaryResponse
+import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementApi
+import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementRepository
 import com.glowstudio.android.blindsjn.feature.paymanagement.viewmodel.PayManagementViewModel
 import java.time.LocalDate
 import kotlin.math.cos
@@ -122,10 +125,10 @@ private fun FixedCostSettingDialog(
 
 @Composable
 fun PayManagementScreen(
-    viewModel: PayManagementViewModel = hiltViewModel(),
-    onNavigateToFoodCost: () -> Unit = {},
-    onNavigateToSalesInput: () -> Unit = {},
-    onNavigateToOcr: () -> Unit = {},
+    viewModel: PayManagementViewModel,
+    onNavigateToFoodCost: () -> Unit,
+    onNavigateToSalesInput: () -> Unit,
+    onNavigateToOcr: () -> Unit,
 ) {
     val periodTabs = listOf("일", "주", "월", "연")
     val selectedPeriod by viewModel.selectedPeriod.collectAsState()
@@ -787,5 +790,17 @@ fun SalesComparisonCard(comparison: SalesComparisonResponse) {
 @Preview(showBackground = true)
 @Composable
 fun PayManagementScreenPreview() {
-    PayManagementScreen()
+    val context = LocalContext.current
+    val viewModel = remember {
+        val api = Network.apiService as PayManagementApi
+        val repository = PayManagementRepository(api, context)
+        PayManagementViewModel(repository)
+    }
+    
+    PayManagementScreen(
+        viewModel = viewModel,
+        onNavigateToFoodCost = {},
+        onNavigateToSalesInput = {},
+        onNavigateToOcr = {}
+    )
 } 

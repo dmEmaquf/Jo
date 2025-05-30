@@ -7,18 +7,15 @@ import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesSummaryR
 import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesComparisonResponse
 import com.glowstudio.android.blindsjn.feature.paymanagement.model.TopItemsResponse
 import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
 
 private const val TAG = "PayManagementViewModel"
 
-@HiltViewModel
-class PayManagementViewModel @Inject constructor(
+class PayManagementViewModel(
     private val repository: PayManagementRepository
 ) : ViewModel() {
     private val _selectedPeriod = MutableStateFlow("일")

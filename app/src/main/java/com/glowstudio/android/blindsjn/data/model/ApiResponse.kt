@@ -2,8 +2,8 @@ package com.glowstudio.android.blindsjn.data.model
 
 import com.google.gson.annotations.SerializedName
 
-data class ApiResponse(
+data class ApiResponse<T>(
     @SerializedName("status") val status: String,
     @SerializedName("message") val message: String,
-    @SerializedName("user_id") val userId: Int? = null // 👈 여기를 추가!
+    @SerializedName("data") val data: T?
 )
