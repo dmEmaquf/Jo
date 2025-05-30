@@ -44,6 +44,7 @@ import com.glowstudio.android.blindsjn.data.network.UserManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.layout.FlowRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -236,6 +237,72 @@ fun PostDetailScreenContent(
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = Int.MAX_VALUE
             )
+            
+            // 해시태그 표시
+            if (it.tags.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    var currentRow = mutableListOf<String>()
+                    var currentRowWidth = 0
+                    val maxWidth = 300 // 예상 최대 너비
+                    
+                    it.tags.forEach { tag ->
+                        val tagWidth = tag.length * 8 + 24 // 대략적인 태그 너비 계산
+                        if (currentRowWidth + tagWidth > maxWidth) {
+                            // 현재 행이 가득 차면 새로운 행 시작
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                currentRow.forEach { rowTag ->
+                                    Surface(
+                                        shape = MaterialTheme.shapes.small,
+                                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                                        modifier = Modifier.padding(2.dp)
+                                    ) {
+                                        Text(
+                                            text = "#$rowTag",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color(0xFF616161),
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            currentRow.clear()
+                            currentRowWidth = 0
+                        }
+                        currentRow.add(tag)
+                        currentRowWidth += tagWidth
+                    }
+                    
+                    // 마지막 행 표시
+                    if (currentRow.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            currentRow.forEach { tag ->
+                                Surface(
+                                    shape = MaterialTheme.shapes.small,
+                                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                                    modifier = Modifier.padding(2.dp)
+                                ) {
+                                    Text(
+                                        text = "#$tag",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color(0xFF616161),
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             Spacer(modifier = Modifier.height(12.dp))
             // 좋아요/댓글 숫자
 
