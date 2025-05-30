@@ -386,7 +386,8 @@ fun PostItem(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                post.tags.forEach { tag ->
+                // 처음 2개의 태그만 표시
+                post.tags.take(2).forEach { tag ->
                     Surface(
                         shape = MaterialTheme.shapes.small,
                         color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
@@ -394,6 +395,21 @@ fun PostItem(
                     ) {
                         Text(
                             text = "#$tag",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+                // 나머지 태그가 있다면 +n 형식으로 표시
+                if (post.tags.size > 2) {
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                        modifier = Modifier.padding(2.dp)
+                    ) {
+                        Text(
+                            text = "+${post.tags.size - 2}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -537,7 +553,8 @@ fun PostItem(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                post.tags.forEach { tag ->
+                // 처음 2개의 태그만 표시
+                post.tags.take(2).forEach { tag ->
                     Surface(
                         shape = MaterialTheme.shapes.small,
                         color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
@@ -545,6 +562,21 @@ fun PostItem(
                     ) {
                         Text(
                             text = "#$tag",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+                // 나머지 태그가 있다면 +n 형식으로 표시
+                if (post.tags.size > 2) {
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                        modifier = Modifier.padding(2.dp)
+                    ) {
+                        Text(
+                            text = "+${post.tags.size - 2}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
