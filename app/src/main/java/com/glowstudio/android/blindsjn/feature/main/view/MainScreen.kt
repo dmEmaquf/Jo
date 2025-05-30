@@ -34,6 +34,7 @@ import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManag
 import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementRepository
 import com.glowstudio.android.blindsjn.feature.paymanagement.viewmodel.PayManagementViewModel
 import com.glowstudio.android.blindsjn.feature.paymanagement.view.PayManagementScreen
+import com.glowstudio.android.blindsjn.feature.paymanagement.view.OcrScreen
 import androidx.compose.ui.platform.LocalContext
 import com.glowstudio.android.blindsjn.feature.foodcost.view.FoodCostScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterRecipeScreen
@@ -44,6 +45,7 @@ import com.glowstudio.android.blindsjn.feature.foodcost.view.IngredientListScree
 import com.glowstudio.android.blindsjn.feature.main.model.NavigationState
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.BottomBarViewModel
 import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
+import com.glowstudio.android.blindsjn.feature.home.NewsListScreen
 import com.glowstudio.android.blindsjn.feature.home.view.NewsMainScreen
 
 /**
@@ -225,10 +227,27 @@ fun MainScreen(
                             link = article.link
                         )
                     }
+                    composable(
+                        route = "news_list/{topic}",
+                        arguments = listOf(
+                            navArgument("topic") {
+                                type = NavType.StringType
+                                defaultValue = "자영업"
+                            }
+                        )
+                    ) { backStackEntry ->
+                        val topic = backStackEntry.arguments?.getString("topic") ?: "자영업"
+                        NewsListScreen(navController = navController, selectedTopic = topic)
+                    }
                     composable("businessCertification") {
                         BusinessCertificationScreen(
                             onConfirm = { /* TODO: 인증 성공 처리 */ },
                             onDismiss = { navController.navigateUp() }
+                        )
+                    }
+                    composable("ocr") {
+                        OcrScreen(
+                            onCaptureClick = { /* TODO: 카메라 캡처 구현 */ }
                         )
                     }
                 }

@@ -8,12 +8,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.ui.navigation.AppNavHost
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
+import com.glowstudio.android.blindsjn.feature.splash.SplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -32,11 +34,22 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val navController = rememberNavController()
-                    val topBarViewModel: TopBarViewModel = viewModel()
-                    AppNavHost(
-                        navController = navController
-                    )
+                    var showSplash by remember { mutableStateOf(true) }
+                    
+                    if (showSplash) {
+                        SplashScreen(
+                            onSplashFinished = {
+                                showSplash = false
+                            }
+                        )
+                    }
+                        else {
+                        val navController = rememberNavController()
+                        val topBarViewModel: TopBarViewModel = viewModel()
+                        AppNavHost(
+                            navController = navController
+                        )
+                    }
                 }
             }
         }

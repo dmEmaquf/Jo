@@ -82,7 +82,7 @@ fun LoginScreen(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.login_image),
+                painter = painterResource(id = R.drawable.ic_logo),
                 contentDescription = "Login Image",
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize()

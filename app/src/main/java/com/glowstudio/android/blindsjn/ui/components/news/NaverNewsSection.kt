@@ -122,7 +122,8 @@ fun NaverNewsSection(navController: NavHostController) {
 
                     // 더보기 버튼
                     IconButton(onClick = { 
-                        navController.navigate("news_list/${selectedTopic}")
+                        val encodedTopic = URLEncoder.encode(selectedTopic, "UTF-8")
+                        navController.navigate("news_list/$encodedTopic")
                     }) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
