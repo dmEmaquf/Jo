@@ -27,6 +27,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.MarginListViewModel
 import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.IngredientViewModel
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import kotlinx.coroutines.delay
 
 @Composable
 fun MarginListScreen(
@@ -43,9 +47,16 @@ fun MarginListScreen(
     val items by viewModel.items.collectAsState()
     val ingredientViewModel: IngredientViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
     val ingredients by ingredientViewModel.ingredients.collectAsState()
+
+    // 애니메이션 시작을 위한 상태
+    var startAnimation by remember { mutableStateOf(false) }
+    
+    // 화면이 로드된 후 애니메이션 시작
     LaunchedEffect(Unit) {
         viewModel.loadMarginData(1) // businessId는 실제 값으로 대체 필요
         ingredientViewModel.loadIngredients()
+        delay(100) // 화면이 완전히 로드될 때까지 잠시 대기
+        startAnimation = true
     }
 
     LazyColumn(
@@ -108,7 +119,8 @@ fun MarginListScreen(
                                 price = item.price,
                                 cost = item.cost,
                                 margin = margin,
-                                marginRate = marginRate
+                                marginRate = marginRate,
+                                startAnimation = startAnimation
                             )
                             if (idx != items.lastIndex) {
                                 Divider(color = DividerGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
@@ -221,8 +233,15 @@ private fun RecipeItem(
     price: Int,
     cost: Int,
     margin: Int,
-    marginRate: Int
+    marginRate: Int,
+    startAnimation: Boolean
 ) {
+    val animatedProgress by animateFloatAsState(
+        targetValue = if (!startAnimation) 0f else marginRate / 100f,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "marginProgress"
+    )
+
     Row(
         Modifier
             .fillMaxWidth()
@@ -243,7 +262,7 @@ private fun RecipeItem(
                 Box(
                     Modifier
                         .fillMaxHeight()
-                        .fillMaxWidth(marginRate / 100f)
+                        .fillMaxWidth(animatedProgress)
                         .background(Blue, RoundedCornerShape(6.dp))
                 )
             }

@@ -39,6 +39,11 @@ import com.glowstudio.android.blindsjn.feature.paymanagement.viewmodel.PayManage
 import java.time.LocalDate
 import kotlin.math.cos
 import kotlin.math.sin
+import androidx.compose.animation.core.*
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import kotlinx.coroutines.delay
 
 @Composable
 private fun GoalSettingDialog(
@@ -143,6 +148,15 @@ fun PayManagementScreen(
     val monthlyGoal by viewModel.monthlyGoal.collectAsState()
     val monthlyProgress by viewModel.monthlyProgress.collectAsState()
     val showGoalSettingDialog by viewModel.showGoalSettingDialog.collectAsState()
+
+    // 애니메이션 시작을 위한 상태
+    var startAnimation by remember { mutableStateOf(false) }
+    
+    // 화면이 로드된 후 애니메이션 시작
+    LaunchedEffect(Unit) {
+        delay(100) // 화면이 완전히 로드될 때까지 잠시 대기
+        startAnimation = true
+    }
 
     // 요일별 마진율: [월, 화, 수, 목, 금, 토, 일] (평균 37%)
     val marginRates = listOf(35, 38, 36, 37, 39, 34, 40)
@@ -259,14 +273,19 @@ fun PayManagementScreen(
                         )
                         Spacer(Modifier.height(8.dp))
                         val progress = (monthlyProgress / monthlyGoal).toFloat().coerceIn(0f, 1f)
+                        val animatedProgress by animateFloatAsState(
+                            targetValue = if (!startAnimation) 0f else progress,
+                            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+                            label = "goalProgress"
+                        )
                         LinearProgressIndicator(
-                            progress = progress,
+                            progress = animatedProgress,
                             modifier = Modifier.fillMaxWidth().height(8.dp),
                             color = Blue
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            "${(monthlyProgress / 10000).toInt()}만원 / ${(monthlyGoal / 10000).toInt()}만원 (${(progress * 100).toInt()}%)",
+                            "${(monthlyProgress / 10000).toInt()}만원 / ${(monthlyGoal / 10000).toInt()}만원 (${(animatedProgress * 100).toInt()}%)",
                             fontSize = 13.sp,
                             color = TextSecondary
                         )
@@ -322,6 +341,13 @@ fun PayManagementScreen(
                                         val isToday = idx == today.dayOfWeek.value - 1
                                         val isFuture = currentDate.isAfter(today)
                                         val isDanger = marginRates[idx] < 20
+                                        
+                                        val animatedHeight by animateFloatAsState(
+                                            targetValue = if (!startAnimation) 0f else if (isFuture) 0f else (value.toFloat() / maxValue * barHeightPx),
+                                            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+                                            label = "barHeight"
+                                        )
+                                        
                                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                             // 금액 라벨 (compact)
                                             val compactValue = if (isFuture) "-" else if (value >= 10000) "${(value / 10000).toInt()}만" else value.toInt().toString()
@@ -340,7 +366,7 @@ fun PayManagementScreen(
                                             Box(
                                                 modifier = Modifier
                                                     .width(32.dp)
-                                                    .height(if (isFuture) 0.dp else (value / maxValue * barHeightPx).dp)
+                                                    .height(animatedHeight.dp)
                                                     .background(
                                                         when {
                                                             isToday -> Blue
@@ -541,7 +567,8 @@ fun PayManagementScreen(
                                         ) {
                                             PieChart(
                                                 proportions = proportions,
-                                                colors = colors
+                                                colors = colors,
+                                                startAnimation = startAnimation
                                             )
                                         }
                                         Spacer(modifier = Modifier.width(24.dp))
@@ -665,14 +692,23 @@ fun PayManagementScreen(
 fun PieChart(
     proportions: List<Float>,
     colors: List<Color>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    startAnimation: Boolean
 ) {
+    val animatedProportions = proportions.map { proportion ->
+        animateFloatAsState(
+            targetValue = if (!startAnimation) 0f else proportion,
+            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+            label = "pieProportion"
+        )
+    }
+
     Canvas(
         modifier = modifier.size(140.dp)
     ) {
         var startAngle = -90f
-        proportions.forEachIndexed { idx, proportion ->
-            val sweep = proportion * 360f
+        animatedProportions.forEachIndexed { idx, animatedProportion ->
+            val sweep = animatedProportion.value * 360f
             drawArc(
                 color = colors[idx],
                 startAngle = startAngle,
@@ -682,7 +718,7 @@ fun PieChart(
             // % 표기 (중앙 각도 계산)
             val angle = startAngle + sweep / 2
             val radius = size.minDimension / 2.5f
-            val percent = (proportion * 100).toInt()
+            val percent = (animatedProportion.value * 100).toInt()
             val x = center.x + radius * cos(Math.toRadians(angle.toDouble())).toFloat()
             val y = center.y + radius * sin(Math.toRadians(angle.toDouble())).toFloat()
 
