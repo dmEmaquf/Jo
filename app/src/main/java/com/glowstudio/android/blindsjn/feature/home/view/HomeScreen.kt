@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
@@ -34,6 +35,8 @@ fun HomeScreen(navController: NavHostController) {
 
         // 네이버 뉴스 섹션
         NaverNewsSection(navController)
+
+        Spacer(modifier = Modifier.height(10.dp)) // 섹션 간 여백
 
         // 인기글 섹션
         HotPostsSection(navController)

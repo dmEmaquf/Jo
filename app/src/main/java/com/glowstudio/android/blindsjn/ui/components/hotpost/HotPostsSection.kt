@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.glowstudio.android.blindsjn.ui.components.common.SectionLayout
@@ -36,7 +37,7 @@ fun HotPostsSection(navController: NavHostController) {
         HotPost("원가 계산하는 방법 알려주세요", "05/15", 67, 35)
     )
 
-    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+    Box(modifier = Modifier.padding(horizontal = 24.dp)) {
         SectionLayout(
             title = "인기글",
             onMoreClick = { navController.navigate("popular") }
@@ -72,10 +73,17 @@ fun HotPostListItem(post: HotPost) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(post.title, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                post.title,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
             Spacer(modifier = Modifier.height(4.dp))
             Text(post.date, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
+        Spacer(modifier = Modifier.width(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.ThumbUp, contentDescription = "좋아요", tint = Error, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(4.dp))
