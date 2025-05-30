@@ -16,11 +16,30 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.glowstudio.android.blindsjn.ui.theme.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import androidx.compose.ui.platform.LocalContext
+import com.glowstudio.android.blindsjn.feature.ocr.view.CameraPreview
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OcrScreen(
     onCaptureClick: () -> Unit = {}
 ) {
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val cameraPermissionGranted = remember {
+        ContextCompat.checkSelfPermission(
+            context, Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+    }
     val verticalPadding = 48.dp
     Box(
         modifier = Modifier
@@ -34,6 +53,9 @@ fun OcrScreen(
                 .padding(top = verticalPadding)
                 .size(width = 320.dp, height = 520.dp)
         ) {
+            if (cameraPermissionGranted) {
+                CameraPreview(modifier = Modifier.matchParentSize())
+            }
             Canvas(modifier = Modifier.matchParentSize()) {
                 val strokeWidth = 4.dp.toPx()
                 val length = 40.dp.toPx()
@@ -60,7 +82,7 @@ fun OcrScreen(
         }
         // 하단에 버튼
         Button(
-            onClick = onCaptureClick,
+            onClick = { showBottomSheet = true },
             shape = CircleShape,
             colors = ButtonDefaults.buttonColors(containerColor = Blue),
             modifier = Modifier
@@ -69,6 +91,17 @@ fun OcrScreen(
                 .size(72.dp)
                 .clip(CircleShape)
         ) {}
+
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false }
+            ) {
+                DailySalesBottomSheet(
+                    onDismiss = { showBottomSheet = false },
+                    onSaved = { showBottomSheet = false }
+                )
+            }
+        }
     }
 }
 
