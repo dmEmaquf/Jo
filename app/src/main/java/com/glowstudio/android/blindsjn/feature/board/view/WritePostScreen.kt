@@ -234,24 +234,6 @@ fun WritePostScreen(
                                 Icon(Icons.Default.AttachFile, contentDescription = "파일 첨부")
                             }
                         }
-
-                        Row {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.clickable { isQuestion = !isQuestion }
-                            ) {
-                                Checkbox(checked = isQuestion, onCheckedChange = null)
-                                Text("질문")
-                            }
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.clickable { isAnonymous = !isAnonymous }
-                            ) {
-                                Checkbox(checked = isAnonymous, onCheckedChange = null)
-                                Text("익명")
-                            }
-                        }
                     }
 
                     Box(
@@ -284,7 +266,7 @@ fun WritePostScreen(
                                 } else {
                                     userId?.let { id ->
                                         val currentCategory = selectedCategory
-                                        val categoryTitle = if (industry.isNotEmpty()) industry else currentCategory?.title ?: "일반"
+                                        val categoryTitle = if (industry.isNotEmpty()) industry else currentCategory?.title ?: "자유게시판"
                                         viewModel.savePost(
                                             title = title,
                                             content = content,
