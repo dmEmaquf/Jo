@@ -181,14 +181,14 @@ fun PostDetailScreenContent(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = null,
                     modifier = Modifier.size(48.dp),
-                    tint = DividerGray
+                    tint = Color.LightGray
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text("익명", color = TextPrimary, style = MaterialTheme.typography.bodyMedium)
                     Text(
                         it.time,
-                        color = DividerGray,
+                        color = TextPrimary,
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -259,13 +259,13 @@ fun PostDetailScreenContent(
                                 currentRow.forEach { rowTag ->
                                     Surface(
                                         shape = MaterialTheme.shapes.small,
-                                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                                        color = Color.Gray.copy(alpha = 0.1f),
                                         modifier = Modifier.padding(2.dp)
                                     ) {
                                         Text(
                                             text = "#$rowTag",
                                             style = MaterialTheme.typography.bodySmall,
-                                            color = Color(0xFF616161),
+                                            color = Color.Gray,
                                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                         )
                                     }
@@ -288,13 +288,13 @@ fun PostDetailScreenContent(
                             currentRow.forEach { tag ->
                                 Surface(
                                     shape = MaterialTheme.shapes.small,
-                                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                                    color = Color.Gray.copy(alpha = 0.1f),
                                     modifier = Modifier.padding(2.dp)
                                 ) {
                                     Text(
                                         text = "#$tag",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = Color(0xFF616161),
+                                        color = Color.Gray,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                     )
                                 }
