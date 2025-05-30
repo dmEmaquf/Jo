@@ -75,9 +75,11 @@ fun BoardScreen(navController: NavController) {
     val industryCategories = boardCategories.filter { it.group == "업종" }
 
     // 카테고리 필터링 + 최신순 정렬
-    val filteredPosts = (selectedCategory?.let { cat ->
-        posts.filter { it.category == cat.title }
-    } ?: posts).sortedByDescending { it.time }
+    val filteredPosts = remember(selectedCategory, posts) {
+        (selectedCategory?.let { cat ->
+            posts.filter { it.category == cat.title }
+        } ?: posts).sortedByDescending { it.time }
+    }
 
     // 카테고리 바텀시트
     if (showCategorySheet) {
@@ -86,6 +88,7 @@ fun BoardScreen(navController: NavController) {
             selectedCategory = selectedCategory,
             onCategorySelected = { category ->
                 selectedCategory = category
+                showCategorySheet = false
             },
             onDismiss = { showCategorySheet = false }
         )
@@ -102,7 +105,7 @@ fun BoardScreen(navController: NavController) {
                 enabledTags = enabledTags,
                 onDone = {
                     showSheet = false
-                    val encodedCategory = URLEncoder.encode(selectedCategory?.title ?: "누구나", "UTF-8")
+                    val encodedCategory = URLEncoder.encode(selectedCategory?.title ?: "자유게시판", "UTF-8")
                     val encodedTags = URLEncoder.encode(it.joinToString(","), "UTF-8")
                     navController.navigate("writePost/$encodedCategory/$encodedTags") {
                         launchSingleTop = true
@@ -130,7 +133,10 @@ fun BoardScreen(navController: NavController) {
                     CustomFilterChip(
                         text = "전체",
                         isSelected = selectedCategory == null,
-                        onClick = { selectedCategory = null }
+                        onClick = { 
+                            selectedCategory = null
+                            showCategorySheet = false
+                        }
                     )
                     
                     // 스크롤 가능한 업종 카테고리
@@ -141,7 +147,10 @@ fun BoardScreen(navController: NavController) {
                             CustomFilterChip(
                                 text = category.title,
                                 isSelected = selectedCategory?.title == category.title,
-                                onClick = { selectedCategory = category }
+                                onClick = { 
+                                    selectedCategory = category
+                                    showCategorySheet = false
+                                }
                             )
                         }
                     }
@@ -340,14 +349,21 @@ fun PostItem(
             .padding(16.dp)
     ) {
         // 업종(카테고리)
-        Text(
-            text = post.category,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.primary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Spacer(modifier = Modifier.height(2.dp))
+        Surface(
+            shape = MaterialTheme.shapes.small,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+            modifier = Modifier.padding(bottom = 4.dp)
+        ) {
+            Text(
+                text = post.category,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
         // 제목
         Text(
             text = post.title,

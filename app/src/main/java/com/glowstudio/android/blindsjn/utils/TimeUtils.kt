@@ -6,19 +6,37 @@ import java.util.*
 object TimeUtils {
     // String 형태의 날짜를 파싱해서 "~ 전" 표시를 돌려줍니다.
     fun getTimeAgo(dateStr: String): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val date = try {
-            dateFormat.parse(dateStr)
-        } catch (e: Exception) {
-            null
-        } ?: return dateStr
+        // 여러 시간 형식 시도
+        val dateFormats = listOf(
+            "yyyy-MM-dd HH:mm:ss",
+            "yyyy-MM-dd'T'HH:mm:ss",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "yyyy-MM-dd HH:mm",
+            "yyyy/MM/dd HH:mm:ss",
+            "yyyy/MM/dd HH:mm"
+        )
 
-        // UTC → KST 변환 (9시간 더하기)
-        val kstDate = Date(date.time + 9 * 60 * 60 * 1000)
-        val now = Date()
-        val diff = now.time - kstDate.time
+        var date: Date? = null
+        for (format in dateFormats) {
+            try {
+                val dateFormat = SimpleDateFormat(format, Locale.getDefault())
+                date = dateFormat.parse(dateStr)
+                if (date != null) break
+            } catch (e: Exception) {
+                continue
+            }
+        }
 
-        val seconds = diff / 1000
+        date ?: return dateStr
+
+        val now = Calendar.getInstance()
+        val postDate = Calendar.getInstance().apply { time = date }
+        
+        // 시간 차이 계산 (밀리초 단위)
+        val diffInMillis = now.timeInMillis - postDate.timeInMillis
+        
+        // 밀리초를 각 단위로 변환
+        val seconds = diffInMillis / 1000
         val minutes = seconds / 60
         val hours = minutes / 60
         val days = hours / 24

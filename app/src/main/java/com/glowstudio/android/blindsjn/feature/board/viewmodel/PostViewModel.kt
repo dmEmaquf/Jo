@@ -31,6 +31,9 @@ class PostViewModel : ViewModel() {
     private val _comments = MutableStateFlow<List<Comment>>(emptyList())
     val comments: StateFlow<List<Comment>> = _comments
 
+    private val _shouldNavigateBack = MutableStateFlow(false)
+    val shouldNavigateBack: StateFlow<Boolean> = _shouldNavigateBack
+
     fun setStatusMessage(message: String) {
         _statusMessage.value = message
     }
@@ -137,8 +140,8 @@ class PostViewModel : ViewModel() {
                 val response = PostRepository.savePost(postRequest)
                 android.util.Log.d("PostViewModel", "Save post response: ${response.body()}")
                 if (response.isSuccessful) {
-                    _statusMessage.value = response.body()?.message ?: "게시글이 저장되었습니다."
                     loadPosts()
+                    _shouldNavigateBack.value = true
                 } else {
                     _statusMessage.value = "저장 실패: ${response.message()}"
                 }
@@ -291,5 +294,9 @@ class PostViewModel : ViewModel() {
 
     fun clearReportResult() {
         _reportResult.value = null
+    }
+
+    fun resetNavigation() {
+        _shouldNavigateBack.value = false
     }
 } 

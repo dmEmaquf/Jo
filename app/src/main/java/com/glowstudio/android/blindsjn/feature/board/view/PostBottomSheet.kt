@@ -16,6 +16,9 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import com.glowstudio.android.blindsjn.ui.theme.BackgroundWhite
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostBottomSheetViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -24,7 +27,13 @@ fun PostBottomSheet(
     enabledTags: List<String> = tags,
     onDone: (List<String>) -> Unit
 ) {
-    val selectedTags = remember { mutableStateListOf<String>() }
+    val context = LocalContext.current
+    val viewModel = viewModel<PostBottomSheetViewModel>()
+    val selectedTags by viewModel.selectedTags.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadData(context)
+    }
 
     Column(
         modifier = Modifier
@@ -44,8 +53,7 @@ fun PostBottomSheet(
                     enabled = enabled,
                     onClick = {
                         if (enabled) {
-                            if (selected) selectedTags.remove(tag)  
-                            else selectedTags.add(tag)
+                            viewModel.toggleTag(tag)
                         }
                     }
                 )
