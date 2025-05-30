@@ -10,20 +10,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
-import com.glowstudio.android.blindsjn.feature.ocr.viewmodel.OcrViewModel
 import com.glowstudio.android.blindsjn.ui.theme.*
 
 @Composable
 fun OcrScreen(
-    navController: NavController,
-    viewModel: OcrViewModel
+    onCaptureClick: () -> Unit = {}
 ) {
     val verticalPadding = 48.dp
     Box(
@@ -64,7 +60,7 @@ fun OcrScreen(
         }
         // 하단에 버튼
         Button(
-            onClick = { /* TODO: Implement capture */ },
+            onClick = onCaptureClick,
             shape = CircleShape,
             colors = ButtonDefaults.buttonColors(containerColor = Blue),
             modifier = Modifier
@@ -80,6 +76,7 @@ fun OcrScreen(
 @Composable
 fun OcrScreenPreview() {
     BlindSJNTheme {
-        OcrScreen(navController = NavController(null), viewModel = OcrViewModel(null))
+        OcrScreen()
     }
-} 
+}
+

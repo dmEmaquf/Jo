@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.glowstudio.android.blindsjn.ui.navigation.mainNavGraph
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.NavigationViewModel
 import androidx.compose.foundation.layout.Box
@@ -30,11 +29,10 @@ import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 import com.glowstudio.android.blindsjn.feature.home.view.NewsDetailScreen
 import com.glowstudio.android.blindsjn.data.model.Article
 import com.glowstudio.android.blindsjn.data.network.Network
-import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementApi
 import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementRepository
 import com.glowstudio.android.blindsjn.feature.paymanagement.viewmodel.PayManagementViewModel
 import com.glowstudio.android.blindsjn.feature.paymanagement.view.PayManagementScreen
-import com.glowstudio.android.blindsjn.feature.paymanagement.view.OcrScreen
+import com.glowstudio.android.blindsjn.feature.ocr.view.OcrScreen
 import androidx.compose.ui.platform.LocalContext
 import com.glowstudio.android.blindsjn.feature.foodcost.view.FoodCostScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterRecipeScreen
@@ -46,7 +44,6 @@ import com.glowstudio.android.blindsjn.feature.main.model.NavigationState
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.BottomBarViewModel
 import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
 import com.glowstudio.android.blindsjn.feature.home.NewsListScreen
-import com.glowstudio.android.blindsjn.feature.home.view.NewsMainScreen
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
