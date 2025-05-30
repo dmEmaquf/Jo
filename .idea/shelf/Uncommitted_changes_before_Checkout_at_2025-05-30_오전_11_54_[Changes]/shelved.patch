@@ -1,0 +1,73 @@
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.repository\r\n\r\nimport android.content.Context\r\nimport android.net.Uri\r\nimport com.glowstudio.android.blindsjn.data.network.isNetworkAvailable\r\nimport com.glowstudio.android.blindsjn.data.network.OcrApiServer\r\nimport com.glowstudio.android.blindsjn.feature.ocr.model.*\r\nimport com.glowstudio.android.blindsjn.feature.ocr.network.OcrItem\r\nimport com.glowstudio.android.blindsjn.feature.ocr.network.OcrSaveRequest\r\nimport com.glowstudio.android.blindsjn.feature.ocr.network.OcrRequest\r\nimport com.glowstudio.android.blindsjn.feature.ocr.network.OcrImage\r\nimport java.io.File\r\nimport java.text.SimpleDateFormat\r\nimport java.util.*\r\nimport android.util.Base64\r\nimport java.util.UUID\r\n\r\nclass OcrRepository {\r\n    companion object {\r\n        private const val API_KEY = \"bmxVU1pnQUhxVFBKWnJlb3RkaE9ybnRId0NkQ3lOQ3Q=\"\r\n    }\r\n\r\n    // 영수증 이미지를 분석하여 상품 정보 추출\r\n    suspend fun analyzeReceipt(uri: Uri): Result<List<OcrResult>> {\r\n        return try {\r\n            val imageBytes = File(uri.path!!).readBytes()\r\n            val base64Image = Base64.encodeToString(imageBytes, Base64.NO_WRAP)\r\n            \r\n            val request = OcrRequest(\r\n                version = \"V2\",\r\n                requestId = UUID.randomUUID().toString(),\r\n                timestamp = System.currentTimeMillis(),\r\n                images = listOf(\r\n                    OcrImage(\r\n                        format = \"jpg\",\r\n                        name = \"image\"\r\n                    )\r\n                )\r\n            )\r\n\r\n            val response = OcrApiServer.apiService.analyzeReceipt(request)\r\n            \r\n            if (response.isSuccessful) {\r\n                val ocrResponse = response.body()\r\n                if (ocrResponse != null) {\r\n                    val results = parseOcrResponse(ocrResponse)\r\n                    if (results.isNotEmpty()) {\r\n                        Result.success(results)\r\n                    } else {\r\n                        Result.failure(Exception(\"영수증에서 상품 정보를 찾을 수 없습니다.\"))\r\n                    }\r\n                } else {\r\n                    Result.failure(Exception(\"응답 데이터가 없습니다.\"))\r\n                }\r\n            } else {\r\n                Result.failure(Exception(\"OCR 분석에 실패했습니다.\"))\r\n            }\r\n        } catch (e: Exception) {\r\n            Result.failure(e)\r\n        }\r\n    }\r\n\r\n    // OCR 분석 결과를 서버에 저장\r\n    suspend fun saveOcrResults(results: List<OcrResult>): Result<Unit> {\r\n        return try {\r\n            val currentDate = SimpleDateFormat(\"yyyy-MM-dd\", Locale.getDefault()).format(Date())\r\n            val request = OcrSaveRequest(\r\n                date = currentDate,\r\n                items = results.map { result ->\r\n                    OcrItem(\r\n                        name = result.name,\r\n                        quantity = result.quantity,\r\n                        price = result.price\r\n                    )\r\n                }\r\n            )\r\n\r\n            val response = OcrApiServer.apiService.saveOcrResult(request)\r\n            if (response.status == \"success\") {\r\n                Result.success(Unit)\r\n            } else {\r\n                Result.failure(Exception(response.message))\r\n            }\r\n        } catch (e: Exception) {\r\n            Result.failure(e)\r\n        }\r\n    }\r\n\r\n    // OCR API 응답을 파싱하여 상품 정보 추출\r\n    private fun parseOcrResponse(response: OcrApiResponse): List<OcrResult> {\r\n        val results = mutableListOf<OcrResult>()\r\n        \r\n        response.images.firstOrNull()?.fields?.let { fields ->\r\n            var currentName = \"\"\r\n            var currentQuantity = 0\r\n            var currentPrice = 0\r\n            \r\n            fields.forEach { field ->\r\n                val text = field.inferText.trim()\r\n                \r\n                // 상품명 추출\r\n                if (text.matches(Regex(\"^[가-힣a-zA-Z\\\\s]+$\"))) {\r\n                    if (currentName.isNotEmpty() && currentPrice > 0) {\r\n                        results.add(OcrResult(currentName, currentQuantity, currentPrice))\r\n                    }\r\n                    currentName = text\r\n                    currentQuantity = 1\r\n                }\r\n                \r\n                // 수량 추출\r\n                if (text.matches(Regex(\"^\\\\d+$\"))) {\r\n                    val number = text.toIntOrNull()\r\n                    if (number != null && number < 100) {\r\n                        currentQuantity = number\r\n                    }\r\n                }\r\n                \r\n                // 가격 추출\r\n                if (text.matches(Regex(\".*\\\\d+$\"))) {\r\n                    val price = text.replace(Regex(\"[^0-9]\"), \"\").toIntOrNull()\r\n                    if (price != null && price > 0) {\r\n                        currentPrice = price\r\n                    }\r\n                }\r\n            }\r\n            \r\n            // 마지막 상품 정보 저장\r\n            if (currentName.isNotEmpty() && currentPrice > 0) {\r\n                results.add(OcrResult(currentName, currentQuantity, currentPrice))\r\n            }\r\n        }\r\n        \r\n        return results\r\n    }\r\n} 
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt	(revision c190834e9c68e52825db49709cd4ca238cbfe93d)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt	(date 1748547232240)
+@@ -14,6 +14,11 @@
+ import java.util.*
+ import android.util.Base64
+ import java.util.UUID
++import okhttp3.MediaType.Companion.toMediaTypeOrNull
++import okhttp3.MultipartBody
++import okhttp3.RequestBody
++import okhttp3.RequestBody.Companion.asRequestBody
++import com.google.gson.Gson
+ 
+ class OcrRepository {
+     companion object {
+@@ -23,10 +28,11 @@
+     // 영수증 이미지를 분석하여 상품 정보 추출
+     suspend fun analyzeReceipt(uri: Uri): Result<List<OcrResult>> {
+         return try {
+-            val imageBytes = File(uri.path!!).readBytes()
+-            val base64Image = Base64.encodeToString(imageBytes, Base64.NO_WRAP)
+-            
+-            val request = OcrRequest(
++            val imageFile = File(uri.path!!)
++            val imageRequestBody = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
++            val imagePart = MultipartBody.Part.createFormData("file", imageFile.name, imageRequestBody)
++
++            val requestJson = OcrRequest(
+                 version = "V2",
+                 requestId = UUID.randomUUID().toString(),
+                 timestamp = System.currentTimeMillis(),
+@@ -37,8 +43,9 @@
+                     )
+                 )
+             )
++            val messageBody = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), Gson().toJson(requestJson))
+ 
+-            val response = OcrApiServer.apiService.analyzeReceipt(request)
++            val response = OcrApiServer.apiService.analyzeReceipt(messageBody, imagePart)
+             
+             if (response.isSuccessful) {
+                 val ocrResponse = response.body()
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/network/OcrApiService.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.network\r\n\r\nimport com.glowstudio.android.blindsjn.feature.ocr.model.*\r\nimport retrofit2.Response\r\nimport retrofit2.http.*\r\n\r\ninterface OcrApiService {\r\n    // 영수증 이미지 분석 API\r\n    @POST(\"document/receipt\")\r\n    suspend fun analyzeReceipt(\r\n        @Body request: OcrRequest\r\n    ): Response<OcrApiResponse>\r\n\r\n    // OCR 분석 결과 저장 API\r\n    @POST(\"api_save_ocr_result.php\")\r\n    suspend fun saveOcrResult(@Body request: OcrSaveRequest): OcrSaveResponse\r\n}\r\n\r\ndata class OcrRequest(\r\n    val version: String,\r\n    val requestId: String,\r\n    val timestamp: Long,\r\n    val images: List<OcrImage>\r\n)\r\n\r\ndata class OcrImage(\r\n    val format: String,\r\n    val name: String\r\n)\r\n\r\ndata class OcrSaveRequest(\r\n    val date: String,\r\n    val items: List<OcrItem>\r\n)\r\n\r\ndata class OcrItem(\r\n    val name: String,\r\n    val quantity: Int,\r\n    val price: Int\r\n)\r\n\r\ndata class OcrSaveResponse(\r\n    val status: String,\r\n    val message: String,\r\n    val data: OcrSaveData?\r\n)\r\n\r\ndata class OcrSaveData(\r\n    val date: String,\r\n    val total_sales_amount: Double,\r\n    val total_margin_amount: Double,\r\n    val day_of_week: String\r\n) 
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/network/OcrApiService.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/network/OcrApiService.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/network/OcrApiService.kt	(revision c190834e9c68e52825db49709cd4ca238cbfe93d)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/network/OcrApiService.kt	(date 1748547232240)
+@@ -3,12 +3,16 @@
+ import com.glowstudio.android.blindsjn.feature.ocr.model.*
+ import retrofit2.Response
+ import retrofit2.http.*
++import okhttp3.MultipartBody
++import okhttp3.RequestBody
+ 
+ interface OcrApiService {
+     // 영수증 이미지 분석 API
++    @Multipart
+     @POST("document/receipt")
+     suspend fun analyzeReceipt(
+-        @Body request: OcrRequest
++        @Part("message") message: RequestBody,
++        @Part file: MultipartBody.Part
+     ): Response<OcrApiResponse>
+ 
+     // OCR 분석 결과 저장 API

@@ -1,0 +1,469 @@
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/model/OcrApiResponse.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.model\r\n\r\ndata class OcrApiResponse(\r\n    val version: String,\r\n    val requestId: String,\r\n    val timestamp: Long,\r\n    val images: List<OcrImage>\r\n)\r\n\r\ndata class OcrImage(\r\n    val uid: String,\r\n    val name: String,\r\n    val inferResult: String,\r\n    val message: String,\r\n    val fields: List<OcrField>\r\n)\r\n\r\ndata class OcrField(\r\n    val valueType: String,\r\n    val boundingPoly: BoundingPoly,\r\n    val inferText: String,\r\n    val inferConfidence: Double\r\n)\r\n\r\ndata class BoundingPoly(\r\n    val vertices: List<Vertex>\r\n)\r\n\r\ndata class Vertex(\r\n    val x: Int,\r\n    val y: Int\r\n)\r\n\r\n/**\r\n * OCR API 응답을 OcrItem 리스트로 변환하는 확장 함수\r\n * \r\n * @return OCR 결과에서 추출한 상품 정보 리스트\r\n */\r\nfun OcrApiResponse.toOcrItems(): List<OcrItem> {\r\n    return images.flatMap { image ->\r\n        // 상품명, 수량, 가격 정보를 추출\r\n        val items = mutableListOf<OcrItem>()\r\n        var currentName = \"\"\r\n        var currentQuantity = 1\r\n        var currentPrice = 0\r\n        \r\n        image.fields.forEach { field ->\r\n            when {\r\n                // 상품명 추출 (예: \"아메리카노\")\r\n                field.inferText.matches(Regex(\"^[가-힣a-zA-Z]+$\")) -> {\r\n                    if (currentName.isNotEmpty() && currentPrice > 0) {\r\n                        items.add(OcrItem(currentName, currentQuantity, currentPrice))\r\n                    }\r\n                    currentName = field.inferText\r\n                    currentQuantity = 1\r\n                    currentPrice = 0\r\n                }\r\n                // 수량 추출 (예: \"2개\")\r\n                field.inferText.matches(Regex(\"^\\\\d+개?$\")) -> {\r\n                    currentQuantity = field.inferText.replace(Regex(\"[^0-9]\"), \"\").toIntOrNull() ?: 1\r\n                }\r\n                // 가격 추출 (예: \"4,000원\")\r\n                field.inferText.matches(Regex(\"^[0-9,]+원$\")) -> {\r\n                    currentPrice = field.inferText.replace(Regex(\"[^0-9]\"), \"\").toIntOrNull() ?: 0\r\n                }\r\n            }\r\n        }\r\n        \r\n        // 마지막 아이템 추가\r\n        if (currentName.isNotEmpty() && currentPrice > 0) {\r\n            items.add(OcrItem(currentName, currentQuantity, currentPrice))\r\n        }\r\n        \r\n        items\r\n    }\r\n} 
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/model/OcrApiResponse.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/model/OcrApiResponse.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/model/OcrApiResponse.kt	(revision c190834e9c68e52825db49709cd4ca238cbfe93d)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/model/OcrApiResponse.kt	(date 1748577101287)
+@@ -12,14 +12,93 @@
+     val name: String,
+     val inferResult: String,
+     val message: String,
+-    val fields: List<OcrField>
++    val validationResult: ValidationResult,
++    val receipt: Receipt?
++)
++
++data class ValidationResult(
++    val result: String,
++    val message: String?
++)
++
++data class Receipt(
++    val meta: ReceiptMeta,
++    val result: ReceiptResult
++)
++
++data class ReceiptMeta(
++    val estimatedLanguage: String
++)
++
++data class ReceiptResult(
++    val storeInfo: StoreInfo,
++    val paymentInfo: PaymentInfo,
++    val items: List<ReceiptItem>,
++    val totalPrice: Price,
++    val subTotal: List<SubTotal>
++)
++
++data class StoreInfo(
++    val name: TextField,
++    val subName: TextField?,
++    val bizNum: TextField?,
++    val addresses: List<TextField>,
++    val tel: List<TextField>
++)
++
++data class PaymentInfo(
++    val date: TextField,
++    val time: TextField,
++    val cardInfo: CardInfo?,
++    val totalPrice: Price
++)
++
++data class ReceiptItem(
++    val name: TextField,
++    val count: Count,
++    val price: ItemPrice
++)
++
++data class ItemPrice(
++    val price: Price,
++    val unitPrice: Price?
+ )
+ 
+-data class OcrField(
+-    val valueType: String,
+-    val boundingPoly: BoundingPoly,
+-    val inferText: String,
+-    val inferConfidence: Double
++data class Price(
++    val text: String,
++    val formatted: FormattedValue,
++    val keyText: String,
++    val confidenceScore: Double,
++    val boundingPolys: List<BoundingPoly>
++)
++
++data class Count(
++    val text: String,
++    val formatted: FormattedValue,
++    val keyText: String,
++    val confidenceScore: Double,
++    val boundingPolys: List<BoundingPoly>
++)
++
++data class SubTotal(
++    val taxPrice: List<Price>
++)
++
++data class CardInfo(
++    val cardCompany: TextField,
++    val cardNumber: TextField
++)
++
++data class TextField(
++    val text: String,
++    val formatted: FormattedValue,
++    val keyText: String,
++    val confidenceScore: Double,
++    val boundingPolys: List<BoundingPoly>
++)
++
++data class FormattedValue(
++    val value: String
+ )
+ 
+ data class BoundingPoly(
+@@ -38,39 +117,12 @@
+  */
+ fun OcrApiResponse.toOcrItems(): List<OcrItem> {
+     return images.flatMap { image ->
+-        // 상품명, 수량, 가격 정보를 추출
+-        val items = mutableListOf<OcrItem>()
+-        var currentName = ""
+-        var currentQuantity = 1
+-        var currentPrice = 0
+-        
+-        image.fields.forEach { field ->
+-            when {
+-                // 상품명 추출 (예: "아메리카노")
+-                field.inferText.matches(Regex("^[가-힣a-zA-Z]+$")) -> {
+-                    if (currentName.isNotEmpty() && currentPrice > 0) {
+-                        items.add(OcrItem(currentName, currentQuantity, currentPrice))
+-                    }
+-                    currentName = field.inferText
+-                    currentQuantity = 1
+-                    currentPrice = 0
+-                }
+-                // 수량 추출 (예: "2개")
+-                field.inferText.matches(Regex("^\\d+개?$")) -> {
+-                    currentQuantity = field.inferText.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 1
+-                }
+-                // 가격 추출 (예: "4,000원")
+-                field.inferText.matches(Regex("^[0-9,]+원$")) -> {
+-                    currentPrice = field.inferText.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0
+-                }
+-            }
+-        }
+-        
+-        // 마지막 아이템 추가
+-        if (currentName.isNotEmpty() && currentPrice > 0) {
+-            items.add(OcrItem(currentName, currentQuantity, currentPrice))
+-        }
+-        
+-        items
++        image.receipt?.result?.items?.map { item ->
++            OcrItem(
++                name = item.name.text,
++                quantity = item.count.formatted.value.toIntOrNull() ?: 1,
++                price = item.price.price.formatted.value.toIntOrNull() ?: 0
++            )
++        } ?: emptyList()
+     }
+ } 
+\ No newline at end of file
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/CameraScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.view\r\n\r\nimport android.content.Context\r\nimport android.net.Uri\r\nimport androidx.camera.core.CameraSelector\r\nimport androidx.camera.core.ImageCapture\r\nimport androidx.camera.core.ImageCaptureException\r\nimport androidx.camera.core.Preview as CameraXPreview\r\nimport androidx.camera.lifecycle.ProcessCameraProvider\r\nimport androidx.camera.view.PreviewView\r\nimport androidx.compose.foundation.Canvas\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.shape.CircleShape\r\nimport androidx.compose.material3.*\r\nimport androidx.compose.runtime.*\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.draw.clip\r\nimport androidx.compose.ui.geometry.Offset\r\nimport androidx.compose.ui.graphics.drawscope.Stroke\r\nimport androidx.compose.ui.platform.LocalContext\r\nimport androidx.compose.ui.platform.LocalLifecycleOwner\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.text.style.TextAlign\r\nimport androidx.compose.ui.tooling.preview.Preview\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\nimport androidx.compose.ui.viewinterop.AndroidView\r\nimport androidx.core.content.ContextCompat\r\nimport androidx.lifecycle.viewmodel.compose.viewModel\r\nimport com.glowstudio.android.blindsjn.feature.ocr.model.OcrResult\r\nimport com.glowstudio.android.blindsjn.feature.ocr.viewmodel.CameraViewModel\r\nimport com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme\r\nimport com.glowstudio.android.blindsjn.ui.theme.*\r\nimport java.io.File\r\nimport java.text.SimpleDateFormat\r\nimport java.util.*\r\nimport java.util.concurrent.Executor\r\nimport com.glowstudio.android.blindsjn.ui.theme.ColorPalette\r\n\r\n@Composable\r\nfun CameraScreen(\r\n    onNavigateToOcrResult: (List<OcrResult>) -> Unit,\r\n    viewModel: CameraViewModel = viewModel()\r\n) {\r\n    val context = LocalContext.current\r\n    val lifecycleOwner = LocalLifecycleOwner.current\r\n    val ocrResults by viewModel.ocrResults.collectAsState()\r\n    val isLoading by viewModel.isLoading.collectAsState()\r\n    val error by viewModel.error.collectAsState()\r\n\r\n    // OCR 결과가 있을 때 자동으로 결과 화면으로 이동\r\n    LaunchedEffect(ocrResults) {\r\n        if (ocrResults.isNotEmpty()) {\r\n            onNavigateToOcrResult(ocrResults)\r\n        }\r\n    }\r\n\r\n    // 에러가 있을 때 처리\r\n    LaunchedEffect(error) {\r\n        error?.let {\r\n            android.widget.Toast.makeText(context, it, android.widget.Toast.LENGTH_LONG).show()\r\n        }\r\n    }\r\n\r\n    // 카메라 관련 상태\r\n    val imageCapture = remember { ImageCapture.Builder().build() }\r\n    val cameraExecutor = remember { ContextCompat.getMainExecutor(context) }\r\n\r\n    Box(\r\n        modifier = Modifier\r\n            .fillMaxSize()\r\n            .background(ColorPalette.White)\r\n    ) {\r\n        // 카메라 프리뷰\r\n        AndroidView(\r\n            factory = { ctx ->\r\n                PreviewView(ctx).apply {\r\n                    implementationMode = PreviewView.ImplementationMode.COMPATIBLE\r\n                }\r\n            },\r\n            modifier = Modifier.fillMaxSize()\r\n        ) { previewView ->\r\n            val cameraProviderFuture = ProcessCameraProvider.getInstance(context)\r\n            cameraProviderFuture.addListener({\r\n                val cameraProvider = cameraProviderFuture.get()\r\n                val preview = CameraXPreview.Builder().build().also {\r\n                    it.setSurfaceProvider(previewView.surfaceProvider)\r\n                }\r\n\r\n                try {\r\n                    cameraProvider.unbindAll()\r\n                    cameraProvider.bindToLifecycle(\r\n                        lifecycleOwner,\r\n                        CameraSelector.DEFAULT_BACK_CAMERA,\r\n                        preview,\r\n                        imageCapture\r\n                    )\r\n                } catch (e: Exception) {\r\n                    e.printStackTrace()\r\n                }\r\n            }, cameraExecutor)\r\n        }\r\n\r\n        // 프레임 오버레이\r\n        Box(\r\n            modifier = Modifier\r\n                .align(Alignment.TopCenter)\r\n                .padding(top = 48.dp)\r\n                .size(width = 320.dp, height = 520.dp)\r\n        ) {\r\n            Canvas(modifier = Modifier.matchParentSize()) {\r\n                val strokeWidth = 4.dp.toPx()\r\n                val length = 40.dp.toPx()\r\n                val w = size.width\r\n                val h = size.height\r\n                val color = Blue\r\n                drawLine(color, Offset(0f, 0f), Offset(length, 0f), strokeWidth)\r\n                drawLine(color, Offset(0f, 0f), Offset(0f, length), strokeWidth)\r\n                drawLine(color, Offset(w, 0f), Offset(w - length, 0f), strokeWidth)\r\n                drawLine(color, Offset(w, 0f), Offset(w, length), strokeWidth)\r\n                drawLine(color, Offset(0f, h), Offset(0f, h - length), strokeWidth)\r\n                drawLine(color, Offset(0f, h), Offset(length, h), strokeWidth)\r\n                drawLine(color, Offset(w, h), Offset(w - length, h), strokeWidth)\r\n                drawLine(color, Offset(w, h), Offset(w, h - length), strokeWidth)\r\n            }\r\n            Text(\r\n                \"문서를 이 영역에 맞춰주세요.\",\r\n                color = TextSecondary,\r\n                fontSize = 18.sp,\r\n                fontWeight = FontWeight.Medium,\r\n                textAlign = TextAlign.Center,\r\n                modifier = Modifier.align(Alignment.Center)\r\n            )\r\n        }\r\n\r\n        // 로딩 인디케이터\r\n        if (isLoading) {\r\n            Box(\r\n                modifier = Modifier\r\n                    .fillMaxSize()\r\n                    .background(ColorPalette.DarkBackground.copy(alpha = 0.5f)),\r\n                contentAlignment = Alignment.Center\r\n            ) {\r\n                CircularProgressIndicator(\r\n                    color = ColorPalette.Blue\r\n                )\r\n            }\r\n        }\r\n\r\n        // 촬영 버튼\r\n        Button(\r\n            onClick = {\r\n                takePhoto(\r\n                    imageCapture = imageCapture,\r\n                    outputDirectory = context.getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)!!,\r\n                    executor = cameraExecutor,\r\n                    onImageCaptured = { uri ->\r\n                        viewModel.processImage(uri)\r\n                    },\r\n                    onError = { /* 에러 처리 */ }\r\n                )\r\n            },\r\n            shape = CircleShape,\r\n            colors = ButtonDefaults.buttonColors(containerColor = ColorPalette.Blue),\r\n            modifier = Modifier\r\n                .align(Alignment.BottomCenter)\r\n                .padding(bottom = 48.dp)\r\n                .size(72.dp)\r\n                .clip(CircleShape)\r\n        ) {}\r\n    }\r\n}\r\n\r\nprivate fun takePhoto(\r\n    imageCapture: ImageCapture,\r\n    outputDirectory: File,\r\n    executor: Executor,\r\n    onImageCaptured: (Uri) -> Unit,\r\n    onError: (ImageCaptureException) -> Unit\r\n) {\r\n    val photoFile = File(\r\n        outputDirectory,\r\n        SimpleDateFormat(\"yyyy-MM-dd-HH-mm-ss-SSS\", Locale.KOREA)\r\n            .format(System.currentTimeMillis()) + \".jpg\"\r\n    )\r\n\r\n    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()\r\n\r\n    imageCapture.takePicture(\r\n        outputOptions,\r\n        executor,\r\n        object : ImageCapture.OnImageSavedCallback {\r\n            override fun onImageSaved(output: ImageCapture.OutputFileResults) {\r\n                val savedUri = Uri.fromFile(photoFile)\r\n                onImageCaptured(savedUri)\r\n            }\r\n\r\n            override fun onError(exception: ImageCaptureException) {\r\n                onError(exception)\r\n            }\r\n        }\r\n    )\r\n}\r\n\r\n@Composable\r\nfun OcrResultScreen(\r\n    results: List<OcrResult>\r\n) {\r\n    Column(\r\n        modifier = Modifier\r\n            .fillMaxWidth()\r\n            .padding(16.dp)\r\n    ) {\r\n        Text(\r\n            text = \"이 결과가 맞나요?\",\r\n            style = MaterialTheme.typography.titleLarge,\r\n            modifier = Modifier.padding(bottom = 16.dp)\r\n        )\r\n\r\n        Card(\r\n            modifier = Modifier\r\n                .fillMaxWidth()\r\n                .padding(bottom = 16.dp)\r\n        ) {\r\n            Column(\r\n                modifier = Modifier.padding(16.dp)\r\n            ) {\r\n                Row(\r\n                    modifier = Modifier.fillMaxWidth(),\r\n                    horizontalArrangement = Arrangement.SpaceBetween\r\n                ) {\r\n                    Text(\r\n                        text = \"이름\",\r\n                        modifier = Modifier.weight(1f),\r\n                        style = MaterialTheme.typography.titleMedium\r\n                    )\r\n                    Text(\r\n                        text = \"수량\",\r\n                        modifier = Modifier.weight(1f),\r\n                        style = MaterialTheme.typography.titleMedium\r\n                    )\r\n                    Text(\r\n                        text = \"가격\",\r\n                        modifier = Modifier.weight(1f),\r\n                        style = MaterialTheme.typography.titleMedium\r\n                    )\r\n                }\r\n\r\n                Divider(\r\n                    modifier = Modifier.padding(vertical = 8.dp),\r\n                    color = MaterialTheme.colorScheme.outline\r\n                )\r\n\r\n                results.forEach { result ->\r\n                    Row(\r\n                        modifier = Modifier\r\n                            .fillMaxWidth()\r\n                            .padding(vertical = 8.dp),\r\n                        horizontalArrangement = Arrangement.SpaceBetween\r\n                    ) {\r\n                        Text(\r\n                            text = result.name,\r\n                            modifier = Modifier.weight(1f)\r\n                        )\r\n                        Text(\r\n                            text = result.quantity.toString(),\r\n                            modifier = Modifier.weight(1f)\r\n                        )\r\n                        Text(\r\n                            text = result.price.toString(),\r\n                            modifier = Modifier.weight(1f)\r\n                        )\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n} 
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/CameraScreen.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/CameraScreen.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/CameraScreen.kt	(revision c190834e9c68e52825db49709cd4ca238cbfe93d)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/CameraScreen.kt	(date 1748578632070)
+@@ -42,6 +42,7 @@
+ @Composable
+ fun CameraScreen(
+     onNavigateToOcrResult: (List<OcrResult>) -> Unit,
++    onNavigateToRawOcrResult: (String) -> Unit,
+     viewModel: CameraViewModel = viewModel()
+ ) {
+     val context = LocalContext.current
+@@ -49,6 +50,8 @@
+     val ocrResults by viewModel.ocrResults.collectAsState()
+     val isLoading by viewModel.isLoading.collectAsState()
+     val error by viewModel.error.collectAsState()
++    val ocrRawResult by viewModel.ocrRawResult.collectAsState()
++    var lastCapturedUri by remember { mutableStateOf<Uri?>(null) }
+ 
+     // OCR 결과가 있을 때 자동으로 결과 화면으로 이동
+     LaunchedEffect(ocrResults) {
+@@ -157,6 +160,7 @@
+                     outputDirectory = context.getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)!!,
+                     executor = cameraExecutor,
+                     onImageCaptured = { uri ->
++                        lastCapturedUri = uri
+                         viewModel.processImage(uri)
+                     },
+                     onError = { /* 에러 처리 */ }
+@@ -170,6 +174,26 @@
+                 .size(72.dp)
+                 .clip(CircleShape)
+         ) {}
++
++        // RAW OCR 결과 버튼 (심플)
++        Button(
++            onClick = {
++                lastCapturedUri?.let { viewModel.processImageRaw(it) }
++            },
++            modifier = Modifier
++                .align(Alignment.BottomCenter)
++                .padding(bottom = 140.dp)
++        ) {
++            Text("RAW OCR 결과")
++        }
++    }
++
++    // RAW OCR 결과가 오면 콜백 호출
++    LaunchedEffect(ocrRawResult) {
++        if (ocrRawResult != null) {
++            onNavigateToRawOcrResult(ocrRawResult!!)
++            viewModel.clearResults() // 결과 초기화(중복 이동 방지)
++        }
+     }
+ }
+ 
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.repository\r\n\r\nimport android.content.Context\r\nimport android.net.Uri\r\nimport com.glowstudio.android.blindsjn.data.network.isNetworkAvailable\r\nimport com.glowstudio.android.blindsjn.data.network.OcrApiServer\r\nimport com.glowstudio.android.blindsjn.feature.ocr.model.*\r\nimport com.glowstudio.android.blindsjn.feature.ocr.network.OcrItem\r\nimport com.glowstudio.android.blindsjn.feature.ocr.network.OcrSaveRequest\r\nimport com.glowstudio.android.blindsjn.feature.ocr.network.OcrRequest\r\nimport com.glowstudio.android.blindsjn.feature.ocr.network.OcrImage\r\nimport java.io.File\r\nimport java.text.SimpleDateFormat\r\nimport java.util.*\r\nimport android.util.Base64\r\nimport java.util.UUID\r\n\r\nclass OcrRepository {\r\n    companion object {\r\n        private const val API_KEY = \"bmxVU1pnQUhxVFBKWnJlb3RkaE9ybnRId0NkQ3lOQ3Q=\"\r\n    }\r\n\r\n    // 영수증 이미지를 분석하여 상품 정보 추출\r\n    suspend fun analyzeReceipt(uri: Uri): Result<List<OcrResult>> {\r\n        return try {\r\n            val imageBytes = File(uri.path!!).readBytes()\r\n            val base64Image = Base64.encodeToString(imageBytes, Base64.NO_WRAP)\r\n            \r\n            val request = OcrRequest(\r\n                version = \"V2\",\r\n                requestId = UUID.randomUUID().toString(),\r\n                timestamp = System.currentTimeMillis(),\r\n                images = listOf(\r\n                    OcrImage(\r\n                        format = \"jpg\",\r\n                        name = \"image\"\r\n                    )\r\n                )\r\n            )\r\n\r\n            val response = OcrApiServer.apiService.analyzeReceipt(request)\r\n            \r\n            if (response.isSuccessful) {\r\n                val ocrResponse = response.body()\r\n                if (ocrResponse != null) {\r\n                    val results = parseOcrResponse(ocrResponse)\r\n                    if (results.isNotEmpty()) {\r\n                        Result.success(results)\r\n                    } else {\r\n                        Result.failure(Exception(\"영수증에서 상품 정보를 찾을 수 없습니다.\"))\r\n                    }\r\n                } else {\r\n                    Result.failure(Exception(\"응답 데이터가 없습니다.\"))\r\n                }\r\n            } else {\r\n                Result.failure(Exception(\"OCR 분석에 실패했습니다.\"))\r\n            }\r\n        } catch (e: Exception) {\r\n            Result.failure(e)\r\n        }\r\n    }\r\n\r\n    // OCR 분석 결과를 서버에 저장\r\n    suspend fun saveOcrResults(results: List<OcrResult>): Result<Unit> {\r\n        return try {\r\n            val currentDate = SimpleDateFormat(\"yyyy-MM-dd\", Locale.getDefault()).format(Date())\r\n            val request = OcrSaveRequest(\r\n                date = currentDate,\r\n                items = results.map { result ->\r\n                    OcrItem(\r\n                        name = result.name,\r\n                        quantity = result.quantity,\r\n                        price = result.price\r\n                    )\r\n                }\r\n            )\r\n\r\n            val response = OcrApiServer.apiService.saveOcrResult(request)\r\n            if (response.status == \"success\") {\r\n                Result.success(Unit)\r\n            } else {\r\n                Result.failure(Exception(response.message))\r\n            }\r\n        } catch (e: Exception) {\r\n            Result.failure(e)\r\n        }\r\n    }\r\n\r\n    // OCR API 응답을 파싱하여 상품 정보 추출\r\n    private fun parseOcrResponse(response: OcrApiResponse): List<OcrResult> {\r\n        val results = mutableListOf<OcrResult>()\r\n        \r\n        response.images.firstOrNull()?.fields?.let { fields ->\r\n            var currentName = \"\"\r\n            var currentQuantity = 0\r\n            var currentPrice = 0\r\n            \r\n            fields.forEach { field ->\r\n                val text = field.inferText.trim()\r\n                \r\n                // 상품명 추출\r\n                if (text.matches(Regex(\"^[가-힣a-zA-Z\\\\s]+$\"))) {\r\n                    if (currentName.isNotEmpty() && currentPrice > 0) {\r\n                        results.add(OcrResult(currentName, currentQuantity, currentPrice))\r\n                    }\r\n                    currentName = text\r\n                    currentQuantity = 1\r\n                }\r\n                \r\n                // 수량 추출\r\n                if (text.matches(Regex(\"^\\\\d+$\"))) {\r\n                    val number = text.toIntOrNull()\r\n                    if (number != null && number < 100) {\r\n                        currentQuantity = number\r\n                    }\r\n                }\r\n                \r\n                // 가격 추출\r\n                if (text.matches(Regex(\".*\\\\d+$\"))) {\r\n                    val price = text.replace(Regex(\"[^0-9]\"), \"\").toIntOrNull()\r\n                    if (price != null && price > 0) {\r\n                        currentPrice = price\r\n                    }\r\n                }\r\n            }\r\n            \r\n            // 마지막 상품 정보 저장\r\n            if (currentName.isNotEmpty() && currentPrice > 0) {\r\n                results.add(OcrResult(currentName, currentQuantity, currentPrice))\r\n            }\r\n        }\r\n        \r\n        return results\r\n    }\r\n} 
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt	(revision c190834e9c68e52825db49709cd4ca238cbfe93d)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt	(date 1748581607904)
+@@ -14,6 +14,12 @@
+ import java.util.*
+ import android.util.Base64
+ import java.util.UUID
++import okhttp3.MediaType.Companion.toMediaTypeOrNull
++import okhttp3.MultipartBody
++import okhttp3.RequestBody
++import okhttp3.RequestBody.Companion.asRequestBody
++import com.google.gson.Gson
++import android.util.Log
+ 
+ class OcrRepository {
+     companion object {
+@@ -23,10 +29,11 @@
+     // 영수증 이미지를 분석하여 상품 정보 추출
+     suspend fun analyzeReceipt(uri: Uri): Result<List<OcrResult>> {
+         return try {
+-            val imageBytes = File(uri.path!!).readBytes()
+-            val base64Image = Base64.encodeToString(imageBytes, Base64.NO_WRAP)
+-            
+-            val request = OcrRequest(
++            val imageFile = File(uri.path!!)
++            val imageRequestBody = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
++            val imagePart = MultipartBody.Part.createFormData("file", imageFile.name, imageRequestBody)
++
++            val requestJson = OcrRequest(
+                 version = "V2",
+                 requestId = UUID.randomUUID().toString(),
+                 timestamp = System.currentTimeMillis(),
+@@ -37,25 +44,50 @@
+                     )
+                 )
+             )
++            val messageBody = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), Gson().toJson(requestJson))
+ 
+-            val response = OcrApiServer.apiService.analyzeReceipt(request)
+-            
++            // 요청 로깅
++            Log.d("OCR_REQUEST", "Message: ${Gson().toJson(requestJson)}")
++            Log.d("OCR_REQUEST", "File: ${imageFile.name}, Size: ${imageFile.length()} bytes")
++
++            val response = OcrApiServer.apiService.analyzeReceipt(messageBody, imagePart)
++
+             if (response.isSuccessful) {
+                 val ocrResponse = response.body()
++                // OCR 응답 raw JSON 로그로 출력
++                Log.d("OCR_RESPONSE", "Raw Response: ${Gson().toJson(ocrResponse)}")
++                
+                 if (ocrResponse != null) {
++                    // inferResult 확인
++                    ocrResponse.images.firstOrNull()?.let { image ->
++                        Log.d("OCR_RESULT", "inferResult: ${image.inferResult}")
++                        Log.d("OCR_RESULT", "message: ${image.message}")
++                        Log.d("OCR_RESULT", "validationResult: ${image.validationResult}")
++                    }
++
+                     val results = parseOcrResponse(ocrResponse)
+                     if (results.isNotEmpty()) {
++                        Log.d("OCR_RESULT", "Parsed Items: ${results.size}")
++                        results.forEach { item ->
++                            Log.d("OCR_ITEM", "Name: ${item.name}, Quantity: ${item.quantity}, Price: ${item.price}")
++                        }
+                         Result.success(results)
+                     } else {
++                        Log.e("OCR_ERROR", "No items found in response")
+                         Result.failure(Exception("영수증에서 상품 정보를 찾을 수 없습니다."))
+                     }
+                 } else {
++                    Log.e("OCR_ERROR", "Response body is null")
+                     Result.failure(Exception("응답 데이터가 없습니다."))
+                 }
+             } else {
+-                Result.failure(Exception("OCR 분석에 실패했습니다."))
++                // 실패 응답도 로그로 출력
++                val errorBody = response.errorBody()?.string()
++                Log.e("OCR_ERROR", "Error Response: $errorBody")
++                Result.failure(Exception("OCR 분석에 실패했습니다. (${response.code()})"))
+             }
+         } catch (e: Exception) {
++            Log.e("OCR_EXCEPTION", "Exception: ${e.message}", e)
+             Result.failure(e)
+         }
+     }
+@@ -90,46 +122,54 @@
+     private fun parseOcrResponse(response: OcrApiResponse): List<OcrResult> {
+         val results = mutableListOf<OcrResult>()
+         
+-        response.images.firstOrNull()?.fields?.let { fields ->
+-            var currentName = ""
+-            var currentQuantity = 0
+-            var currentPrice = 0
++        response.images.firstOrNull()?.receipt?.result?.items?.forEach { item ->
++            val name = item.name.text
++            val quantity = item.count.formatted.value.toIntOrNull() ?: 1
++            val price = item.price.price.formatted.value.toIntOrNull() ?: 0
+             
+-            fields.forEach { field ->
+-                val text = field.inferText.trim()
+-                
+-                // 상품명 추출
+-                if (text.matches(Regex("^[가-힣a-zA-Z\\s]+$"))) {
+-                    if (currentName.isNotEmpty() && currentPrice > 0) {
+-                        results.add(OcrResult(currentName, currentQuantity, currentPrice))
+-                    }
+-                    currentName = text
+-                    currentQuantity = 1
+-                }
+-                
+-                // 수량 추출
+-                if (text.matches(Regex("^\\d+$"))) {
+-                    val number = text.toIntOrNull()
+-                    if (number != null && number < 100) {
+-                        currentQuantity = number
+-                    }
+-                }
+-                
+-                // 가격 추출
+-                if (text.matches(Regex(".*\\d+$"))) {
+-                    val price = text.replace(Regex("[^0-9]"), "").toIntOrNull()
+-                    if (price != null && price > 0) {
+-                        currentPrice = price
+-                    }
+-                }
+-            }
+-            
+-            // 마지막 상품 정보 저장
+-            if (currentName.isNotEmpty() && currentPrice > 0) {
+-                results.add(OcrResult(currentName, currentQuantity, currentPrice))
++            if (name.isNotEmpty() && price > 0) {
++                results.add(OcrResult(name, quantity, price))
+             }
+         }
+         
+         return results
+     }
++
++    // OCR 전체 결과를 raw JSON으로 반환 (테스트용)
++    suspend fun analyzeReceiptRaw(uri: Uri): Result<String> {
++        return try {
++            val imageFile = File(uri.path!!)
++            val imageRequestBody = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
++            val imagePart = MultipartBody.Part.createFormData("file", imageFile.name, imageRequestBody)
++
++            val requestJson = OcrRequest(
++                version = "V2",
++                requestId = UUID.randomUUID().toString(),
++                timestamp = System.currentTimeMillis(),
++                images = listOf(
++                    OcrImage(
++                        format = "jpg",
++                        name = "image"
++                    )
++                )
++            )
++            val messageBody = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), Gson().toJson(requestJson))
++
++            val response = OcrApiServer.apiService.analyzeReceipt(messageBody, imagePart)
++            Log.d("OCR_RESPONSE", "isSuccessful: ${response.isSuccessful}")
++            if (response.isSuccessful) {
++                val ocrResponse = response.body()
++                val rawJson = Gson().toJson(ocrResponse)
++                Log.d("OCR_RESPONSE", "Raw: $rawJson")
++                Result.success(rawJson)
++            } else {
++                val errorBody = response.errorBody()?.string()
++                Log.e("OCR_ERROR", "Error: $errorBody")
++                Result.failure(Exception("OCR 분석에 실패했습니다. (${response.code()})\n$errorBody"))
++            }
++        } catch (e: Exception) {
++            Log.e("OCR_ERROR", "Exception: ${e.message}", e)
++            Result.failure(e)
++        }
++    }
+ } 
+\ No newline at end of file
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/network/OcrApiService.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.network\r\n\r\nimport com.glowstudio.android.blindsjn.feature.ocr.model.*\r\nimport retrofit2.Response\r\nimport retrofit2.http.*\r\n\r\ninterface OcrApiService {\r\n    // 영수증 이미지 분석 API\r\n    @POST(\"document/receipt\")\r\n    suspend fun analyzeReceipt(\r\n        @Body request: OcrRequest\r\n    ): Response<OcrApiResponse>\r\n\r\n    // OCR 분석 결과 저장 API\r\n    @POST(\"api_save_ocr_result.php\")\r\n    suspend fun saveOcrResult(@Body request: OcrSaveRequest): OcrSaveResponse\r\n}\r\n\r\ndata class OcrRequest(\r\n    val version: String,\r\n    val requestId: String,\r\n    val timestamp: Long,\r\n    val images: List<OcrImage>\r\n)\r\n\r\ndata class OcrImage(\r\n    val format: String,\r\n    val name: String\r\n)\r\n\r\ndata class OcrSaveRequest(\r\n    val date: String,\r\n    val items: List<OcrItem>\r\n)\r\n\r\ndata class OcrItem(\r\n    val name: String,\r\n    val quantity: Int,\r\n    val price: Int\r\n)\r\n\r\ndata class OcrSaveResponse(\r\n    val status: String,\r\n    val message: String,\r\n    val data: OcrSaveData?\r\n)\r\n\r\ndata class OcrSaveData(\r\n    val date: String,\r\n    val total_sales_amount: Double,\r\n    val total_margin_amount: Double,\r\n    val day_of_week: String\r\n) 
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/network/OcrApiService.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/network/OcrApiService.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/network/OcrApiService.kt	(revision c190834e9c68e52825db49709cd4ca238cbfe93d)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/network/OcrApiService.kt	(date 1748575134540)
+@@ -3,12 +3,16 @@
+ import com.glowstudio.android.blindsjn.feature.ocr.model.*
+ import retrofit2.Response
+ import retrofit2.http.*
++import okhttp3.MultipartBody
++import okhttp3.RequestBody
+ 
+ interface OcrApiService {
+     // 영수증 이미지 분석 API
++    @Multipart
+     @POST("document/receipt")
+     suspend fun analyzeReceipt(
+-        @Body request: OcrRequest
++        @Part("message") message: RequestBody,
++        @Part file: MultipartBody.Part
+     ): Response<OcrApiResponse>
+ 
+     // OCR 분석 결과 저장 API
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/viewmodel/CameraViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.viewmodel\r\n\r\nimport android.net.Uri\r\nimport androidx.lifecycle.ViewModel\r\nimport androidx.lifecycle.viewModelScope\r\nimport com.glowstudio.android.blindsjn.feature.ocr.model.OcrResult\r\nimport com.glowstudio.android.blindsjn.feature.ocr.repository.OcrRepository\r\nimport kotlinx.coroutines.flow.MutableStateFlow\r\nimport kotlinx.coroutines.flow.StateFlow\r\nimport kotlinx.coroutines.flow.asStateFlow\r\nimport kotlinx.coroutines.launch\r\n\r\nclass CameraViewModel : ViewModel() {\r\n    private val ocrRepository = OcrRepository()\r\n    \r\n    private val _ocrResults = MutableStateFlow<List<OcrResult>>(emptyList())\r\n    val ocrResults: StateFlow<List<OcrResult>> = _ocrResults.asStateFlow()\r\n\r\n    private val _isLoading = MutableStateFlow(false)\r\n    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()\r\n\r\n    private val _error = MutableStateFlow<String?>(null)\r\n    val error: StateFlow<String?> = _error.asStateFlow()\r\n\r\n    private val _saveSuccess = MutableStateFlow(false)\r\n    val saveSuccess: StateFlow<Boolean> = _saveSuccess.asStateFlow()\r\n\r\n    fun processImage(uri: Uri) {\r\n        viewModelScope.launch {\r\n            _isLoading.value = true\r\n            _error.value = null\r\n            \r\n            try {\r\n                val results = ocrRepository.analyzeReceipt(uri)\r\n                results.fold(\r\n                    onSuccess = { ocrResults ->\r\n                        _ocrResults.value = ocrResults\r\n                    },\r\n                    onFailure = { e ->\r\n                        _error.value = e.message ?: \"영수증 분석 중 오류가 발생했습니다.\"\r\n                    }\r\n                )\r\n            } catch (e: Exception) {\r\n                _error.value = e.message ?: \"영수증 분석 중 오류가 발생했습니다.\"\r\n            } finally {\r\n                _isLoading.value = false\r\n            }\r\n        }\r\n    }\r\n\r\n    fun updateOcrResult(index: Int, result: OcrResult) {\r\n        val currentResults = _ocrResults.value.toMutableList()\r\n        if (index in currentResults.indices) {\r\n            currentResults[index] = result\r\n            _ocrResults.value = currentResults\r\n        }\r\n    }\r\n\r\n    fun saveOcrResults() {\r\n        viewModelScope.launch {\r\n            _isLoading.value = true\r\n            _error.value = null\r\n            _saveSuccess.value = false\r\n\r\n            try {\r\n                ocrRepository.saveOcrResults(_ocrResults.value)\r\n                    .fold(\r\n                        onSuccess = {\r\n                            _saveSuccess.value = true\r\n                        },\r\n                        onFailure = { e ->\r\n                            _error.value = e.message ?: \"결과 저장 중 오류가 발생했습니다.\"\r\n                        }\r\n                    )\r\n            } catch (e: Exception) {\r\n                _error.value = e.message ?: \"결과 저장 중 오류가 발생했습니다.\"\r\n            } finally {\r\n                _isLoading.value = false\r\n            }\r\n        }\r\n    }\r\n\r\n    fun getTotalAmount(): Int {\r\n        return _ocrResults.value.sumOf { it.price * it.quantity }\r\n    }\r\n\r\n    fun clearResults() {\r\n        _ocrResults.value = emptyList()\r\n        _error.value = null\r\n        _saveSuccess.value = false\r\n    }\r\n} 
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/viewmodel/CameraViewModel.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/viewmodel/CameraViewModel.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/viewmodel/CameraViewModel.kt	(revision c190834e9c68e52825db49709cd4ca238cbfe93d)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/viewmodel/CameraViewModel.kt	(date 1748578270448)
+@@ -25,6 +25,9 @@
+     private val _saveSuccess = MutableStateFlow(false)
+     val saveSuccess: StateFlow<Boolean> = _saveSuccess.asStateFlow()
+ 
++    private val _ocrRawResult = MutableStateFlow<String?>(null)
++    val ocrRawResult: StateFlow<String?> = _ocrRawResult.asStateFlow()
++
+     fun processImage(uri: Uri) {
+         viewModelScope.launch {
+             _isLoading.value = true
+@@ -47,6 +50,25 @@
+             }
+         }
+     }
++
++    fun processImageRaw(uri: Uri) {
++        viewModelScope.launch {
++            _isLoading.value = true
++            _error.value = null
++            _ocrRawResult.value = null
++            try {
++                val result = ocrRepository.analyzeReceiptRaw(uri)
++                result.fold(
++                    onSuccess = { raw -> _ocrRawResult.value = raw },
++                    onFailure = { e -> _error.value = e.message ?: "영수증 분석 중 오류가 발생했습니다." }
++                )
++            } catch (e: Exception) {
++                _error.value = e.message ?: "영수증 분석 중 오류가 발생했습니다."
++            } finally {
++                _isLoading.value = false
++            }
++        }
++    }
+ 
+     fun updateOcrResult(index: Int, result: OcrResult) {
+         val currentResults = _ocrResults.value.toMutableList()
