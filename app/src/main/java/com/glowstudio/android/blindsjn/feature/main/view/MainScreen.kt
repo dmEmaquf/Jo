@@ -58,7 +58,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
@@ -329,7 +333,7 @@ fun SearchTagScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 72.dp) // FAB 공간 확보
+                    .padding(bottom = 0.dp) // FAB 공간 없음
             ) {
                 // 1~2. 상단 서치바 + 선택된 태그를 파란색 배경 Column으로 묶음
                 Column(
@@ -364,7 +368,9 @@ fun SearchTagScreen(
                                 )
                                 TextField(
                                     value = searchText,
-                                    onValueChange = { searchText = it },
+                                    onValueChange = { 
+                                        searchText = it
+                                    },
                                     placeholder = { Text("궁금한 게시글 제목을 입력하세요", color = MaterialTheme.colorScheme.primary) },
                                     colors = TextFieldDefaults.colors(
                                         focusedContainerColor = Color.Transparent,
@@ -381,13 +387,23 @@ fun SearchTagScreen(
                                         .padding(start = 8.dp, end = 8.dp),
                                     textStyle = MaterialTheme.typography.bodyLarge,
                                     singleLine = true,
-                                    maxLines = 1
+                                    maxLines = 1,
+                                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+                                    keyboardActions = KeyboardActions(
+                                        onSearch = { 
+                                            onApply(searchText, selectedTags)
+                                            onClose()
+                                        }
+                                    )
                                 )
                             }
                         }
                         // X(닫기) 버튼
                         IconButton(
-                            onClick = onClose,
+                            onClick = {
+                                onApply("", selectedTags)
+                                onClose()
+                            },
                             modifier = Modifier
                                 .padding(start = 8.dp)
                                 .size(32.dp)
@@ -419,7 +435,9 @@ fun SearchTagScreen(
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                     IconButton(
-                                        onClick = { selectedTags = selectedTags - tag },
+                                        onClick = { 
+                                            selectedTags = selectedTags - tag
+                                        },
                                         modifier = Modifier.size(16.dp)
                                     ) {
                                         Icon(
@@ -448,7 +466,11 @@ fun SearchTagScreen(
                         val selected = selectedTags.contains(tag)
                         Surface(
                             onClick = {
-                                selectedTags = if (selected) selectedTags - tag else selectedTags + tag
+                                if (selected) {
+                                    selectedTags = selectedTags - tag
+                                } else if (!selectedTags.contains(tag)) {
+                                    selectedTags = selectedTags + tag
+                                }
                             },
                             shape = RoundedCornerShape(20.dp),
                             color = Color.White,
@@ -466,16 +488,6 @@ fun SearchTagScreen(
                         }
                     }
                 }
-            }
-            // 5. 하단 FloatingActionButton(검색)
-            FloatingActionButton(
-                onClick = { onApply(searchText, selectedTags) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(24.dp)
-            ) {
-                Icon(Icons.Filled.Search, contentDescription = "검색", tint = Color.White)
             }
         }
     }
