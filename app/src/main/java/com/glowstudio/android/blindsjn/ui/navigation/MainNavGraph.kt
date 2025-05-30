@@ -70,7 +70,7 @@ fun NavGraphBuilder.mainNavGraph(
                     onMoreClick = { /* 더보기 */ },
                     onNotificationClick = { /* 알림 */ }
                 )
-                BoardScreen(navController = navController)
+                BoardScreen(navController = navController, onSearchClick = { })
             }
 
             composable(
