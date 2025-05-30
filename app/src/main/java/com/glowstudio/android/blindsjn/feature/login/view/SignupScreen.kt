@@ -22,25 +22,23 @@ import androidx.compose.ui.unit.dp
 
 
 import android.util.Log
-import com.glowstudio.android.blindsjn.data.network.InternalServer
+import com.glowstudio.android.blindsjn.data.network.Network
 import com.glowstudio.android.blindsjn.data.model.SignupRequest
 import kotlinx.coroutines.launch
 
 //서버 클라이언트 간 회원가입 실행 함수
-suspend fun signup(phoneNumber: String, password: String): Boolean {
-    // 서버에 보낼 요청 객체 생성
-    val request = SignupRequest(phoneNumber, password)
-
+suspend fun signup(request: SignupRequest): Boolean {
     return try {
         // 서버에 회원가입 요청
-        val response = InternalServer.api.signup(request)
+        val response = Network.apiService.signup(request)
+        Log.d("SignupScreen", "Signup request - phone: ${request.phoneNumber}")
+        Log.d("SignupScreen", "Signup response code: ${response.code()}")
+        Log.d("SignupScreen", "Signup response body: ${response.body()}")
 
         // 응답 처리
         if (response.isSuccessful) {
             val result = response.body()
             Log.d("SignupScreen", "Signup response: $result")
-
-            // 서버 응답이 성공이면 true 반환
             result?.status == "success"
         } else {
             // 오류 로그 출력
@@ -56,7 +54,7 @@ suspend fun signup(phoneNumber: String, password: String): Boolean {
 
 @Composable
 fun SignupScreen(
-    onSignupClick: (String, String) -> Unit, // 전화번호, 비밀번호 전달
+    onSignupClick: (String, String) -> Unit,
     onBackToLoginClick: () -> Unit
 ) {
     // 상태 변수
@@ -66,6 +64,7 @@ fun SignupScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     Column(
@@ -85,7 +84,7 @@ fun SignupScreen(
         // 전화번호 입력
         OutlinedTextField(
             value = phoneNumber,
-            onValueChange = { phoneNumber = it.filter { char -> char.isDigit() } }, // 숫자만 입력
+            onValueChange = { phoneNumber = it.filter { char -> char.isDigit() } },
             label = { Text("전화번호") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
@@ -162,18 +161,35 @@ fun SignupScreen(
         Button(
             onClick = {
                 coroutineScope.launch {
-                    val success = signup(phoneNumber, password)
+                    isLoading = true
+                    errorMessage = ""
+                    try {
+                        val request = SignupRequest(phoneNumber, password)
+                        val success = signup(request)
                     if (success) {
-                        onSignupClick(phoneNumber, password) // 회원가입 성공 시 동작
+                            onSignupClick(phoneNumber, password)
                     } else {
-                        errorMessage = "회원가입에 실패했습니다. 다시 시도해주세요." // 회원가입 실패 시 동작
+                            errorMessage = "회원가입에 실패했습니다. 다시 시도해주세요."
+                        }
+                    } catch (e: Exception) {
+                        errorMessage = "네트워크 오류가 발생했습니다. 다시 시도해주세요."
+                        Log.e("SignupScreen", "Error during signup: ${e.message}", e)
+                    } finally {
+                        isLoading = false
                     }
                 }
             },
-            enabled = phoneNumber.isNotBlank() && password.isNotBlank() && password == confirmPassword,
+            enabled = !isLoading && phoneNumber.isNotBlank() && password.isNotBlank() && password == confirmPassword,
             modifier = Modifier.fillMaxWidth()
         ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
             Text("회원가입")
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))

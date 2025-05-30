@@ -29,7 +29,12 @@ import com.google.gson.Gson
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 import com.glowstudio.android.blindsjn.feature.home.view.NewsDetailScreen
 import com.glowstudio.android.blindsjn.data.model.Article
+import com.glowstudio.android.blindsjn.data.network.Network
+import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementApi
+import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementRepository
+import com.glowstudio.android.blindsjn.feature.paymanagement.viewmodel.PayManagementViewModel
 import com.glowstudio.android.blindsjn.feature.paymanagement.view.PayManagementScreen
+import androidx.compose.ui.platform.LocalContext
 import com.glowstudio.android.blindsjn.feature.foodcost.view.FoodCostScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterRecipeScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterIngredientScreen
@@ -38,6 +43,8 @@ import com.glowstudio.android.blindsjn.feature.foodcost.view.EditRecipeScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.IngredientListScreen
 import com.glowstudio.android.blindsjn.feature.main.model.NavigationState
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.BottomBarViewModel
+import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
+import com.glowstudio.android.blindsjn.feature.home.view.NewsMainScreen
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
@@ -49,6 +56,13 @@ fun MainScreen(
     navigationViewModel: NavigationViewModel = viewModel(),
     bottomBarViewModel: BottomBarViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val payManagementViewModel = remember {
+        val api = Network.payManagementApiService
+        val repository = PayManagementRepository(api, context)
+        PayManagementViewModel(repository)
+    }
+
     // 하나의 NavController 생성
     val navController = rememberNavController()
     // TopBarViewModel에서 상단바 상태를 관찰
@@ -112,7 +126,9 @@ fun MainScreen(
                     composable("board") { BoardScreen(navController) }
                     composable("paymanagement") {
                         PayManagementScreen(
+                            viewModel = payManagementViewModel,
                             onNavigateToFoodCost = { navController.navigate("foodcoast") },
+                            onNavigateToSalesInput = { /* TODO: Implement Sales Input navigation */ },
                             onNavigateToOcr = { navController.navigate("ocr") }
                         )
                     }
@@ -161,8 +177,12 @@ fun MainScreen(
                         BoardDetailScreen(navController, title)
                     }
                     composable(
-                        route = "writePost?tags={tags}",
+                        route = "writePost/{category}/{tags}",
                         arguments = listOf(
+                            navArgument("category") {
+                                type = NavType.StringType
+                                defaultValue = ""
+                            },
                             navArgument("tags") {
                                 type = NavType.StringType
                                 nullable = true
@@ -170,8 +190,9 @@ fun MainScreen(
                             }
                         )
                     ) { backStackEntry ->
+                        val category = backStackEntry.arguments?.getString("category") ?: ""
                         val tags = backStackEntry.arguments?.getString("tags")
-                        WritePostScreen(navController, tags)
+                        WritePostScreen(navController, category, tags)
                     }
                     composable(
                         route = "postDetail/{postId}",
@@ -194,39 +215,22 @@ fun MainScreen(
                         )
                     }
                     composable("news_detail/{articleJson}") { backStackEntry ->
-                        val articleJson = backStackEntry.arguments?.getString("articleJson")
-                        val article = try {
-                            Gson().fromJson(URLDecoder.decode(articleJson, "UTF-8"), Article::class.java)
-                        } catch (e: Exception) {
-                            null
-                        }
-
-                        if (article != null) {
-                            NewsDetailScreen(
-                                title = article.title ?: "제목 없음",
-                                content = article.content,
-                                description = article.description,
-                                imageUrl = article.urlToImage,
-                                link = article.link
-                            )
-                        }
-                    }
-                    composable("businessCertification") {
-                        com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen(
-                            navController = navController,
-                            onConfirm = { phone, certNumber, industry ->
-                                // 인증 완료 후 뒤로가기 또는 원하는 화면 이동
-                                navController.popBackStack()
-                            }
+                        val articleJson = backStackEntry.arguments?.getString("articleJson") ?: ""
+                        val article = Gson().fromJson(articleJson, Article::class.java)
+                        NewsDetailScreen(
+                            title = article.title ?: "",
+                            content = article.content,
+                            description = article.description,
+                            imageUrl = article.urlToImage,
+                            link = article.link
                         )
                     }
-                    composable("ocr") {
-                        com.glowstudio.android.blindsjn.feature.paymanagement.view.OcrScreen()
+                    composable("businessCertification") {
+                        BusinessCertificationScreen(
+                            onConfirm = { /* TODO: 인증 성공 처리 */ },
+                            onDismiss = { navController.navigateUp() }
+                        )
                     }
-                    mainNavGraph(
-                        navController = navController,
-                        topBarViewModel = topBarViewModel
-                    )
                 }
             }
         }

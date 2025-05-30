@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -21,16 +22,21 @@ import com.glowstudio.android.blindsjn.ui.theme.*
 import com.glowstudio.android.blindsjn.feature.board.view.PostBottomSheet
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostBottomSheetViewModel
 import java.net.URLEncoder
+import com.glowstudio.android.blindsjn.data.network.UserManager
+import androidx.compose.runtime.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BoardDetailScreen(navController: NavController, title: String) {
+    val context = LocalContext.current
     val viewModel: PostViewModel = viewModel()
     val posts by viewModel.posts.collectAsState()
-    val statusMessage by viewModel.statusMessage.collectAsState()
+    val statusMessage by viewModel.statusMessage.collectAsState(initial = "")
+    val coroutineScope = rememberCoroutineScope()
+    val userId by UserManager.userId.collectAsState(initial = -1)
 
     var selectedCategory by remember { mutableStateOf("모든 분야") }
-    val categories = listOf("모든 분야", "카페", "식당", "배달 전문", "패스트푸드", "호텔")
+    val categories = listOf("모든 분야", "음식점 및 카페", "쇼핑 및 리테일", "건강 및 의료", "숙박 및 여행", "교육 및 학습","여가 및 오락","금융 및 공공기관")
 
     val postBottomSheetViewModel: PostBottomSheetViewModel = viewModel()
     var showSheet by remember { mutableStateOf(false) }
@@ -84,17 +90,17 @@ fun BoardDetailScreen(navController: NavController, title: String) {
                     selectedCategory == "모든 분야" || post.category.contains(selectedCategory)
                 }
 
-                if (!statusMessage.isNullOrEmpty()) {
+                if (statusMessage.isNotEmpty()) {
                     Text(
-                        text = statusMessage ?: "",
+                        text = statusMessage,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(16.dp)
                     )
                 }
 
-                // TODO: 실제 로그인 유저 id로 교체 필요
-                val userId = 1234
-                PostList(navController, filteredPosts, viewModel, userId)
+                if (userId != -1) {
+                    PostList(navController, filteredPosts, viewModel, userId)
+                }
             }
         }
     )

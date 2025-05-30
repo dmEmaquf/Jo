@@ -3,5 +3,7 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">wonrdc.duckdns.org</domain>
         <domain includeSubdomains="true">wonrdc.iptime.org</domain>
+        <domain includeSubdomains="true">192.168.0.10</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
     </domain-config>
 </network-security-config>
