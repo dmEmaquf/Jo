@@ -164,4 +164,8 @@ interface ApiService {
     // 🔹 마진
     @GET("Recipe_margin_summary.php")
     suspend fun getMarginSummary(@Query("business_id") businessId: Int): Response<ApiResponse<MarginData>>
+
+    // 🔹 매출 저장
+    @POST("api_save_daily_sales_simple.php")
+    suspend fun saveDailySales(@Body request: DailySalesRequest): Response<DailySalesResponse>
 } 

@@ -1,0 +1,433 @@
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/OcrScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.view\r\n\r\nimport android.graphics.BitmapFactory\r\nimport androidx.compose.foundation.Canvas\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.shape.CircleShape\r\nimport androidx.compose.material3.*\r\nimport androidx.compose.runtime.*\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.draw.clip\r\nimport androidx.compose.ui.geometry.Offset\r\nimport androidx.compose.ui.platform.LocalContext\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.text.style.TextAlign\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\nimport androidx.compose.ui.tooling.preview.Preview\r\nimport androidx.lifecycle.viewmodel.compose.viewModel\r\nimport com.glowstudio.android.blindsjn.ui.theme.*\r\nimport com.glowstudio.android.blindsjn.feature.ocr.viewmodel.OcrViewModel\r\nimport com.glowstudio.android.blindsjn.feature.ocr.camera.CameraPreview\r\nimport com.glowstudio.android.blindsjn.feature.ocr.camera.OcrCameraManager\r\nimport com.glowstudio.android.blindsjn.data.network.PermissionManager\r\n\r\n@Composable\r\nfun OcrScreen(\r\n    viewModel: OcrViewModel = viewModel()\r\n) {\r\n    val context = LocalContext.current\r\n    val uiState by viewModel.uiState.collectAsState()\r\n    var cameraManager by remember { mutableStateOf<OcrCameraManager?>(null) }\r\n    val hasCameraPermission by PermissionManager.hasCameraPermission.collectAsState()\r\n\r\n    Box(\r\n        modifier = Modifier\r\n            .fillMaxSize()\r\n            .background(BackgroundWhite)\r\n    ) {\r\n        if (hasCameraPermission) {\r\n            // Camera Preview as background\r\n            CameraPreview(\r\n                modifier = Modifier.fillMaxSize(),\r\n                onCameraReady = { manager ->\r\n                    cameraManager = manager\r\n                }\r\n            )\r\n\r\n            // Frame overlay\r\n            Box(\r\n                modifier = Modifier\r\n                    .align(Alignment.TopCenter)\r\n                    .padding(top = 48.dp)\r\n                    .size(width = 320.dp, height = 240.dp)  // 640x480의 1:2 비율\r\n            ) {\r\n                Canvas(modifier = Modifier.matchParentSize()) {\r\n                    val strokeWidth = 4.dp.toPx()\r\n                    val length = 40.dp.toPx()\r\n                    val w = size.width\r\n                    val h = size.height\r\n                    val color = Blue\r\n                    drawLine(color, Offset(0f, 0f), Offset(length, 0f), strokeWidth)\r\n                    drawLine(color, Offset(0f, 0f), Offset(0f, length), strokeWidth)\r\n                    drawLine(color, Offset(w, 0f), Offset(w - length, 0f), strokeWidth)\r\n                    drawLine(color, Offset(w, 0f), Offset(w, length), strokeWidth)\r\n                    drawLine(color, Offset(0f, h), Offset(0f, h - length), strokeWidth)\r\n                    drawLine(color, Offset(0f, h), Offset(length, h), strokeWidth)\r\n                    drawLine(color, Offset(w, h), Offset(w - length, h), strokeWidth)\r\n                    drawLine(color, Offset(w, h), Offset(w, h - length), strokeWidth)\r\n                }\r\n                Text(\r\n                    \"문서를 이 영역에 맞춰주세요.\",\r\n                    color = TextSecondary,\r\n                    fontSize = 18.sp,\r\n                    fontWeight = FontWeight.Medium,\r\n                    textAlign = TextAlign.Center,\r\n                    modifier = Modifier.align(Alignment.Center)\r\n                )\r\n            }\r\n\r\n            // Capture button\r\n            Button(\r\n                onClick = {\r\n                    cameraManager?.captureImage { imageBytes ->\r\n                        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)\r\n                        viewModel.processImage(bitmap)\r\n                    }\r\n                },\r\n                shape = CircleShape,\r\n                colors = ButtonDefaults.buttonColors(containerColor = Blue),\r\n                modifier = Modifier\r\n                    .align(Alignment.BottomCenter)\r\n                    .padding(bottom = 48.dp)\r\n                    .size(72.dp)\r\n                    .clip(CircleShape)\r\n            ) {}\r\n        } else {\r\n            // Permission not granted\r\n            Column(\r\n                modifier = Modifier\r\n                    .fillMaxSize()\r\n                    .padding(16.dp),\r\n                horizontalAlignment = Alignment.CenterHorizontally,\r\n                verticalArrangement = Arrangement.Center\r\n            ) {\r\n                Text(\r\n                    text = \"카메라 권한이 필요합니다\",\r\n                    style = MaterialTheme.typography.titleLarge,\r\n                    color = TextPrimary\r\n                )\r\n                Spacer(modifier = Modifier.height(16.dp))\r\n                Text(\r\n                    text = \"앱 설정에서 카메라 권한을 허용해주세요\",\r\n                    style = MaterialTheme.typography.bodyMedium,\r\n                    color = TextSecondary\r\n                )\r\n            }\r\n        }\r\n\r\n        // Loading indicator\r\n        if (uiState.isLoading) {\r\n            CircularProgressIndicator(\r\n                modifier = Modifier.align(Alignment.Center)\r\n            )\r\n        }\r\n\r\n        // Error message\r\n        uiState.error?.let { error ->\r\n            Text(\r\n                text = error,\r\n                color = MaterialTheme.colorScheme.error,\r\n                modifier = Modifier\r\n                    .align(Alignment.Center)\r\n                    .padding(16.dp)\r\n            )\r\n        }\r\n    }\r\n}\r\n\r\n@Preview(showBackground = true)\r\n@Composable\r\nfun OcrScreenPreview() {\r\n    BlindSJNTheme {\r\n        OcrScreen()\r\n    }\r\n}\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/OcrScreen.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/OcrScreen.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/OcrScreen.kt	(revision 0c62a20d8680d4b6905a3a92f8820b8ba13b0a27)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/OcrScreen.kt	(date 1748614430844)
+@@ -17,6 +17,8 @@
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+ import androidx.compose.ui.tooling.preview.Preview
++import androidx.lifecycle.ViewModel
++import androidx.lifecycle.ViewModelProvider
+ import androidx.lifecycle.viewmodel.compose.viewModel
+ import com.glowstudio.android.blindsjn.ui.theme.*
+ import com.glowstudio.android.blindsjn.feature.ocr.viewmodel.OcrViewModel
+@@ -25,10 +27,13 @@
+ import com.glowstudio.android.blindsjn.data.network.PermissionManager
+ 
+ @Composable
+-fun OcrScreen(
+-    viewModel: OcrViewModel = viewModel()
+-) {
++fun OcrScreen() {
+     val context = LocalContext.current
++    val viewModel: OcrViewModel = viewModel(factory = object : ViewModelProvider.Factory {
++        override fun <T : ViewModel> create(modelClass: Class<T>): T {
++            return OcrViewModel(context) as T
++        }
++    })
+     val uiState by viewModel.uiState.collectAsState()
+     var cameraManager by remember { mutableStateOf<OcrCameraManager?>(null) }
+     val hasCameraPermission by PermissionManager.hasCameraPermission.collectAsState()
+@@ -95,6 +100,18 @@
+                     .size(72.dp)
+                     .clip(CircleShape)
+             ) {}
++
++            // Test button
++            Button(
++                onClick = { viewModel.testProcessImageFile() },
++                colors = ButtonDefaults.buttonColors(containerColor = Blue),
++                modifier = Modifier
++                    .align(Alignment.BottomEnd)
++                    .padding(bottom = 48.dp, end = 16.dp)
++            ) {
++                Text("테스트 이미지")
++            }
++
+         } else {
+             // Permission not granted
+             Column(
+Index: app/src/main/java/com/glowstudio/android/blindsjn/data/network/RetrofitInstance.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.data.network\r\n\r\n/**\r\n * URL 서버 통신 객체\r\n *\r\n *\r\n **/\r\n\r\nimport com.glowstudio.android.blindsjn.data.network.ApiService\r\nimport com.glowstudio.android.blindsjn.feature.ocr.api.NaverOcrApiService\r\nimport com.google.gson.GsonBuilder\r\nimport okhttp3.OkHttpClient\r\nimport okhttp3.logging.HttpLoggingInterceptor\r\nimport retrofit2.Response\r\nimport retrofit2.Retrofit\r\nimport retrofit2.converter.gson.GsonConverterFactory\r\nimport java.util.concurrent.TimeUnit\r\nimport retrofit2.http.GET\r\nimport retrofit2.http.Query\r\n\r\n// 네이버 뉴스 응답 모델\r\ndata class NaverNewsItem(\r\n    val title: String,\r\n    val originallink: String,\r\n    val link: String,\r\n    val description: String,\r\n    val pubDate: String\r\n)\r\n\r\ndata class NaverNewsResponse(\r\n    val items: List<NaverNewsItem>\r\n)\r\n\r\ninterface NaverNewsApiService {\r\n    @GET(\"v1/search/news.json\")\r\n    suspend fun searchNews(\r\n        @Query(\"query\") query: String,\r\n        @Query(\"display\") display: Int = 20,\r\n        @Query(\"start\") start: Int = 1,\r\n        @Query(\"sort\") sort: String = \"date\"\r\n    ): Response<NaverNewsResponse>\r\n}\r\n\r\n// 공통 네트워크 설정\r\nobject NetworkConfig {\r\n    const val INTERNAL_BASE_URL = \"http://wonrdc.iptime.org/\"\r\n    const val NAVER_BASE_URL = \"https://openapi.naver.com/\"\r\n    const val PUBLIC_API_BASE_URL = \"https://api.odcloud.kr/api/\"\r\n    const val NAVER_OCR_BASE_URL = \"https://d7cblqkw1o.apigw.ntruss.com/custom/v1/42447/02392618f64f8a5d3fd1004abc08eb2e9cd4a9eba2e80c21b5ccdf7fa7b73df4/\"\r\n\r\n    private val defaultClient = OkHttpClient.Builder()\r\n        .addInterceptor(HttpLoggingInterceptor().apply {\r\n            level = HttpLoggingInterceptor.Level.BODY\r\n        })\r\n            .connectTimeout(30, TimeUnit.SECONDS)\r\n            .readTimeout(30, TimeUnit.SECONDS)\r\n            .writeTimeout(30, TimeUnit.SECONDS)\r\n            .build()\r\n\r\n    private val naverClient = OkHttpClient.Builder()\r\n        .addInterceptor { chain ->\r\n            val request = chain.request().newBuilder()\r\n                .addHeader(\"X-Naver-Client-Id\", \"ztMJBFDCJqlNxnax0Hrj\")\r\n                .addHeader(\"X-Naver-Client-Secret\", \"GrIMlIGxdu\")\r\n                .build()\r\n            chain.proceed(request)\r\n        }\r\n        .connectTimeout(30, TimeUnit.SECONDS)\r\n        .readTimeout(30, TimeUnit.SECONDS)\r\n        .writeTimeout(30, TimeUnit.SECONDS)\r\n        .build()\r\n\r\n    private val naverOcrClient = OkHttpClient.Builder()\r\n        .addInterceptor { chain ->\r\n            val request = chain.request().newBuilder()\r\n                .addHeader(\"X-OCR-SECRET\", \"bmxVU1pnQUhxVFBKWnJlb3RkaE9ybnRId0NkQ3lOQ3Q=\")\r\n                .build()\r\n            chain.proceed(request)\r\n        }\r\n        .connectTimeout(30, TimeUnit.SECONDS)\r\n        .readTimeout(30, TimeUnit.SECONDS)\r\n        .writeTimeout(30, TimeUnit.SECONDS)\r\n        .build()\r\n\r\n    val defaultClientInstance: OkHttpClient\r\n        get() = defaultClient\r\n\r\n    val naverClientInstance: OkHttpClient\r\n        get() = naverClient\r\n\r\n    val naverOcrClientInstance: OkHttpClient\r\n        get() = naverOcrClient\r\n}\r\n\r\n// 네이버 뉴스 서버용 Retrofit 인스턴스\r\nobject NaverNewsServer {\r\n    private val retrofit = Retrofit.Builder()\r\n            .baseUrl(NetworkConfig.NAVER_BASE_URL)\r\n        .client(NetworkConfig.naverClientInstance)\r\n            .addConverterFactory(GsonConverterFactory.create())\r\n            .build()\r\n\r\n    val apiService: NaverNewsApiService = retrofit.create(NaverNewsApiService::class.java)\r\n}\r\n\r\n// 내부 서버\r\nobject InternalServer {\r\n    private val retrofit = Retrofit.Builder()\r\n            .baseUrl(NetworkConfig.INTERNAL_BASE_URL)\r\n        .client(NetworkConfig.defaultClientInstance)\r\n            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))\r\n            .build()\r\n\r\n    val api: ApiService = retrofit.create(ApiService::class.java)\r\n}\r\n\r\n// 공공 API 서버용 Retrofit 인스턴스\r\nobject PublicApiRetrofitInstance {\r\n    private val retrofit = Retrofit.Builder()\r\n            .baseUrl(NetworkConfig.PUBLIC_API_BASE_URL)\r\n        .client(NetworkConfig.defaultClientInstance)\r\n            .addConverterFactory(GsonConverterFactory.create())\r\n            .build()\r\n\r\n    val api: ApiService = retrofit.create(ApiService::class.java)\r\n}\r\n\r\n// Naver OCR 서버용 Retrofit 인스턴스\r\nobject NaverOcrServer {\r\n    private val retrofit = Retrofit.Builder()\r\n        .baseUrl(NetworkConfig.NAVER_OCR_BASE_URL)\r\n        .client(NetworkConfig.naverOcrClientInstance)\r\n        .addConverterFactory(GsonConverterFactory.create())\r\n        .build()\r\n\r\n    val apiService: NaverOcrApiService = retrofit.create(NaverOcrApiService::class.java)\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/data/network/RetrofitInstance.kt b/app/src/main/java/com/glowstudio/android/blindsjn/data/network/RetrofitInstance.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/data/network/RetrofitInstance.kt	(revision 0c62a20d8680d4b6905a3a92f8820b8ba13b0a27)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/data/network/RetrofitInstance.kt	(date 1748610650531)
+@@ -46,16 +46,16 @@
+     const val INTERNAL_BASE_URL = "http://wonrdc.iptime.org/"
+     const val NAVER_BASE_URL = "https://openapi.naver.com/"
+     const val PUBLIC_API_BASE_URL = "https://api.odcloud.kr/api/"
+-    const val NAVER_OCR_BASE_URL = "https://d7cblqkw1o.apigw.ntruss.com/custom/v1/42447/02392618f64f8a5d3fd1004abc08eb2e9cd4a9eba2e80c21b5ccdf7fa7b73df4/"
++    const val NAVER_OCR_BASE_URL = "https://6tokqfp55h.apigw.ntruss.com/custom/v1/42411/4d9a076ebd69c217cfb9d34c123028b61b76d1d14e6b017ce365bc770e40ebdc/"
+ 
+     private val defaultClient = OkHttpClient.Builder()
+         .addInterceptor(HttpLoggingInterceptor().apply {
+             level = HttpLoggingInterceptor.Level.BODY
+         })
+-            .connectTimeout(30, TimeUnit.SECONDS)
+-            .readTimeout(30, TimeUnit.SECONDS)
+-            .writeTimeout(30, TimeUnit.SECONDS)
+-            .build()
++        .connectTimeout(30, TimeUnit.SECONDS)
++        .readTimeout(30, TimeUnit.SECONDS)
++        .writeTimeout(30, TimeUnit.SECONDS)
++        .build()
+ 
+     private val naverClient = OkHttpClient.Builder()
+         .addInterceptor { chain ->
+@@ -73,10 +73,14 @@
+     private val naverOcrClient = OkHttpClient.Builder()
+         .addInterceptor { chain ->
+             val request = chain.request().newBuilder()
+-                .addHeader("X-OCR-SECRET", "bmxVU1pnQUhxVFBKWnJlb3RkaE9ybnRId0NkQ3lOQ3Q=")
++                .addHeader("X-OCR-SECRET", "RktjZFZ5eXJ1TUptdWNyd3R1em1oclBzQURFeG52R20=")
++                .addHeader("Content-Type", "application/json")
+                 .build()
+             chain.proceed(request)
+         }
++        .addInterceptor(HttpLoggingInterceptor().apply {
++            level = HttpLoggingInterceptor.Level.BODY
++        })
+         .connectTimeout(30, TimeUnit.SECONDS)
+         .readTimeout(30, TimeUnit.SECONDS)
+         .writeTimeout(30, TimeUnit.SECONDS)
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.repository\r\n\r\nimport android.graphics.Bitmap\r\nimport com.glowstudio.android.blindsjn.feature.ocr.model.OcrResult\r\nimport kotlinx.coroutines.flow.Flow\r\n\r\ninterface OcrRepository {\r\n    suspend fun processImage(bitmap: Bitmap): Flow<OcrResult>\r\n    suspend fun saveOcrResult(result: OcrResult)\r\n    fun getOcrHistory(): Flow<List<OcrResult>>\r\n} 
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt	(revision 0c62a20d8680d4b6905a3a92f8820b8ba13b0a27)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepository.kt	(date 1748605315276)
+@@ -5,7 +5,7 @@
+ import kotlinx.coroutines.flow.Flow
+ 
+ interface OcrRepository {
+-    suspend fun processImage(bitmap: Bitmap): Flow<OcrResult>
++    suspend fun processImage(bitmap: Bitmap): OcrResult
+     suspend fun saveOcrResult(result: OcrResult)
+     fun getOcrHistory(): Flow<List<OcrResult>>
+ } 
+\ No newline at end of file
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepositoryImpl.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.repository\r\n\r\nimport android.graphics.Bitmap\r\nimport android.util.Base64\r\nimport android.util.Log\r\nimport com.glowstudio.android.blindsjn.data.network.NaverOcrServer\r\nimport com.glowstudio.android.blindsjn.feature.ocr.model.OcrImage\r\nimport com.glowstudio.android.blindsjn.feature.ocr.model.OcrRequest\r\nimport com.glowstudio.android.blindsjn.feature.ocr.model.OcrResult\r\nimport kotlinx.coroutines.flow.Flow\r\nimport kotlinx.coroutines.flow.flow\r\nimport java.io.ByteArrayOutputStream\r\nimport java.util.UUID\r\nimport java.lang.Runtime\r\n\r\nclass OcrRepositoryImpl : OcrRepository {\r\n    private val apiService = NaverOcrServer.apiService\r\n    private val TAG = \"OcrRepositoryImpl\"\r\n    \r\n    companion object {\r\n        private const val MAX_IMAGE_WIDTH = 640\r\n        private const val MAX_IMAGE_HEIGHT = 480\r\n        private const val JPEG_QUALITY = 70\r\n    }\r\n\r\n    private fun logMemoryUsage(tag: String) {\r\n        val runtime = Runtime.getRuntime()\r\n        val usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / 1024 / 1024\r\n        val maxMemory = runtime.maxMemory() / 1024 / 1024\r\n        Log.d(TAG, \"$tag - Memory Usage: $usedMemory MB / $maxMemory MB\")\r\n    }\r\n\r\n    override suspend fun processImage(bitmap: Bitmap): Flow<OcrResult> = flow {\r\n        var resizedBitmap: Bitmap? = null\r\n        var byteArrayOutputStream: ByteArrayOutputStream? = null\r\n        \r\n        try {\r\n            logMemoryUsage(\"Before processing\")\r\n            \r\n            // Resize bitmap if needed\r\n            resizedBitmap = if (bitmap.width > MAX_IMAGE_WIDTH || bitmap.height > MAX_IMAGE_HEIGHT) {\r\n                val scale = MAX_IMAGE_WIDTH.toFloat() / bitmap.width.coerceAtLeast(bitmap.height)\r\n                Bitmap.createScaledBitmap(\r\n                    bitmap,\r\n                    (bitmap.width * scale).toInt(),\r\n                    (bitmap.height * scale).toInt(),\r\n                    true\r\n                )\r\n            } else {\r\n                bitmap\r\n            }\r\n            logMemoryUsage(\"After resize\")\r\n\r\n            // Convert bitmap to base64 with reduced quality\r\n            byteArrayOutputStream = ByteArrayOutputStream()\r\n            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, byteArrayOutputStream)\r\n            val imageBytes = byteArrayOutputStream.toByteArray()\r\n            \r\n            if (imageBytes.isEmpty()) {\r\n                throw Exception(\"Failed to convert image to bytes\")\r\n            }\r\n            \r\n            val base64Image = Base64.encodeToString(imageBytes, Base64.NO_WRAP)\r\n            if (base64Image.isEmpty()) {\r\n                throw Exception(\"Failed to encode image to base64\")\r\n            }\r\n            logMemoryUsage(\"After base64 encoding\")\r\n\r\n            // Create OCR request with required fields\r\n            val request = OcrRequest(\r\n                version = \"V2\",\r\n                requestId = UUID.randomUUID().toString(),\r\n                timestamp = System.currentTimeMillis(),\r\n                images = listOf(\r\n                    OcrImage(\r\n                        format = \"jpg\",\r\n                        data = base64Image,\r\n                        name = \"image.jpg\"\r\n                    )\r\n                )\r\n            )\r\n\r\n            // Call Naver OCR API\r\n            val response = apiService.performOcr(request)\r\n            Log.d(TAG, \"OCR Response: $response\")\r\n\r\n            if (response.images.isNotEmpty()) {\r\n                val result = response.images[0]\r\n                if (result.inferResult == \"SUCCESS\") {\r\n                    val fields = result.fields\r\n                    if (fields.isNotEmpty()) {\r\n                        val text = fields.joinToString(\"\\n\") { it.inferText }\r\n                        val confidence = fields.map { it.inferConfidence }.average().toFloat()\r\n                        emit(OcrResult(text, confidence))\r\n                    } else {\r\n                        Log.e(TAG, \"No fields found in OCR result\")\r\n                        throw Exception(\"No text detected in image\")\r\n                    }\r\n                } else {\r\n                    Log.e(TAG, \"OCR inference failed: ${result.message}\")\r\n                    throw Exception(\"Failed to process image: ${result.message}\")\r\n                }\r\n            } else {\r\n                Log.e(TAG, \"No OCR results found\")\r\n                throw Exception(\"No OCR results found\")\r\n            }\r\n            logMemoryUsage(\"After OCR processing\")\r\n\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Failed to process image\", e)\r\n            throw Exception(\"Failed to process image: ${e.message}\")\r\n        } finally {\r\n            // Clean up resources\r\n            if (resizedBitmap != null && resizedBitmap != bitmap) {\r\n                resizedBitmap.recycle()\r\n            }\r\n            byteArrayOutputStream?.close()\r\n            logMemoryUsage(\"After cleanup\")\r\n        }\r\n    }\r\n\r\n    override suspend fun saveOcrResult(result: OcrResult) {\r\n        TODO(\"Not yet implemented\")\r\n    }\r\n\r\n    override fun getOcrHistory(): Flow<List<OcrResult>> {\r\n        TODO(\"Not yet implemented\")\r\n    }\r\n} 
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepositoryImpl.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepositoryImpl.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepositoryImpl.kt	(revision 0c62a20d8680d4b6905a3a92f8820b8ba13b0a27)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/repository/OcrRepositoryImpl.kt	(date 1748614800222)
+@@ -1,21 +1,31 @@
+ package com.glowstudio.android.blindsjn.feature.ocr.repository
+ 
++import android.content.Context
+ import android.graphics.Bitmap
+-import android.util.Base64
++import android.net.Uri
+ import android.util.Log
+ import com.glowstudio.android.blindsjn.data.network.NaverOcrServer
++import com.glowstudio.android.blindsjn.data.network.NetworkConfig
+ import com.glowstudio.android.blindsjn.feature.ocr.model.OcrImage
+ import com.glowstudio.android.blindsjn.feature.ocr.model.OcrRequest
+ import com.glowstudio.android.blindsjn.feature.ocr.model.OcrResult
+ import kotlinx.coroutines.flow.Flow
+-import kotlinx.coroutines.flow.flow
+-import java.io.ByteArrayOutputStream
++import java.io.File
++import java.io.FileOutputStream
++import java.io.InputStream
++import java.net.URLEncoder
++import java.nio.charset.StandardCharsets
+ import java.util.UUID
+-import java.lang.Runtime
++import com.google.gson.Gson
++import okhttp3.MediaType.Companion.toMediaTypeOrNull
++import okhttp3.MultipartBody
++import okhttp3.RequestBody.Companion.asRequestBody
++import okhttp3.RequestBody.Companion.toRequestBody
+ 
+-class OcrRepositoryImpl : OcrRepository {
++class OcrRepositoryImpl(private val context: Context) : OcrRepository {
+     private val apiService = NaverOcrServer.apiService
+     private val TAG = "OcrRepositoryImpl"
++    private val gson = Gson()
+     
+     companion object {
+         private const val MAX_IMAGE_WIDTH = 640
+@@ -30,72 +40,63 @@
+         Log.d(TAG, "$tag - Memory Usage: $usedMemory MB / $maxMemory MB")
+     }
+ 
+-    override suspend fun processImage(bitmap: Bitmap): Flow<OcrResult> = flow {
+-        var resizedBitmap: Bitmap? = null
+-        var byteArrayOutputStream: ByteArrayOutputStream? = null
+-        
++    override suspend fun processImage(bitmap: Bitmap): OcrResult {
++        // 임시 파일로 저장
++        val tempFile = File.createTempFile("ocr_image", ".jpg")
+         try {
+-            logMemoryUsage("Before processing")
+-            
+-            // Resize bitmap if needed
+-            resizedBitmap = if (bitmap.width > MAX_IMAGE_WIDTH || bitmap.height > MAX_IMAGE_HEIGHT) {
+-                val scale = MAX_IMAGE_WIDTH.toFloat() / bitmap.width.coerceAtLeast(bitmap.height)
+-                Bitmap.createScaledBitmap(
+-                    bitmap,
+-                    (bitmap.width * scale).toInt(),
+-                    (bitmap.height * scale).toInt(),
+-                    true
+-                )
+-            } else {
+-                bitmap
+-            }
+-            logMemoryUsage("After resize")
+-
+-            // Convert bitmap to base64 with reduced quality
+-            byteArrayOutputStream = ByteArrayOutputStream()
+-            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, byteArrayOutputStream)
+-            val imageBytes = byteArrayOutputStream.toByteArray()
+-            
+-            if (imageBytes.isEmpty()) {
+-                throw Exception("Failed to convert image to bytes")
+-            }
+-            
+-            val base64Image = Base64.encodeToString(imageBytes, Base64.NO_WRAP)
+-            if (base64Image.isEmpty()) {
+-                throw Exception("Failed to encode image to base64")
+-            }
+-            logMemoryUsage("After base64 encoding")
++            // Bitmap을 파일로 저장
++            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, tempFile.outputStream())
++            return processImageFile(tempFile)
++        } finally {
++            tempFile.delete() // 임시 파일 삭제
++        }
++    }
+ 
+-            // Create OCR request with required fields
+-            val request = OcrRequest(
+-                version = "V2",
+-                requestId = UUID.randomUUID().toString(),
+-                timestamp = System.currentTimeMillis(),
+-                images = listOf(
+-                    OcrImage(
+-                        format = "jpg",
+-                        data = base64Image,
+-                        name = "image.jpg"
++    suspend fun processImageFile(file: File): OcrResult {
++        try {
++            // Create message JSON
++            val message = mapOf(
++                "version" to "V2",
++                "requestId" to UUID.randomUUID().toString(),
++                "timestamp" to System.currentTimeMillis(),
++                "images" to listOf(
++                    mapOf(
++                        "format" to "jpg",
++                        "name" to file.name
+                     )
+                 )
+             )
++
++            // Create multipart request
++            val messageBody = gson.toJson(message).toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
++            val imagePart = MultipartBody.Part.createFormData(
++                "file",
++                file.name,
++                file.asRequestBody("image/jpeg".toMediaTypeOrNull())
++            )
++
++            // Enhanced logging for debugging
++            Log.d(TAG, "OCR Request Headers: ${gson.toJson(NaverOcrServer.apiService)}")
++            Log.d(TAG, "OCR Request URL: ${NetworkConfig.NAVER_OCR_BASE_URL}")
++            Log.d(TAG, "OCR Request JSON: ${gson.toJson(message)}")
+ 
+             // Call Naver OCR API
+-            val response = apiService.performOcr(request)
++            val response = apiService.performOcr(messageBody, imagePart)
+             Log.d(TAG, "OCR Response: $response")
+ 
+             if (response.images.isNotEmpty()) {
+                 val result = response.images[0]
+                 if (result.inferResult == "SUCCESS") {
+                     val fields = result.fields
+-                    if (fields.isNotEmpty()) {
+-                        val text = fields.joinToString("\n") { it.inferText }
+-                        val confidence = fields.map { it.inferConfidence }.average().toFloat()
+-                        emit(OcrResult(text, confidence))
+-                    } else {
+-                        Log.e(TAG, "No fields found in OCR result")
+-                        throw Exception("No text detected in image")
+-                    }
++                    // '메뉴', '건수', '매출' 필드만 추출
++                    val productNames = fields.filter { it.name == "메뉴" }.map { it.inferText }
++                    val quantities = fields.filter { it.name == "건수" }.map { it.inferText }
++                    val sales = fields.filter { it.name == "매출" }.map { it.inferText }
++                    return OcrResult(
++                        products = productNames,
++                        quantities = quantities,
++                        sales = sales
++                    )
+                 } else {
+                     Log.e(TAG, "OCR inference failed: ${result.message}")
+                     throw Exception("Failed to process image: ${result.message}")
+@@ -104,18 +105,10 @@
+                 Log.e(TAG, "No OCR results found")
+                 throw Exception("No OCR results found")
+             }
+-            logMemoryUsage("After OCR processing")
+ 
+         } catch (e: Exception) {
+             Log.e(TAG, "Failed to process image", e)
+             throw Exception("Failed to process image: ${e.message}")
+-        } finally {
+-            // Clean up resources
+-            if (resizedBitmap != null && resizedBitmap != bitmap) {
+-                resizedBitmap.recycle()
+-            }
+-            byteArrayOutputStream?.close()
+-            logMemoryUsage("After cleanup")
+         }
+     }
+ 
+@@ -126,4 +119,26 @@
+     override fun getOcrHistory(): Flow<List<OcrResult>> {
+         TODO("Not yet implemented")
+     }
++
++    // 테스트용 메서드 추가
++    suspend fun testProcessImageFile() {
++        try {
++            // assets 폴더에서 테스트 이미지 복사
++            val testImageFile = File(context.filesDir, "credit3.png")
++            
++            // assets에서 이미지 복사
++            context.assets.open("credit3.png").use { inputStream ->
++                FileOutputStream(testImageFile).use { outputStream ->
++                    inputStream.copyTo(outputStream)
++                }
++            }
++
++            Log.d(TAG, "Processing file: ${testImageFile.absolutePath}")
++            val result = processImageFile(testImageFile)
++            Log.d(TAG, "OCR Result: $result")
++        } catch (e: Exception) {
++            Log.e(TAG, "Error processing test file", e)
++            throw e
++        }
++    }
+ } 
+\ No newline at end of file
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/viewmodel/OcrViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.viewmodel\r\n\r\nimport android.graphics.Bitmap\r\nimport androidx.lifecycle.ViewModel\r\nimport androidx.lifecycle.viewModelScope\r\nimport com.glowstudio.android.blindsjn.feature.ocr.repository.OcrRepository\r\nimport com.glowstudio.android.blindsjn.feature.ocr.repository.OcrRepositoryImpl\r\nimport com.glowstudio.android.blindsjn.feature.ocr.model.OcrResult\r\nimport kotlinx.coroutines.flow.MutableStateFlow\r\nimport kotlinx.coroutines.flow.StateFlow\r\nimport kotlinx.coroutines.flow.asStateFlow\r\nimport kotlinx.coroutines.launch\r\n\r\ndata class OcrUiState(\r\n    val isLoading: Boolean = false,\r\n    val error: String? = null,\r\n    val result: OcrResult? = null\r\n)\r\n\r\nclass OcrViewModel : ViewModel() {\r\n    private val repository: OcrRepository = OcrRepositoryImpl()\r\n    private val _uiState = MutableStateFlow(OcrUiState())\r\n    val uiState: StateFlow<OcrUiState> = _uiState.asStateFlow()\r\n\r\n    fun processImage(bitmap: Bitmap) {\r\n        viewModelScope.launch {\r\n            try {\r\n                _uiState.value = _uiState.value.copy(isLoading = true, error = null, result = null)\r\n                \r\n                repository.processImage(bitmap).collect { result ->\r\n                    _uiState.value = _uiState.value.copy(\r\n                        isLoading = false,\r\n                        result = result\r\n                    )\r\n                }\r\n            } catch (e: Exception) {\r\n                _uiState.value = _uiState.value.copy(\r\n                    isLoading = false,\r\n                    error = e.message ?: \"Failed to process image\",\r\n                    result = null\r\n                )\r\n            }\r\n        }\r\n    }\r\n\r\n    fun clearError() {\r\n        _uiState.value = _uiState.value.copy(error = null)\r\n    }\r\n} 
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/viewmodel/OcrViewModel.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/viewmodel/OcrViewModel.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/viewmodel/OcrViewModel.kt	(revision 0c62a20d8680d4b6905a3a92f8820b8ba13b0a27)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/viewmodel/OcrViewModel.kt	(date 1748614398880)
+@@ -1,5 +1,6 @@
+ package com.glowstudio.android.blindsjn.feature.ocr.viewmodel
+ 
++import android.content.Context
+ import android.graphics.Bitmap
+ import androidx.lifecycle.ViewModel
+ import androidx.lifecycle.viewModelScope
+@@ -17,8 +18,8 @@
+     val result: OcrResult? = null
+ )
+ 
+-class OcrViewModel : ViewModel() {
+-    private val repository: OcrRepository = OcrRepositoryImpl()
++class OcrViewModel(context: Context) : ViewModel() {
++    private val repository: OcrRepository = OcrRepositoryImpl(context)
+     private val _uiState = MutableStateFlow(OcrUiState())
+     val uiState: StateFlow<OcrUiState> = _uiState.asStateFlow()
+ 
+@@ -26,13 +27,11 @@
+         viewModelScope.launch {
+             try {
+                 _uiState.value = _uiState.value.copy(isLoading = true, error = null, result = null)
+-                
+-                repository.processImage(bitmap).collect { result ->
+-                    _uiState.value = _uiState.value.copy(
+-                        isLoading = false,
+-                        result = result
+-                    )
+-                }
++                val result = repository.processImage(bitmap)
++                _uiState.value = _uiState.value.copy(
++                    isLoading = false,
++                    result = result
++                )
+             } catch (e: Exception) {
+                 _uiState.value = _uiState.value.copy(
+                     isLoading = false,
+@@ -42,6 +41,21 @@
+             }
+         }
+     }
++
++    fun testProcessImageFile() {
++        viewModelScope.launch {
++            try {
++                _uiState.value = _uiState.value.copy(isLoading = true, error = null, result = null)
++                (repository as OcrRepositoryImpl).testProcessImageFile()
++            } catch (e: Exception) {
++                _uiState.value = _uiState.value.copy(
++                    isLoading = false,
++                    error = e.message ?: "Failed to process test file",
++                    result = null
++                )
++            }
++        }
++    }
+ 
+     fun clearError() {
+         _uiState.value = _uiState.value.copy(error = null)
+Index: app/build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    alias(libs.plugins.android.application)\r\n    alias(libs.plugins.kotlin.android)\r\n    alias(libs.plugins.kotlin.compose)\r\n    id(\"kotlin-kapt\")\r\n    id(\"com.google.dagger.hilt.android\")\r\n\r\n    // Kotlin serialization plugin for type safe routes and navigation arguments\r\n    kotlin(\"plugin.serialization\") version \"2.0.21\"\r\n}\r\n\r\nandroid {\r\n    namespace = \"com.glowstudio.android.blindsjn\"\r\n    compileSdk = 35\r\n\r\n    defaultConfig {\r\n        applicationId = \"com.glowstudio.android.blindsjn\"\r\n        minSdk = 24\r\n        targetSdk = 34\r\n        versionCode = 1\r\n        versionName = \"1.0\"\r\n        testInstrumentationRunner = \"androidx.test.runner.AndroidJUnitRunner\"\r\n    }\r\n\r\n    buildTypes {\r\n        release {\r\n            isMinifyEnabled = false\r\n            proguardFiles(\r\n                getDefaultProguardFile(\"proguard-android-optimize.txt\"),\r\n                \"proguard-rules.pro\"\r\n            )\r\n        }\r\n    }\r\n    compileOptions {\r\n        sourceCompatibility = JavaVersion.VERSION_11\r\n        targetCompatibility = JavaVersion.VERSION_11\r\n        // Kotlin DSL에서는 isCoreLibraryDesugaringEnabled를 사용합니다.\r\n        isCoreLibraryDesugaringEnabled = true\r\n    }\r\n    kotlinOptions {\r\n        jvmTarget = \"11\"\r\n    }\r\n    buildFeatures {\r\n        compose = true\r\n    }\r\n}\r\n\r\ndependencies {\r\n    // 기본 AndroidX, Compose, Material3, Navigation, Test 의존성\r\n    implementation(libs.androidx.core.ktx)\r\n    implementation(libs.androidx.lifecycle.runtime.ktx)\r\n    implementation(libs.androidx.activity.compose)\r\n    implementation(platform(libs.androidx.compose.bom))\r\n    implementation(libs.androidx.ui)\r\n    implementation(libs.androidx.ui.graphics)\r\n    implementation(libs.androidx.ui.tooling.preview)\r\n    implementation(libs.androidx.material3)\r\n    implementation(libs.play.services.ads.api)\r\n    implementation(libs.androidx.media3.exoplayer)\r\n    testImplementation(libs.junit)\r\n    androidTestImplementation(libs.androidx.junit)\r\n    androidTestImplementation(libs.androidx.espresso.core)\r\n    androidTestImplementation(platform(libs.androidx.compose.bom))\r\n    androidTestImplementation(libs.androidx.ui.test.junit4)\r\n    debugImplementation(libs.androidx.ui.tooling)\r\n    debugImplementation(libs.androidx.ui.test.manifest)\r\n\r\n    // Compose Core 및 Material3\r\n    implementation(\"androidx.compose.ui:ui:1.7.8\")\r\n    implementation(\"androidx.compose.material3:material3:1.3.1\")\r\n    implementation(\"androidx.activity:activity-compose:1.9.3\")\r\n\r\n    // Navigation for Compose\r\n    implementation(\"androidx.navigation:navigation-compose:2.8.4\")\r\n\r\n    // Icons\r\n    implementation(\"androidx.compose.material:material-icons-core:1.7.5\")\r\n    implementation(\"androidx.compose.material:material-icons-extended:1.7.5\")\r\n\r\n    // JSON serialization\r\n    implementation(\"org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3\")\r\n\r\n    // Retrofit and Coroutines\r\n    implementation(\"com.squareup.retrofit2:retrofit:2.9.0\")\r\n    implementation(\"com.squareup.retrofit2:converter-gson:2.9.0\")\r\n    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3\")\r\n    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3\")\r\n\r\n    implementation(\"com.squareup.okhttp3:okhttp:4.9.3\")\r\n    implementation(\"com.squareup.okhttp3:logging-interceptor:4.9.3\")\r\n\r\n    // DataStore for auto-login\r\n    implementation(\"androidx.datastore:datastore-preferences:1.0.0\")\r\n    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4\")\r\n\r\n    // tess-two for text extraction\r\n    implementation(\"com.rmtheis:tess-two:9.1.0\")\r\n    implementation(\"androidx.appcompat:appcompat:1.6.1\")\r\n    implementation(\"androidx.constraintlayout:constraintlayout:2.1.4\")\r\n\r\n    // Core Library Desugaring: Java 8+ API를 낮은 API 레벨에서도 사용\r\n    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.0.3\")\r\n\r\n    // Coil (이미지 로딩)\r\n    implementation(\"io.coil-kt:coil-compose:2.1.0\")\r\n\r\n    implementation (\"com.google.accompanist:accompanist-pager:0.32.0\")\r\n    implementation (\"com.google.accompanist:accompanist-pager-indicators:0.32.0\")\r\n\r\n    implementation (\"org.jsoup:jsoup:1.15.3\")\r\n\r\n    // Hilt\r\n    implementation(\"com.google.dagger:hilt-android:2.48\")\r\n    kapt(\"com.google.dagger:hilt-android-compiler:2.48\")\r\n    implementation(\"androidx.hilt:hilt-navigation-compose:1.1.0\")\r\n\r\n    // ExoPlayer\r\n    implementation(\"androidx.media3:media3-exoplayer:1.1.1\")\r\n    implementation(\"androidx.media3:media3-ui:1.1.1\")\r\n    implementation(\"androidx.media3:media3-common:1.1.1\")\r\n}\r\n\r\n// Allow references to generated code\r\nkapt {\r\n    correctErrorTypes = true\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+--- a/app/build.gradle.kts	(revision 0c62a20d8680d4b6905a3a92f8820b8ba13b0a27)
++++ b/app/build.gradle.kts	(date 1748605470389)
+@@ -3,7 +3,6 @@
+     alias(libs.plugins.kotlin.android)
+     alias(libs.plugins.kotlin.compose)
+     id("kotlin-kapt")
+-    id("com.google.dagger.hilt.android")
+ 
+     // Kotlin serialization plugin for type safe routes and navigation arguments
+     kotlin("plugin.serialization") version "2.0.21"
+@@ -109,11 +108,6 @@
+ 
+     implementation ("org.jsoup:jsoup:1.15.3")
+ 
+-    // Hilt
+-    implementation("com.google.dagger:hilt-android:2.48")
+-    kapt("com.google.dagger:hilt-android-compiler:2.48")
+-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+-
+     // ExoPlayer
+     implementation("androidx.media3:media3-exoplayer:1.1.1")
+     implementation("androidx.media3:media3-ui:1.1.1")

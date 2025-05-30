@@ -44,6 +44,7 @@ import com.glowstudio.android.blindsjn.feature.main.model.NavigationState
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.BottomBarViewModel
 import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
 import com.glowstudio.android.blindsjn.feature.home.NewsListScreen
+import com.glowstudio.android.blindsjn.feature.ocr.view.DailySalesScreen
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
@@ -244,7 +245,12 @@ fun MainScreen(
                     }
                     composable("ocr") {
                         OcrScreen(
-                            onCaptureClick = { /* TODO: 카메라 캡처 구현 */ }
+                            onCaptureClick = { navController.navigate("dailySalesScreen") }
+                        )
+                    }
+                    composable("dailySalesScreen") {
+                        DailySalesScreen(
+                            onBackClick = { navController.navigateUp() }
                         )
                     }
                 }

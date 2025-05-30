@@ -1,0 +1,191 @@
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/camera/CameraManager.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.camera\r\n\r\nimport android.content.Context\r\nimport android.graphics.ImageFormat\r\nimport android.hardware.camera2.*\r\nimport android.media.ImageReader\r\nimport android.os.Handler\r\nimport android.os.HandlerThread\r\nimport android.util.Log\r\nimport android.view.Surface\r\nimport kotlinx.coroutines.flow.MutableStateFlow\r\nimport kotlinx.coroutines.flow.StateFlow\r\nimport java.util.concurrent.Executors\r\n\r\nclass OcrCameraManager(private val context: Context) {\r\n    private var cameraDevice: CameraDevice? = null\r\n    private var captureSession: CameraCaptureSession? = null\r\n    private val cameraThread = HandlerThread(\"CameraThread\").apply { start() }\r\n    private val cameraHandler = Handler(cameraThread.looper)\r\n    private val cameraExecutor = Executors.newSingleThreadExecutor()\r\n    \r\n    private val _cameraState = MutableStateFlow<CameraState>(CameraState.Closed)\r\n    val cameraState: StateFlow<CameraState> = _cameraState\r\n\r\n    private var imageReader: ImageReader? = null\r\n    private var onImageCaptured: ((ByteArray) -> Unit)? = null\r\n    private var previewSurface: Surface? = null\r\n\r\n    companion object {\r\n        const val PREVIEW_WIDTH = 640\r\n        const val PREVIEW_HEIGHT = 480\r\n    }\r\n\r\n    init {\r\n        imageReader = ImageReader.newInstance(\r\n            PREVIEW_WIDTH, PREVIEW_HEIGHT, ImageFormat.JPEG, 2\r\n        ).apply {\r\n            setOnImageAvailableListener({ reader ->\r\n                var image = reader.acquireLatestImage()\r\n                try {\r\n                    if (image != null) {\r\n                        val buffer = image.planes[0].buffer\r\n                        val bytes = ByteArray(buffer.remaining())\r\n                        buffer.get(bytes)\r\n                        onImageCaptured?.invoke(bytes)\r\n                    }\r\n                } catch (e: Exception) {\r\n                    Log.e(\"OcrCameraManager\", \"Error processing image\", e)\r\n                } finally {\r\n                    image?.close()\r\n                }\r\n            }, cameraHandler)\r\n        }\r\n    }\r\n\r\n    fun setPreviewSurface(surface: Surface) {\r\n        previewSurface = surface\r\n    }\r\n\r\n    fun openCamera(cameraId: String) {\r\n        val systemCameraManager = context.getSystemService(Context.CAMERA_SERVICE) as android.hardware.camera2.CameraManager\r\n        try {\r\n            systemCameraManager.openCamera(cameraId, object : CameraDevice.StateCallback() {\r\n                override fun onOpened(camera: CameraDevice) {\r\n                    cameraDevice = camera\r\n                    _cameraState.value = CameraState.Opened\r\n                    createCaptureSession()\r\n                }\r\n\r\n                override fun onDisconnected(camera: CameraDevice) {\r\n                    camera.close()\r\n                    cameraDevice = null\r\n                    _cameraState.value = CameraState.Closed\r\n                }\r\n\r\n                override fun onError(camera: CameraDevice, error: Int) {\r\n                    camera.close()\r\n                    cameraDevice = null\r\n                    _cameraState.value = CameraState.Error(\"Camera error: $error\")\r\n                }\r\n            }, cameraHandler)\r\n        } catch (e: SecurityException) {\r\n            _cameraState.value = CameraState.Error(\"Camera permission not granted\")\r\n        } catch (e: CameraAccessException) {\r\n            _cameraState.value = CameraState.Error(\"Camera access error: ${e.message}\")\r\n        }\r\n    }\r\n\r\n    private fun createCaptureSession() {\r\n        val surfaces = mutableListOf<Surface>()\r\n        previewSurface?.let { surfaces.add(it) }\r\n        imageReader?.surface?.let { surfaces.add(it) }\r\n\r\n        if (surfaces.isEmpty()) {\r\n            _cameraState.value = CameraState.Error(\"No surfaces available for preview\")\r\n            return\r\n        }\r\n\r\n        cameraDevice?.createCaptureSession(surfaces, object : CameraCaptureSession.StateCallback() {\r\n            override fun onConfigured(session: CameraCaptureSession) {\r\n                captureSession = session\r\n                try {\r\n                    val requestBuilder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)\r\n                    surfaces.forEach { surface ->\r\n                        requestBuilder?.addTarget(surface)\r\n                    }\r\n                    session.setRepeatingRequest(requestBuilder?.build()!!, null, cameraHandler)\r\n                } catch (e: CameraAccessException) {\r\n                    _cameraState.value = CameraState.Error(\"Failed to start camera preview: ${e.message}\")\r\n                }\r\n            }\r\n\r\n            override fun onConfigureFailed(session: CameraCaptureSession) {\r\n                _cameraState.value = CameraState.Error(\"Failed to configure camera session\")\r\n            }\r\n        }, cameraHandler)\r\n    }\r\n\r\n    fun captureImage(callback: (ByteArray) -> Unit) {\r\n        onImageCaptured = callback\r\n        try {\r\n            val requestBuilder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)\r\n            imageReader?.surface?.let { requestBuilder?.addTarget(it) }\r\n            \r\n            captureSession?.stopRepeating()\r\n            captureSession?.abortCaptures()\r\n            captureSession?.capture(requestBuilder?.build()!!, object : CameraCaptureSession.CaptureCallback() {\r\n                override fun onCaptureCompleted(\r\n                    session: CameraCaptureSession,\r\n                    request: CaptureRequest,\r\n                    result: TotalCaptureResult\r\n                ) {\r\n                    createCaptureSession() // Restart preview\r\n                }\r\n            }, cameraHandler)\r\n        } catch (e: CameraAccessException) {\r\n            _cameraState.value = CameraState.Error(\"Failed to capture image: ${e.message}\")\r\n        }\r\n    }\r\n\r\n    fun closeCamera() {\r\n        try {\r\n            captureSession?.close()\r\n            captureSession = null\r\n            cameraDevice?.close()\r\n            cameraDevice = null\r\n            _cameraState.value = CameraState.Closed\r\n        } catch (e: Exception) {\r\n            Log.e(\"OcrCameraManager\", \"Error closing camera\", e)\r\n        }\r\n    }\r\n\r\n    fun release() {\r\n        closeCamera()\r\n        cameraThread.quitSafely()\r\n        cameraExecutor.shutdown()\r\n        imageReader?.close()\r\n        imageReader = null\r\n    }\r\n}\r\n\r\nsealed class CameraState {\r\n    object Closed : CameraState()\r\n    object Opened : CameraState()\r\n    data class Error(val message: String) : CameraState()\r\n} 
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/camera/CameraManager.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/camera/CameraManager.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/camera/CameraManager.kt	(revision 0c62a20d8680d4b6905a3a92f8820b8ba13b0a27)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/camera/CameraManager.kt	(date 1748605676411)
+@@ -25,6 +25,7 @@
+     private var imageReader: ImageReader? = null
+     private var onImageCaptured: ((ByteArray) -> Unit)? = null
+     private var previewSurface: Surface? = null
++    private var isCapturing = false
+ 
+     companion object {
+         const val PREVIEW_WIDTH = 640
+@@ -117,29 +118,60 @@
+     }
+ 
+     fun captureImage(callback: (ByteArray) -> Unit) {
++        if (isCapturing || captureSession == null) {
++            Log.e("OcrCameraManager", "Cannot capture image: Session is null or already capturing")
++            return
++        }
++
++        isCapturing = true
+         onImageCaptured = callback
++
+         try {
+             val requestBuilder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
+             imageReader?.surface?.let { requestBuilder?.addTarget(it) }
+             
+-            captureSession?.stopRepeating()
+-            captureSession?.abortCaptures()
+-            captureSession?.capture(requestBuilder?.build()!!, object : CameraCaptureSession.CaptureCallback() {
+-                override fun onCaptureCompleted(
+-                    session: CameraCaptureSession,
+-                    request: CaptureRequest,
+-                    result: TotalCaptureResult
+-                ) {
+-                    createCaptureSession() // Restart preview
+-                }
+-            }, cameraHandler)
++            val captureRequest = requestBuilder?.build()
++            if (captureRequest != null) {
++                captureSession?.capture(captureRequest, object : CameraCaptureSession.CaptureCallback() {
++                    override fun onCaptureCompleted(
++                        session: CameraCaptureSession,
++                        request: CaptureRequest,
++                        result: TotalCaptureResult
++                    ) {
++                        isCapturing = false
++                        // Restart preview after capture
++                        try {
++                            val previewRequestBuilder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
++                            previewSurface?.let { previewRequestBuilder?.addTarget(it) }
++                            session.setRepeatingRequest(
++                                previewRequestBuilder?.build()!!,
++                                null,
++                                cameraHandler
++                            )
++                        } catch (e: CameraAccessException) {
++                            Log.e("OcrCameraManager", "Failed to restart preview", e)
++                        }
++                    }
++
++                    override fun onCaptureFailed(
++                        session: CameraCaptureSession,
++                        request: CaptureRequest,
++                        failure: CaptureFailure
++                    ) {
++                        isCapturing = false
++                        Log.e("OcrCameraManager", "Capture failed: ${failure.reason}")
++                    }
++                }, cameraHandler)
++            }
+         } catch (e: CameraAccessException) {
++            isCapturing = false
+             _cameraState.value = CameraState.Error("Failed to capture image: ${e.message}")
+         }
+     }
+ 
+     fun closeCamera() {
+         try {
++            isCapturing = false
+             captureSession?.close()
+             captureSession = null
+             cameraDevice?.close()
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/model/OcrModels.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.model\r\n\r\nimport com.google.gson.annotations.SerializedName\r\n\r\n/**\r\n * Request model for Naver OCR API\r\n */\r\ndata class OcrRequest(\r\n    val version: String = \"V2\",\r\n    val requestId: String,\r\n    val timestamp: Long,\r\n    val images: List<OcrImage>\r\n)\r\n\r\n/**\r\n * Image data for OCR request\r\n */\r\ndata class OcrImage(\r\n    val format: String = \"jpg\",\r\n    val data: String,  // Base64 encoded image\r\n    val name: String\r\n)\r\n\r\n/**\r\n * Response model from Naver OCR API\r\n */\r\ndata class OcrResponse(\r\n    val version: String,\r\n    val requestId: String,\r\n    val timestamp: Long,\r\n    val images: List<OcrImageResult>\r\n)\r\n\r\n/**\r\n * Result for a single image in the OCR response\r\n */\r\ndata class OcrImageResult(\r\n    val uid: String,\r\n    val name: String,\r\n    val inferResult: String,  // \"SUCCESS\" or \"FAIL\"\r\n    val message: String,\r\n    val validationResult: ValidationResult,\r\n    val fields: List<Field>\r\n)\r\n\r\n/**\r\n * Validation result for the OCR response\r\n */\r\ndata class ValidationResult(\r\n    val result: String\r\n)\r\n\r\n/**\r\n * Recognized field from the receipt\r\n * Field types include:\r\n * - \"item\": Product/item name\r\n * - \"total_amount\": Total payment amount\r\n * - \"date\": Receipt date\r\n */\r\ndata class Field(\r\n    val valueType: String,\r\n    val boundingPolys: List<BoundingPoly>,\r\n    val inferText: String,\r\n    val inferConfidence: Double,\r\n    val type: String,\r\n    val value: String\r\n)\r\n\r\n/**\r\n * Bounding polygon for a recognized field\r\n */\r\ndata class BoundingPoly(\r\n    val vertices: List<Vertex>\r\n)\r\n\r\n/**\r\n * Vertex coordinates for bounding polygon\r\n */\r\ndata class Vertex(\r\n    val x: Int,\r\n    val y: Int\r\n)\r\n\r\n/**\r\n * Processed OCR result for UI display\r\n */\r\ndata class OcrResult(\r\n    val text: String,\r\n    val confidence: Float,\r\n    val timestamp: Long = System.currentTimeMillis()\r\n) 
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/model/OcrModels.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/model/OcrModels.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/model/OcrModels.kt	(revision 0c62a20d8680d4b6905a3a92f8820b8ba13b0a27)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/model/OcrModels.kt	(date 1748610656547)
+@@ -18,7 +18,8 @@
+ data class OcrImage(
+     val format: String = "jpg",
+     val data: String,  // Base64 encoded image
+-    val name: String
++    val name: String,
++    val templateIds: List<Int>? = null  // Optional template IDs
+ )
+ 
+ /**
+@@ -58,6 +59,7 @@
+  * - "date": Receipt date
+  */
+ data class Field(
++    val name: String,
+     val valueType: String,
+     val boundingPolys: List<BoundingPoly>,
+     val inferText: String,
+@@ -85,7 +87,8 @@
+  * Processed OCR result for UI display
+  */
+ data class OcrResult(
+-    val text: String,
+-    val confidence: Float,
++    val products: List<String>,
++    val quantities: List<String>,
++    val sales: List<String>,
+     val timestamp: Long = System.currentTimeMillis()
+ ) 
+\ No newline at end of file
+Index: app/src/main/java/com/glowstudio/android/blindsjn/network/Network.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.network\r\n\r\nimport com.glowstudio.android.blindsjn.feature.ocr.api.NaverOcrApiService\r\nimport retrofit2.Retrofit\r\nimport retrofit2.converter.gson.GsonConverterFactory\r\n\r\nobject Network {\r\n    private const val BASE_URL = \"https://api.example.com/\"  // Replace with actual base URL\r\n    private const val NAVER_OCR_BASE_URL = \"https://d7cblqkw1o.apigw.ntruss.com/custom/v1/42447/02392618f64f8a5d3fd1004abc08eb2e9cd4a9eba2e80c21b5ccdf7fa7b73df4/document/receipt\"\r\n\r\n    private val retrofit = Retrofit.Builder()\r\n        .baseUrl(BASE_URL)\r\n        .addConverterFactory(GsonConverterFactory.create())\r\n        .build()\r\n\r\n    private val naverOcrRetrofit = Retrofit.Builder()\r\n        .baseUrl(NAVER_OCR_BASE_URL)\r\n        .addConverterFactory(GsonConverterFactory.create())\r\n        .build()\r\n\r\n    // ... existing API services ...\r\n\r\n    val naverOcrApiService: NaverOcrApiService = naverOcrRetrofit.create(NaverOcrApiService::class.java)\r\n} 
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/network/Network.kt b/app/src/main/java/com/glowstudio/android/blindsjn/network/Network.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/network/Network.kt	(revision 0c62a20d8680d4b6905a3a92f8820b8ba13b0a27)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/network/Network.kt	(date 1748604987693)
+@@ -1,24 +1,15 @@
+ package com.glowstudio.android.blindsjn.network
+ 
+-import com.glowstudio.android.blindsjn.feature.ocr.api.NaverOcrApiService
+ import retrofit2.Retrofit
+ import retrofit2.converter.gson.GsonConverterFactory
+ 
+ object Network {
+     private const val BASE_URL = "https://api.example.com/"  // Replace with actual base URL
+-    private const val NAVER_OCR_BASE_URL = "https://d7cblqkw1o.apigw.ntruss.com/custom/v1/42447/02392618f64f8a5d3fd1004abc08eb2e9cd4a9eba2e80c21b5ccdf7fa7b73df4/document/receipt"
+ 
+     private val retrofit = Retrofit.Builder()
+         .baseUrl(BASE_URL)
+         .addConverterFactory(GsonConverterFactory.create())
+         .build()
+-
+-    private val naverOcrRetrofit = Retrofit.Builder()
+-        .baseUrl(NAVER_OCR_BASE_URL)
+-        .addConverterFactory(GsonConverterFactory.create())
+-        .build()
+ 
+     // ... existing API services ...
+-
+-    val naverOcrApiService: NaverOcrApiService = naverOcrRetrofit.create(NaverOcrApiService::class.java)
+ } 
+\ No newline at end of file
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/api/NaverOcrApiService.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.api\r\n\r\nimport com.glowstudio.android.blindsjn.feature.ocr.model.OcrRequest\r\nimport com.glowstudio.android.blindsjn.feature.ocr.model.OcrResponse\r\nimport retrofit2.http.Body\r\nimport retrofit2.http.POST\r\n\r\ninterface NaverOcrApiService {\r\n    @POST(\"\")\r\n    suspend fun performOcr(\r\n        @Body request: OcrRequest\r\n    ): OcrResponse\r\n} 
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/api/NaverOcrApiService.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/api/NaverOcrApiService.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/api/NaverOcrApiService.kt	(revision 0c62a20d8680d4b6905a3a92f8820b8ba13b0a27)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/api/NaverOcrApiService.kt	(date 1748613831634)
+@@ -1,13 +1,17 @@
+ package com.glowstudio.android.blindsjn.feature.ocr.api
+ 
+-import com.glowstudio.android.blindsjn.feature.ocr.model.OcrRequest
+ import com.glowstudio.android.blindsjn.feature.ocr.model.OcrResponse
+-import retrofit2.http.Body
++import okhttp3.MultipartBody
++import okhttp3.RequestBody
++import retrofit2.http.Multipart
+ import retrofit2.http.POST
++import retrofit2.http.Part
+ 
+ interface NaverOcrApiService {
+-    @POST("")
++    @Multipart
++    @POST("infer")
+     suspend fun performOcr(
+-        @Body request: OcrRequest
++        @Part("message") message: RequestBody,
++        @Part file: MultipartBody.Part
+     ): OcrResponse
+ } 
+\ No newline at end of file
