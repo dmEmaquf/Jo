@@ -16,11 +16,27 @@ class RecipeViewModel : ViewModel() {
     private val _recipeList = MutableStateFlow<List<Recipe>>(emptyList())
     val recipeList: StateFlow<List<Recipe>> = _recipeList
 
+    private val _ingredients = MutableStateFlow<List<Ingredient>>(emptyList())
+    val ingredients: StateFlow<List<Ingredient>> = _ingredients
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
+
+    fun loadIngredients() {
+        viewModelScope.launch {
+            try {
+                val response = InternalServer.api.getIngredientsList()
+                if (response.isSuccessful && response.body()?.status == "success") {
+                    _ingredients.value = response.body()?.data ?: emptyList()
+                }
+            } catch (e: Exception) {
+                _error.value = e.message ?: "재료 목록을 불러오는데 실패했습니다."
+            }
+        }
+    }
 
     fun registerRecipe(title: String, price: Long, businessId: Int, ingredients: List<RecipeIngredient>) {
         viewModelScope.launch {
