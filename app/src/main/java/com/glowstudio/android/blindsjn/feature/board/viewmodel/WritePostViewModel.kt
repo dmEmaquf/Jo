@@ -11,15 +11,8 @@ class WritePostViewModel(
 ) : ViewModel() {
     val categories: StateFlow<List<BoardCategory>> = boardViewModel.boardCategories
 
-    private val _selectedCategory = MutableStateFlow(
-        BoardCategory(
-            emoji = "📝",
-            title = "일반",
-            route = "general",
-            group = "일반"
-        )
-    )
-    val selectedCategory: StateFlow<BoardCategory> = _selectedCategory.asStateFlow()
+    private val _selectedCategory = MutableStateFlow<BoardCategory?>(null)
+    val selectedCategory: StateFlow<BoardCategory?> = _selectedCategory.asStateFlow()
 
     private val _selectedTags = MutableStateFlow<List<String>>(emptyList())
     val selectedTags: StateFlow<List<String>> = _selectedTags.asStateFlow()

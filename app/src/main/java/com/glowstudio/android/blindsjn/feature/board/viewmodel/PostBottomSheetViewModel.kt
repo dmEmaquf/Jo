@@ -14,12 +14,21 @@ import kotlinx.coroutines.launch
 class PostBottomSheetViewModel : ViewModel() {
     private val repository = BusinessCertRepository()
 
-    // 전체 태그 목록 (누구나, 질문, 업종 목록)
-    private val _tags = MutableStateFlow<List<String>>(emptyList())
+    // 전체 태그 목록
+    private val _tags = MutableStateFlow<List<String>>(
+        listOf(
+            "예비사장님", "알바/직원", "손님", "고민글", "정보", "질문/조언", "후기",
+            "초보사장님", "고수사장님"
+        )
+    )
     val tags: StateFlow<List<String>> = _tags.asStateFlow()
 
-    // 선택 가능한 태그 목록
-    private val _enabledTags = MutableStateFlow<List<String>>(emptyList())
+    // 선택 가능한 태그 목록 (인증 여부에 따라 이 리스트를 조정)
+    private val _enabledTags = MutableStateFlow<List<String>>(
+        listOf(
+            "예비사장님", "알바/직원", "손님", "고민글", "정보", "질문/조언", "후기"
+        )
+    )
     val enabledTags: StateFlow<List<String>> = _enabledTags.asStateFlow()
 
     // 선택된 태그 목록
@@ -37,39 +46,38 @@ class PostBottomSheetViewModel : ViewModel() {
     fun loadData(context: Context) {
         viewModelScope.launch {
             try {
-                // 1. 업종 목록 가져오기
-                val response = repository.getIndustries()
-                if (response.isSuccessful) {
-                    response.body()?.data?.let { industries ->
-                        _industries.value = industries
-                    }
-                }
-
-                // 2. 기본 태그 설정 (누구나, 질문)
-                val baseTags = listOf("누구나", "질문")
-                // 모든 태그를 보이게 설정 (누구나, 질문 + 모든 업종)
-                _tags.value = baseTags + _industries.value.map { it.name }
-
-                // 3. 사업자 인증 상태 확인
+                // 1. 사업자 인증 상태 확인
                 val phoneNumber = UserManager.getPhoneNumber(context)
                 if (phoneNumber != null) {
-                    val certification = repository.getBusinessCertification(phoneNumber)
-                    if (certification.isSuccessful) {
-                        certification.body()?.data?.let { cert ->
-                            _certifiedIndustry.value = _industries.value.find { it.id == cert.industryId }
+                    val isCertified = repository.checkAlreadyCertified(phoneNumber)
+                    if (isCertified) {
+                        val certification = repository.getBusinessCertification(phoneNumber)
+                        if (certification.isSuccessful) {
+                            certification.body()?.data?.let { cert ->
+                                val response = repository.getIndustries()
+                                if (response.isSuccessful) {
+                                    response.body()?.data?.let { industries ->
+                                        _certifiedIndustry.value = industries.find { it.id == cert.industryId }
+                                    }
+                                }
+                            }
                         }
                     }
-                }
 
-                // 4. 선택 가능한 태그 설정
-                val enabledTags = mutableListOf<String>()
-                enabledTags.addAll(baseTags) // 누구나, 질문은 항상 활성화
+                    // 2. 선택 가능한 태그 설정
+                    val enabledTags = mutableListOf<String>()
+                    // 기본 태그는 항상 활성화
+                    enabledTags.addAll(listOf(
+                        "예비사장님", "알바/직원", "손님", "고민글", "정보", "질문/조언", "후기"
+                    ))
 
-                // 인증된 업종이 있으면 해당 업종만 활성화
-                _certifiedIndustry.value?.let { industry ->
-                    enabledTags.add(industry.name)
+                    // 인증된 사용자는 추가 태그 활성화
+                    if (isCertified) {
+                        enabledTags.addAll(listOf("초보사장님", "고수사장님"))
+                    }
+
+                    _enabledTags.value = enabledTags
                 }
-                _enabledTags.value = enabledTags
             } catch (e: Exception) {
                 // 에러 처리
             }
@@ -77,17 +85,21 @@ class PostBottomSheetViewModel : ViewModel() {
     }
 
     fun toggleTag(tag: String) {
-        val currentTags = _selectedTags.value.toMutableSet()
-        if (currentTags.contains(tag)) {
-            currentTags.remove(tag)
+        if (!_enabledTags.value.contains(tag)) return
+        _selectedTags.value = if (_selectedTags.value.contains(tag)) {
+            _selectedTags.value - tag
         } else {
-            currentTags.clear() // 다른 태그 선택 해제
-            currentTags.add(tag)
+            _selectedTags.value + tag
         }
-        _selectedTags.value = currentTags
     }
 
     fun clearSelection() {
+        _selectedTags.value = emptySet()
+    }
+
+    fun setTags(tags: List<String>, enabledTags: List<String>) {
+        _tags.value = tags
+        _enabledTags.value = enabledTags
         _selectedTags.value = emptySet()
     }
 } 
