@@ -171,7 +171,7 @@ private fun MarginSummaryCard(recipes: List<MarginItem>) {
     val marginRate = if (totalSales > 0) (totalMargin * 100f / totalSales).toInt() else 0
 
     var selectedPeriod by remember { mutableStateOf("일") }
-    val periods = listOf("일", "주", "월")
+    //val periods = listOf("일", "주", "월")
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -186,23 +186,23 @@ private fun MarginSummaryCard(recipes: List<MarginItem>) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("전체 마진 현황", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = TextPrimary, modifier = Modifier.weight(1f))
-                Row {
-                    periods.forEachIndexed { idx, period ->
-                        TextButton(
-                            onClick = { selectedPeriod = period },
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = if (selectedPeriod == period) Blue else TextSecondary
-                            ),
-                            modifier = Modifier
-                                .height(32.dp)
-                                .width(36.dp),
-                        ) {
-                            Text(period, fontWeight = if (selectedPeriod == period) FontWeight.Bold else FontWeight.Normal)
-                        }
-                        if (idx != periods.lastIndex) {
-                            Spacer(modifier = Modifier.width(2.dp))
-                        }
-                    }
+//                Row {
+//                    periods.forEachIndexed { idx, period ->
+//                        TextButton(
+//                            onClick = { selectedPeriod = period },
+//                            colors = ButtonDefaults.textButtonColors(
+//                                contentColor = if (selectedPeriod == period) Blue else TextSecondary
+//                            ),
+//                            modifier = Modifier
+//                                .height(32.dp)
+//                                .width(36.dp),
+//                        ) {
+//                            Text(period, fontWeight = if (selectedPeriod == period) FontWeight.Bold else FontWeight.Normal)
+//                        }
+//                        if (idx != periods.lastIndex) {
+//                            Spacer(modifier = Modifier.width(2.dp))
+//                        }
+//                    }
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -210,14 +210,14 @@ private fun MarginSummaryCard(recipes: List<MarginItem>) {
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                MarginStatItem("총 매출", totalSales)
+                MarginStatItem("총 수입", totalSales)
                 MarginStatItem("총 원가", totalCost)
                 MarginStatItem("총 마진", totalMargin)
                 MarginStatItem("마진율", marginRate, "%")
             }
         }
     }
-}
+//}
 
 @Composable
 private fun MarginStatItem(label: String, value: Int, suffix: String = "원") {
