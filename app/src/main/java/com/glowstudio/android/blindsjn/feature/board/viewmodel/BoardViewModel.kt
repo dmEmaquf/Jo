@@ -60,6 +60,7 @@ class BoardViewModel : ViewModel() {
         _boardCategories.value = listOf(
             // 소통 카테고리
             BoardCategory("💬", "자유게시판", "free", "소통"),
+            BoardCategory("🔥", "인기 게시판", "popular", "소통"),
             // 업종별 게시판
             BoardCategory("🍴", "음식점 및 카페", "restaurant_cafe", "업종"),
             BoardCategory("🛍️", "쇼핑 및 리테일", "shopping_retail", "업종"),
@@ -73,7 +74,8 @@ class BoardViewModel : ViewModel() {
 
     fun isCategoryEnabled(category: BoardCategory): Boolean {
         val enabled = when {
-            category.group == "소통" -> true // 소통 카테고리(자유게시판, 인기 게시판)는 항상 활성화
+            category.title == "인기 게시판" -> false // 인기 게시판은 선택 불가
+            category.group == "소통" -> true // 소통 카테고리(자유게시판)는 항상 활성화
             !_isCertified.value -> false // 인증되지 않은 사용자는 업종별 게시판 선택 불가
             category.title == _certifiedIndustry.value -> true // 인증된 사용자는 자신의 업종만 선택 가능
             else -> false // 그 외의 경우 선택 불가
