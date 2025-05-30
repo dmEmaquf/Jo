@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import com.glowstudio.android.blindsjn.ui.components.common.SectionLayout
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.geometry.Offset
@@ -606,13 +607,55 @@ fun PayManagementScreen(
                 .fillMaxSize(),
             contentAlignment = Alignment.BottomEnd
         ) {
-            FloatingActionButton(
-                onClick = onNavigateToOcr,
-                containerColor = Blue,
-                contentColor = Color.White,
+            var expanded by remember { mutableStateOf(false) }
+            
+            Column(
+                horizontalAlignment = Alignment.End,
                 modifier = Modifier.padding(16.dp)
             ) {
-                Icon(Icons.Default.Edit, contentDescription = "매출 입력")
+                if (expanded) {
+                    Card(
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .width(200.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        Column {
+                            DropdownMenuItem(
+                                text = { Text("OCR로 매출 입력") },
+                                onClick = {
+                                    onNavigateToOcr()
+                                    expanded = false
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.CameraAlt, contentDescription = null)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("수동으로 매출 입력") },
+                                onClick = {
+                                    onNavigateToSalesInput()
+                                    expanded = false
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Edit, contentDescription = null)
+                                }
+                            )
+                        }
+                    }
+                }
+                
+                FloatingActionButton(
+                    onClick = { expanded = !expanded },
+                    containerColor = Blue,
+                    contentColor = Color.White
+                ) {
+                    Icon(
+                        if (expanded) Icons.Default.ArrowUpward else Icons.Default.Edit,
+                        contentDescription = "매출 입력"
+                    )
+                }
             }
         }
     }
