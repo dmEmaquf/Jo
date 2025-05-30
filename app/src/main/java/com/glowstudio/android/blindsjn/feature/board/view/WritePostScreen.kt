@@ -93,6 +93,32 @@ fun WritePostScreen(
         }
     }
 
+    // 게시글 저장 함수
+    fun savePost() {
+        if (title.isBlank() || content.isBlank()) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "제목과 내용을 입력해주세요",
+                    duration = SnackbarDuration.Short
+                )
+            }
+            return
+        }
+
+        if (userId != null && phoneNumber != null) {
+            viewModel.savePost(
+                title = title,
+                content = content,
+                userId = userId!!,
+                industry = selectedCategory?.title ?: industry,
+                industryId = selectedCategory?.id,
+                phoneNumber = phoneNumber!!,
+                experience = "신입",
+                tags = selectedTags.toList()  // 선택된 태그 전달
+            )
+        }
+    }
+
     Scaffold(
         snackbarHost = {
             SnackbarHost(
@@ -273,7 +299,10 @@ fun WritePostScreen(
                                             content = content,
                                             userId = id,
                                             industry = categoryTitle,
-                                            phoneNumber = phoneNumber!!
+                                            industryId = currentCategory?.id,
+                                            phoneNumber = phoneNumber!!,
+                                            experience = "신입",
+                                            tags = selectedTags.toList()
                                         )
                                     } ?: run {
                                         coroutineScope.launch {

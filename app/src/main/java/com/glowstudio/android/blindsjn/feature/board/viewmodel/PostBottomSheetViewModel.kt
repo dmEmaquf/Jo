@@ -84,18 +84,25 @@ class PostBottomSheetViewModel : ViewModel() {
         }
     }
 
-
+    // 태그 선택 토글 함수
     fun toggleTag(tag: String) {
-        if (!_enabledTags.value.contains(tag)) return
-        _selectedTags.value = if (_selectedTags.value.contains(tag)) {
-            _selectedTags.value - tag
+        val currentTags = _selectedTags.value.toMutableSet()
+        if (currentTags.contains(tag)) {
+            currentTags.remove(tag)
         } else {
-            _selectedTags.value + tag
+            currentTags.add(tag)
         }
+        _selectedTags.value = currentTags
+    }
+
+    // 선택된 태그 초기화
+    fun clearSelectedTags() {
+        _selectedTags.value = emptySet()
     }
 
     fun clearSelection() {
         _selectedTags.value = emptySet()
+        _certifiedIndustry.value = null
     }
 
     fun setTags(tags: List<String>, enabledTags: List<String>) {

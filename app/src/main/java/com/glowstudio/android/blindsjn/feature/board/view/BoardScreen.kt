@@ -264,12 +264,7 @@ fun BoardScreenPreview() {
 fun BoardCategoryItemPreview() {
     BlindSJNTheme {
         BoardCategoryItem(
-            category = BoardCategory(
-                title = "자유게시판",
-                emoji = "💬",
-                route = "freeBoard",
-                group = "소통"
-            ),
+            category = BoardCategory.FreeBoard,
             onClick = {}
         )
     }
@@ -286,7 +281,7 @@ fun PostListPreview() {
                 id = 1,
                 title = "샘플 게시글 1",
                 content = "이것은 샘플 게시글의 내용입니다.",
-                category = "자유게시판",
+                category = BoardCategory.FreeBoard.title,
                 time = "2024-03-20 14:30:00",
                 commentCount = 5,
                 likeCount = 10,
@@ -297,7 +292,7 @@ fun PostListPreview() {
                 id = 2,
                 title = "샘플 게시글 2",
                 content = "두 번째 샘플 게시글의 내용입니다.",
-                category = "질문게시판",
+                category = BoardCategory.PopularBoard.title,
                 time = "2024-03-20 15:00:00",
                 commentCount = 3,
                 likeCount = 7,
@@ -319,7 +314,7 @@ fun PostItemPreview() {
             id = 1,
             title = "샘플 게시글",
             content = "이것은 샘플 게시글의 내용입니다. 미리보기에서 확인할 수 있습니다.",
-            category = "자유게시판",
+            category = BoardCategory.FreeBoard.title,
             time = "2024-03-20 14:30:00",
             commentCount = 5,
             likeCount = 10,
@@ -330,6 +325,7 @@ fun PostItemPreview() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun PostItem(
     navController: NavController,
@@ -381,6 +377,32 @@ fun PostItem(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
+        // 태그 표시 (내용과 메타데이터 사이)
+        if (post.tags.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                post.tags.forEach { tag ->
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                        modifier = Modifier.padding(2.dp)
+                    ) {
+                        Text(
+                            text = "#$tag",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -431,7 +453,6 @@ fun PostItem(
                     color = MaterialTheme.colorScheme.primary
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
@@ -454,6 +475,137 @@ fun PostList(
                 viewModel = viewModel,
                 userId = userId
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun PostItem(
+    post: Post,
+    onPostClick: (Int) -> Unit,
+    onLikeClick: (Int) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
+            .clickable { onPostClick(post.id) }
+            .padding(16.dp)
+    ) {
+        // 업종(카테고리)
+        Surface(
+            shape = MaterialTheme.shapes.small,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+            modifier = Modifier.padding(bottom = 4.dp)
+        ) {
+            Text(
+                text = post.category,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        
+        // 제목
+        Text(
+            text = post.title,
+            style = MaterialTheme.typography.titleMedium,
+            color = TextPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        
+        // 내용
+        Text(
+            text = post.content,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        
+        // 태그 표시 (내용과 메타데이터 사이)
+        if (post.tags.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                post.tags.forEach { tag ->
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                        modifier = Modifier.padding(2.dp)
+                    ) {
+                        Text(
+                            text = "#$tag",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // 메타데이터 (시간, 좋아요, 댓글)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 시간
+            Text(
+                text = TimeUtils.getTimeAgo(post.time),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.alignByBaseline()
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            // 좋아요
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.alignByBaseline()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ThumbUp,
+                    contentDescription = "좋아요",
+                    tint = if (post.isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = post.likeCount.toString(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (post.isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            // 댓글
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.alignByBaseline()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ChatBubbleOutline,
+                    contentDescription = "댓글",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = post.commentCount.toString(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }

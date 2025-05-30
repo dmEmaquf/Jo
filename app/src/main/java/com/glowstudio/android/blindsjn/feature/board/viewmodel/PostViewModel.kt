@@ -42,9 +42,11 @@ class PostViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = PostRepository.loadPosts()
+                android.util.Log.d("PostViewModel", "Load posts response: ${response.body()}")
                 if (response.isSuccessful) {
                     response.body()?.let { apiResponse ->
                         apiResponse.data?.let { posts ->
+                            android.util.Log.d("PostViewModel", "Loaded posts: $posts")
                             _posts.value = posts
                         }
                     }
@@ -124,9 +126,10 @@ class PostViewModel : ViewModel() {
         }
     }
 
-    fun savePost(title: String, content: String, userId: Int, industry: String, industryId: Int? = null, phoneNumber: String, experience: String = "") {
+    fun savePost(title: String, content: String, userId: Int, industry: String, industryId: Int? = null, phoneNumber: String, experience: String = "", tags: List<String> = emptyList()) {
         viewModelScope.launch {
             try {
+                android.util.Log.d("PostViewModel", "Starting to save post with tags: $tags")
                 val postRequest = PostRequest(
                     title = title,
                     content = content,
@@ -134,18 +137,22 @@ class PostViewModel : ViewModel() {
                     category = industry,
                     industryId = industryId,
                     phoneNumber = phoneNumber,
-                    experience = experience
+                    experience = experience,
+                    tags = tags
                 )
-                android.util.Log.d("PostViewModel", "Saving post with request: $postRequest")
+                android.util.Log.d("PostViewModel", "Created PostRequest with tags: ${postRequest.tags}")
                 val response = PostRepository.savePost(postRequest)
                 android.util.Log.d("PostViewModel", "Save post response: ${response.body()}")
                 if (response.isSuccessful) {
+                    android.util.Log.d("PostViewModel", "Post saved successfully, reloading posts")
                     loadPosts()
                     _shouldNavigateBack.value = true
                 } else {
+                    android.util.Log.e("PostViewModel", "Failed to save post: ${response.message()}")
                     _statusMessage.value = "저장 실패: ${response.message()}"
                 }
             } catch (e: Exception) {
+                android.util.Log.e("PostViewModel", "Error saving post", e)
                 _statusMessage.value = "에러 발생: ${e.message}"
             }
         }

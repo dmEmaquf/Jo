@@ -20,7 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostBottomSheetViewModel
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun PostBottomSheet(
     tags: List<String>,
@@ -42,7 +42,8 @@ fun PostBottomSheet(
     ) {
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
             tags.forEach { tag ->
                 val enabled = enabledTags.contains(tag)
@@ -68,6 +69,7 @@ fun PostBottomSheet(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TagChip(
     text: String,

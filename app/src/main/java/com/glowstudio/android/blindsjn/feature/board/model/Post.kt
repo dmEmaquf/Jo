@@ -12,5 +12,6 @@ data class Post(
     @SerializedName("commentCount") val commentCount: Int,
     @SerializedName("likeCount") val likeCount: Int,
     @SerializedName("isLiked") val isLiked: Boolean = false,
-    @SerializedName("user_id") val userId: Int? = null
+    @SerializedName("user_id") val userId: Int? = null,
+    @SerializedName("tags") val tags: List<String> = emptyList()  // 태그 필드 추가
 )
