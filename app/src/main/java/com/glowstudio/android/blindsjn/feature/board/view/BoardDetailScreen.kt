@@ -22,6 +22,7 @@ import com.glowstudio.android.blindsjn.ui.theme.*
 import com.glowstudio.android.blindsjn.feature.board.view.PostBottomSheet
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostBottomSheetViewModel
 import java.net.URLEncoder
+import com.glowstudio.android.blindsjn.ui.theme.BackgroundWhite
 import com.glowstudio.android.blindsjn.data.network.UserManager
 import androidx.compose.runtime.collectAsState
 
@@ -47,7 +48,8 @@ fun BoardDetailScreen(navController: NavController, title: String) {
 
     if (showSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showSheet = false }
+            onDismissRequest = { showSheet = false },
+            containerColor = BackgroundWhite
         ) {
             val tags by postBottomSheetViewModel.tags.collectAsState()
             val enabledTags by postBottomSheetViewModel.enabledTags.collectAsState()

@@ -1,6 +1,7 @@
 package com.glowstudio.android.blindsjn.feature.board.view
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -14,26 +15,35 @@ import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import com.glowstudio.android.blindsjn.ui.theme.BackgroundWhite
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostBottomSheetViewModel
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun PostBottomSheet(
     tags: List<String>,
     enabledTags: List<String> = tags,
     onDone: (List<String>) -> Unit
 ) {
-    val selectedTags = remember { mutableStateListOf<String>() }
+    val context = LocalContext.current
+    val viewModel = viewModel<PostBottomSheetViewModel>()
+    val selectedTags by viewModel.selectedTags.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadData(context)
+    }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(24.dp)
     ) {
-        Text("태그를 선택하세요", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(16.dp))
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
             tags.forEach { tag ->
                 val enabled = enabledTags.contains(tag)
@@ -44,8 +54,7 @@ fun PostBottomSheet(
                     enabled = enabled,
                     onClick = {
                         if (enabled) {
-                            if (selected) selectedTags.remove(tag)  
-                            else selectedTags.add(tag)
+                            viewModel.toggleTag(tag)
                         }
                     }
                 )
@@ -60,6 +69,7 @@ fun PostBottomSheet(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TagChip(
     text: String,

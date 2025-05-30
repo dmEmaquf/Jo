@@ -9,5 +9,6 @@ data class PostRequest(
     @SerializedName("industry") val category: String,
     @SerializedName("industry_id") val industryId: Int?,
     @SerializedName("phone_number") val phoneNumber: String,
-    @SerializedName("experience") val experience: String = "신입"
+    @SerializedName("experience") val experience: String = "신입",
+    @SerializedName("tags") val tags: List<String> = emptyList()
 )

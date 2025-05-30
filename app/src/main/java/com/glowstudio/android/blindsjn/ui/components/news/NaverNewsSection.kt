@@ -60,60 +60,68 @@ fun NaverNewsSection(navController: NavHostController) {
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Absolute.Left,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "새로운 ",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                // 주제 선택 콤보박스
-                Box {
+                Row {
                     Row(
-                        modifier = Modifier
-                            .clickable { expanded = true }
-                            .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Absolute.Left
+                        horizontalArrangement = Arrangement.Start
                     ) {
                         Text(
-                            text = selectedTopic,
+                            text = "새로운 ",
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.primary
+                            fontWeight = FontWeight.Bold
                         )
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "주제 선택",
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                        // 주제 선택 콤보박스
+                        Box {
+                            Row(
+                                modifier = Modifier
+                                    .clickable { expanded = true },
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Text(
+                                    text = selectedTopic,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "▾",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
 
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        newsTopics.forEach { topic ->
-                            DropdownMenuItem(
-                                text = { Text(topic) },
-                                onClick = {
-                                    selectedTopic = topic
-                                    viewModel.saveSelectedTopic(context, topic)
-                                    expanded = false
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                newsTopics.forEach { topic ->
+                                    DropdownMenuItem(
+                                        text = { Text(topic) },
+                                        onClick = {
+                                            selectedTopic = topic
+                                            viewModel.saveSelectedTopic(context, topic)
+                                            expanded = false
+                                        }
+                                    )
                                 }
-                            )
+                            }
                         }
+                        Text(
+                            text = " 소식",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
-                Text(
-                    text = " 소식",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -121,9 +129,8 @@ fun NaverNewsSection(navController: NavHostController) {
 
 
                     // 더보기 버튼
-                    IconButton(onClick = { 
-                        val encodedTopic = URLEncoder.encode(selectedTopic, "UTF-8")
-                        navController.navigate("news_list/$encodedTopic")
+                    IconButton(onClick = {
+                        navController.navigate("news_list/${selectedTopic}")
                     }) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
@@ -133,9 +140,9 @@ fun NaverNewsSection(navController: NavHostController) {
                     }
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             when {
                 uiState.isLoading -> {
                     CircularProgressIndicator()
@@ -154,7 +161,8 @@ fun NaverNewsSection(navController: NavHostController) {
                                     .width(300.dp)
                                     .height(120.dp)
                                     .clickable {
-                                        val articleJson = URLEncoder.encode(Gson().toJson(article), "UTF-8")
+                                        val articleJson =
+                                            URLEncoder.encode(Gson().toJson(article), "UTF-8")
                                         navController.navigate("news_detail/$articleJson")
                                     },
                                 shape = RoundedCornerShape(12.dp),
