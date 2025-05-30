@@ -41,6 +41,24 @@ fun NavGraphBuilder.mainNavGraph(
             HomeScreen(navController = navController)
         }
 
+        // 뉴스 목록 화면
+        composable(
+            route = "news_list/{topic}",
+            arguments = listOf(
+                navArgument("topic") {
+                    type = NavType.StringType
+                    defaultValue = "자영업"
+                }
+            )
+        ) { backStackEntry ->
+            val topic = backStackEntry.arguments?.getString("topic") ?: "자영업"
+            topBarViewModel.setDetailBar(
+                title = "${topic} 소식",
+                onBackClick = { navController.navigateUp() }
+            )
+            NewsListScreen(navController = navController, selectedTopic = topic)
+        }
+
         // 게시판 네비게이션 그래프
         navigation(
             startDestination = "board_list_screen",
