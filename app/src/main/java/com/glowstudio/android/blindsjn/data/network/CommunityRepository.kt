@@ -18,15 +18,14 @@ class CommunityRepository {
     suspend fun createPost(request: PostRequest): Response<ApiResponse<BasicResponse>> {
         // 업종별 게시판인 경우 사업자 인증 확인
         if (request.industryId != null) {
-            val response = apiService.checkBusinessCertification(request.phoneNumber)
-                val isCertified = response.body()?.data?.isCertified ?: false
+            val response = apiService.getBusinessCertification(request.phoneNumber)
+            val isCertified = response.body()?.data?.isCertified ?: false
             if (!isCertified) {
                 throw Exception("업종별 게시판은 사업자 인증이 필요합니다.")
             }
 
             // 인증된 업종과 게시글 작성하려는 업종이 일치하는지 확인
-            val certificationResponse = apiService.getBusinessCertification(request.phoneNumber)
-            val certification = certificationResponse.body()?.data
+            val certification = response.body()?.data
             if (certification?.industryId != request.industryId) {
                 throw Exception("인증된 업종의 게시판에만 글을 작성할 수 있습니다.")
             }

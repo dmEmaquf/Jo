@@ -33,7 +33,8 @@ class BoardViewModel : ViewModel() {
                 val phoneNumber = UserManager.getPhoneNumber(context)
                 Log.d("BoardViewModel", "Phone number: $phoneNumber")
                 if (phoneNumber != null) {
-                    _isCertified.value = repository.checkAlreadyCertified(phoneNumber)
+                    val (isCertified, _) = repository.checkAlreadyCertified(phoneNumber, "")
+                    _isCertified.value = isCertified
                     Log.d("BoardViewModel", "Is certified: ${_isCertified.value}")
                     if (_isCertified.value) {
                         val certification = repository.getBusinessCertification(phoneNumber)

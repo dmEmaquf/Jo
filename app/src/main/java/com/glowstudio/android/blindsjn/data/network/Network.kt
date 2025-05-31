@@ -138,14 +138,20 @@ interface ApiService {
     suspend fun getIndustries(): Response<ApiResponse<List<Industry>>>
 
     // 🔹 사업자 인증
-    @GET("check_business.php")
-    suspend fun checkBusinessCertification(@Query("business_number") businessNumber: String): Response<ApiResponse<BusinessCertificationResponse>>
-
     @POST("business_certification.php")
-    suspend fun saveBusinessCertification(@Body request: BusinessCertificationRequest): Response<ApiResponse<BusinessCertificationResponse>>
+    suspend fun checkBusinessNumber(
+        @Body request: BusinessNumberRequest
+    ): Response<ApiResponse<BusinessCertificationResponse>>
+
+    @POST("save_business_certification.php")
+    suspend fun saveBusinessCertification(
+        @Body request: BusinessCertificationRequest
+    ): Response<ApiResponse<BusinessCertificationResponse>>
 
     @GET("get_business.php")
-    suspend fun getBusinessCertification(@Query("phone_number") phoneNumber: String): Response<ApiResponse<BusinessCertificationResponse>>
+    suspend fun getBusinessCertification(
+        @Query("phone_number") phoneNumber: String
+    ): Response<ApiResponse<BusinessCertificationResponse>>
 
     // 🔹 레시피
     @POST("Save_recipe.php")
@@ -168,4 +174,10 @@ interface ApiService {
     // 🔹 매출 저장
     @POST("api_save_daily_sales_simple.php")
     suspend fun saveDailySales(@Body request: DailySalesRequest): Response<DailySalesResponse>
-} 
+}
+
+data class BusinessNumberRequest(
+    val businessNumber: String,
+    val phoneNumber: String,
+    val industryId: Int
+) 

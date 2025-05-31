@@ -121,15 +121,15 @@ fun BusinessCertificationScreen(
 
                     try {
                         // 1. 이미 인증된 번호인지 확인
-                        val isAlreadyCertified = repository.checkAlreadyCertified(UserManager.getPhoneNumber(context) ?: "")
+                        val (isAlreadyCertified, message) = repository.checkAlreadyCertified(UserManager.getPhoneNumber(context) ?: "", businessNumber)
                         if (isAlreadyCertified) {
-                            errorMessage = "이미 인증된 번호입니다."
+                            errorMessage = message
                             return@launch
                         }
 
                         // 2. 사업자 등록번호 진위확인
                         val isValid = repository.checkBusinessNumberValidity(businessNumber)
-                        if (!isValid) {
+                        if (isValid == null) {
                             errorMessage = "유효하지 않은 사업자 등록번호입니다."
                             return@launch
                         }
