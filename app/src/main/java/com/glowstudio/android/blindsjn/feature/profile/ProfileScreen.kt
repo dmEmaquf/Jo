@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import com.glowstudio.android.blindsjn.data.network.AutoLoginManager
 import kotlinx.coroutines.launch
 import com.glowstudio.android.blindsjn.ui.theme.*
+import android.content.Intent
+import com.glowstudio.android.blindsjn.MainActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,6 +109,12 @@ fun ProfileScreen(
                         try {
                             AutoLoginManager.clearLoginInfo(context)
                             showLogoutPopup = false
+                            // MainActivity 재시작
+                            val intent = Intent(context, MainActivity::class.java).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            context.startActivity(intent)
                             onLogoutClick()
                         } catch (e: Exception) {
                             Log.e("HomeScreen", "로그아웃 실패: ${e.message}")
