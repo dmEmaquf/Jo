@@ -7,6 +7,8 @@ data class Post(
     @SerializedName("title") val title: String,
     @SerializedName("content") val content: String,
     @SerializedName("category") val category: String,
+    @SerializedName("industry") val industry: String? = null,  // 업종 정보 추가
+    @SerializedName("industry_id") val industryId: Int? = null,  // 업종 ID 필드 추가
     @SerializedName("experience") val experience: String = "",
     @SerializedName("time") val time: String,  // ← 이게 있어야 합니다
     @SerializedName("commentCount") val commentCount: Int,

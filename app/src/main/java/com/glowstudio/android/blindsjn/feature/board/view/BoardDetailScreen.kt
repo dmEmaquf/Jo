@@ -25,6 +25,7 @@ import java.net.URLEncoder
 import com.glowstudio.android.blindsjn.ui.theme.BackgroundWhite
 import com.glowstudio.android.blindsjn.data.network.UserManager
 import androidx.compose.runtime.collectAsState
+import com.glowstudio.android.blindsjn.data.model.IndustryData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,7 +90,12 @@ fun BoardDetailScreen(navController: NavController, title: String) {
                 )
 
                 val filteredPosts = posts.filter { post ->
-                    selectedCategory == "모든 분야" || post.category.contains(selectedCategory)
+                    if (selectedCategory == "모든 분야") {
+                        true
+                    } else {
+                        val industryId = IndustryData.industries.entries.find { it.value == selectedCategory }?.key
+                        post.industryId == industryId
+                    }
                 }
 
                 if (statusMessage.isNotEmpty()) {

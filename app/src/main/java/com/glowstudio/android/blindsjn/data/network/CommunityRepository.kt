@@ -18,7 +18,7 @@ class CommunityRepository {
     suspend fun createPost(request: PostRequest): Response<ApiResponse<BasicResponse>> {
         // 업종별 게시판인 경우 사업자 인증 확인
         if (request.industryId != null) {
-            val response = apiService.getBusinessCertification(request.phoneNumber)
+            val response = apiService.getBusinessCertification(request.userId.toString())
             val isCertified = response.body()?.data?.isCertified ?: false
             if (!isCertified) {
                 throw Exception("업종별 게시판은 사업자 인증이 필요합니다.")
