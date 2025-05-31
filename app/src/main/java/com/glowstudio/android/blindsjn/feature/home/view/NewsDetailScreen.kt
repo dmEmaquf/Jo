@@ -5,7 +5,7 @@
 * */
 
 
-package com.glowstudio.android.blindsjn.feature.home.view
+package com.glowstudio.android.blindsjn.feature.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -22,7 +22,7 @@ import org.jsoup.nodes.Document
 @Composable
 fun NewsDetailScreen(title: String, content: String?, description: String?, imageUrl: String?, link: String?) {
     val uriHandler = LocalUriHandler.current
-    
+
     // description에서 이미지 URL 추출
     val extractedImageUrl = description?.let { desc ->
         try {
@@ -32,7 +32,7 @@ fun NewsDetailScreen(title: String, content: String?, description: String?, imag
             null
         }
     }
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
