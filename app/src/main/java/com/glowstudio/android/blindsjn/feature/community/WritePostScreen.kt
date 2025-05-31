@@ -198,8 +198,7 @@ fun WritePostScreen(
                                 content = content,
                                 userId = id,
                                 category = selectedCategory!!.displayName,
-                                industryId = selectedIndustry?.id,
-                                phoneNumber = phoneNumber ?: ""
+                                industryId = selectedIndustry?.id
                             )
                             val response = repository.createPost(request)
                             

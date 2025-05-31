@@ -105,16 +105,17 @@ fun WritePostScreen(
             return
         }
 
-        if (userId != null && phoneNumber != null) {
+        if (userId != null) {
+            val selectedIndustryId = writePostViewModel.getSelectedIndustryId()
+            android.util.Log.d("WritePostScreen", "Selected industry: ${selectedCategory?.title}, industryId: $selectedIndustryId")
+            
             viewModel.savePost(
                 title = title,
                 content = content,
                 userId = userId!!,
                 industry = selectedCategory?.title ?: industry,
-                industryId = selectedCategory?.id,
-                phoneNumber = phoneNumber!!,
-                experience = "신입",
-                tags = selectedTags.toList()  // 선택된 태그 전달
+                industryId = selectedIndustryId,
+                tags = selectedTags.toList()
             )
         }
     }
@@ -276,42 +277,8 @@ fun WritePostScreen(
                                             duration = SnackbarDuration.Short
                                         )
                                     }
-                                } else if (title.isBlank() || content.isBlank()) {
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            message = "제목과 내용을 입력하세요",
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    }
-                                } else if (phoneNumber == null) {
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            message = "전화번호 정보를 찾을 수 없습니다",
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    }
                                 } else {
-                                    userId?.let { id ->
-                                        val currentCategory = selectedCategory
-                                        val categoryTitle = if (industry.isNotEmpty()) industry else currentCategory?.title ?: "자유게시판"
-                                        viewModel.savePost(
-                                            title = title,
-                                            content = content,
-                                            userId = id,
-                                            industry = categoryTitle,
-                                            industryId = currentCategory?.id,
-                                            phoneNumber = phoneNumber!!,
-                                            experience = "신입",
-                                            tags = selectedTags.toList()
-                                        )
-                                    } ?: run {
-                                        coroutineScope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                message = "사용자 정보를 찾을 수 없습니다",
-                                                duration = SnackbarDuration.Short
-                                            )
-                                        }
-                                    }
+                                    savePost()
                                 }
                             },
                             enabled = selectedCategory != null
