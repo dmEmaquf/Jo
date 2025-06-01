@@ -30,13 +30,15 @@ fun HomeScreen(navController: NavHostController) {
         // 배너 섹션
         BannerSection()
 
+        Spacer(modifier = Modifier.height(6.dp)) // 섹션 간 여백
+
         // 바로가기 섹션
         // ShortcutSection(navController)
 
         // 네이버 뉴스 섹션
         NaverNewsSection(navController)
 
-        Spacer(modifier = Modifier.height(10.dp)) // 섹션 간 여백
+        Spacer(modifier = Modifier.height(6.dp)) // 섹션 간 여백
 
         // 인기글 섹션
         HotPostsSection(navController)

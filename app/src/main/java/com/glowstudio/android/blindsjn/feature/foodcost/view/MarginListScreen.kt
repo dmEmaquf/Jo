@@ -80,7 +80,6 @@ fun MarginListScreen(
         // 상단 마진 요약 카드
         item {
             MarginSummaryCard(items)
-            Spacer(Modifier.height(24.dp))
         }
 
         // 레시피 섹션
@@ -92,7 +91,7 @@ fun MarginListScreen(
                 Card(
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(containerColor = CardWhite),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         // 레시피 테이블 헤더
@@ -183,9 +182,11 @@ private fun MarginSummaryCard(recipes: List<MarginItem>) {
     val marginRate = if (totalSales > 0) (totalMargin * 100f / totalSales).toInt() else 0
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
         colors = CardDefaults.cardColors(containerColor = CardWhite),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -194,7 +195,7 @@ private fun MarginSummaryCard(recipes: List<MarginItem>) {
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("전체 마진 현황", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = TextPrimary, modifier = Modifier.weight(1f))
+                Text("전체 마진 현황", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary, modifier = Modifier.weight(1f))
             }
             Spacer(Modifier.height(8.dp))
             Row(

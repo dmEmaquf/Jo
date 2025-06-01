@@ -47,6 +47,7 @@ import kotlinx.coroutines.delay
 import androidx.compose.material3.ModalBottomSheet
 import com.glowstudio.android.blindsjn.feature.ocr.view.DailySalesBottomSheet
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 private fun GoalSettingDialog(
@@ -206,9 +207,9 @@ fun PayManagementScreen(
                         modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
                     ) {
                         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Red)
+                            Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFD32F2F))
                             Spacer(Modifier.width(8.dp))
-                            Text(errorMessage, color = Color.Red, fontWeight = FontWeight.Bold)
+                            Text(errorMessage, color = Color(0xFFD32F2F), fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -218,7 +219,6 @@ fun PayManagementScreen(
             salesSummary?.let { summary ->
                 item {
                     SalesSummaryCard(summary)
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
 
@@ -235,12 +235,12 @@ fun PayManagementScreen(
                                 Icon(
                                     if (weekComparison.isIncrease) Icons.Default.ArrowUpward else Icons.Default.Warning,
                                     contentDescription = null,
-                                    tint = if (weekComparison.isIncrease) Color(0xFF388E3C) else Color.Red
+                                    tint = if (weekComparison.isIncrease) Color(0xFF388E3C) else Color(0xFFE53935)
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
                                     "지난주 대비 매출이 ${if (weekComparison.isIncrease) "+" else ""}${weekComparison.differenceRate.toInt()}% ${if (weekComparison.isIncrease) "증가" else "감소"}했어요!",
-                                    color = if (weekComparison.isIncrease) Color(0xFF388E3C) else Color.Red,
+                                    color = if (weekComparison.isIncrease) Color(0xFF388E3C) else Color(0xFFE53935),
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -251,14 +251,20 @@ fun PayManagementScreen(
 
             // 2. 목표 달성률 ProgressBar
             item {
-                Card(Modifier.fillMaxWidth().padding(bottom = 16.dp), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = CardWhite)) {
+                Card(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardWhite)
+                ) {
                     Column(Modifier.padding(16.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("이번달 매출 목표", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Text("이번달 매출 목표", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                             IconButton(
                                 onClick = { viewModel.showGoalSettingDialog() }
                             ) {
@@ -269,19 +275,20 @@ fun PayManagementScreen(
                                 )
                             }
                         }
-                        Text(
-                            "${(monthlyGoal / 10000).toInt()}만원",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            color = Blue
-                        )
-                        Spacer(Modifier.height(8.dp))
                         val progress = (monthlyProgress / monthlyGoal).toFloat().coerceIn(0f, 1f)
                         val animatedProgress by animateFloatAsState(
                             targetValue = if (!startAnimation) 0f else progress,
                             animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
                             label = "goalProgress"
                         )
+                        Text(
+                            "${(animatedProgress * 100).toInt()}%",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = Blue
+                        )
+                        Spacer(Modifier.height(8.dp))
+
                         LinearProgressIndicator(
                             progress = animatedProgress,
                             modifier = Modifier.fillMaxWidth().height(8.dp),
@@ -289,9 +296,10 @@ fun PayManagementScreen(
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            "${(monthlyProgress / 10000).toInt()}만원 / ${(monthlyGoal / 10000).toInt()}만원 (${(animatedProgress * 100).toInt()}%)",
-                            fontSize = 13.sp,
-                            color = TextSecondary
+                            "${(monthlyProgress / 10000).toInt()}만원 / ${(monthlyGoal / 10000).toInt()}만원",
+                            fontSize = 14.sp,
+                            color = TextSecondary,
+                            textAlign = TextAlign.Right
                         )
                     }
                 }
@@ -299,127 +307,129 @@ fun PayManagementScreen(
 
             // 3. 매출 추이 섹션
             item {
-                SectionLayout(title = "매출 추이", onMoreClick = onNavigateToSalesInput) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = CardWhite)
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardWhite)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
+                        Text("매출 추이", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        // 막대그래프
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(170.dp)
+                                .padding(horizontal = 8.dp)
                         ) {
-                            // 막대그래프
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(170.dp)
-                                    .padding(horizontal = 8.dp)
-                            ) {
-                                val maxValue = weeklySales.maxOrNull()?.toFloat() ?: 500000f
-                                val average = weeklyAverage.toFloat()
-                                val compactAverage = if (average >= 10000) "${(average / 10000).toInt()}만" else average.toInt().toString()
-                                val barHeightPx = 120f
-                                val yOffsetPx = (1 - (average / maxValue)) * barHeightPx
-                                val yOffset = yOffsetPx.dp
-                                
-                                // 평균선
-                                Canvas(modifier = Modifier.matchParentSize()) {
-                                    val y = size.height - ((average / maxValue) * (size.height - 120f)) - 40f
-                                    drawLine(
-                                        color = Color(0xFF4CAF50),  // 초록색으로 변경
-                                        start = Offset(30f, y),
-                                        end = Offset(size.width - 30f, y),
-                                        strokeWidth = 2.dp.toPx()
-                                    )
-                                }
-                                
-                                Row(
-                                    modifier = Modifier.fillMaxSize(),
-                                    verticalAlignment = Alignment.Bottom,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)
-                                ) {
-                                    weeklySales.forEachIndexed { idx, value ->
-                                        val today = LocalDate.now()
-                                        val startOfWeek = today.minusDays(today.dayOfWeek.value.toLong() - 1)
-                                        val currentDate = startOfWeek.plusDays(idx.toLong())
-                                        val isToday = idx == today.dayOfWeek.value - 1
-                                        val isFuture = currentDate.isAfter(today)
-                                        val isDanger = marginRates[idx] < 20
-                                        
-                                        val animatedHeight by animateFloatAsState(
-                                            targetValue = if (!startAnimation) 0f else if (isFuture) 0f else (value.toFloat() / maxValue * barHeightPx),
-                                            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
-                                            label = "barHeight"
-                                        )
-                                        
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            // 금액 라벨 (compact)
-                                            val compactValue = if (isFuture) "-" else if (value >= 10000) "${(value / 10000).toInt()}만" else value.toInt().toString()
-                                            Text(
-                                                compactValue,
-                                                fontSize = 11.sp,
-                                                color = when {
-                                                    isToday -> Blue
-                                                    isFuture -> TextSecondary
-                                                    isDanger -> Color.Red
-                                                    else -> TextHint
-                                                },
-                                                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
-                                            )
-                                            // 막대
-                                            Box(
-                                                modifier = Modifier
-                                                    .width(32.dp)
-                                                    .height(animatedHeight.dp)
-                                                    .background(
-                                                        when {
-                                                            isToday -> Blue
-                                                            isFuture -> Color.Transparent
-                                                            isDanger -> Color.Red
-                                                            idx == 5 -> LightBlue // 토요일
-                                                            idx == 6 -> Color(0xFFE0E0E0) // 일요일(연회색)
-                                                            else -> MaterialTheme.colorScheme.primary
-                                                        },
-                                                        RoundedCornerShape(4.dp)
-                                                    )
-                                            )
-                                            // 날짜
-                                            Text(
-                                                barLabels[idx],
-                                                fontSize = 14.sp,
-                                                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Medium,
-                                                color = when {
-                                                    isToday -> Blue
-                                                    isFuture -> TextSecondary
-                                                    else -> TextSecondary
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                                // 평균선 라벨 - 왼쪽
-                                Text(
-                                    "평균",
-                                    color = Color(0xFF4CAF50),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .align(Alignment.TopStart)
-                                        .padding(start = 2.dp)
-                                        .offset(y = yOffset+8.dp)
-                                )
-                                // 평균선 라벨 - 오른쪽
-                                Text(
-                                    compactAverage,
-                                    color = Color(0xFF4CAF50),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .padding(end = 2.dp)
-                                        .offset(y = yOffset+8.dp)
+                            val maxValue = weeklySales.maxOrNull()?.toFloat() ?: 500000f
+                            val average = weeklyAverage.toFloat()
+                            val compactAverage = if (average >= 10000) "${(average / 10000).toInt()}만" else average.toInt().toString()
+                            val barHeightPx = 120f
+                            val yOffsetPx = (1 - (average / maxValue)) * barHeightPx
+                            val yOffset = yOffsetPx.dp
+                            
+                            // 평균선
+                            Canvas(modifier = Modifier.matchParentSize()) {
+                                val y = size.height - ((average / maxValue) * (size.height - 120f)) - 40f
+                                drawLine(
+                                    color = Color(0xFF4CAF50),  // 초록색으로 변경
+                                    start = Offset(30f, y),
+                                    end = Offset(size.width - 30f, y),
+                                    strokeWidth = 2.dp.toPx()
                                 )
                             }
+                            
+                            Row(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalAlignment = Alignment.Bottom,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)
+                            ) {
+                                weeklySales.forEachIndexed { idx, value ->
+                                    val today = LocalDate.now()
+                                    val startOfWeek = today.minusDays(today.dayOfWeek.value.toLong() - 1)
+                                    val currentDate = startOfWeek.plusDays(idx.toLong())
+                                    val isToday = idx == today.dayOfWeek.value - 1
+                                    val isFuture = currentDate.isAfter(today)
+                                    val isDanger = marginRates[idx] < 20
+                                    
+                                    val animatedHeight by animateFloatAsState(
+                                        targetValue = if (!startAnimation) 0f else if (isFuture) 0f else (value.toFloat() / maxValue * barHeightPx),
+                                        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+                                        label = "barHeight"
+                                    )
+                                    
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        // 금액 라벨 (compact)
+                                        val compactValue = if (isFuture) "-" else if (value >= 10000) "${(value / 10000).toInt()}만" else value.toInt().toString()
+                                        Text(
+                                            compactValue,
+                                            fontSize = 11.sp,
+                                            color = when {
+                                                isToday -> Blue
+                                                isFuture -> TextSecondary
+                                                isDanger -> Color(0xFFE53935)
+                                                else -> TextHint
+                                            },
+                                            fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                        // 막대
+                                        Box(
+                                            modifier = Modifier
+                                                .width(32.dp)
+                                                .height(animatedHeight.dp)
+                                                .background(
+                                                    when {
+                                                        isToday -> Blue
+                                                        isFuture -> Color.Transparent
+                                                        isDanger -> Color(0xFFE53935)
+                                                        idx == 5 -> LightBlue // 토요일
+                                                        idx == 6 -> Color(0xFFE0E0E0) // 일요일(연회색)
+                                                        else -> MaterialTheme.colorScheme.primary
+                                                    },
+                                                    RoundedCornerShape(4.dp)
+                                                )
+                                        )
+                                        // 날짜
+                                        Text(
+                                            barLabels[idx],
+                                            fontSize = 14.sp,
+                                            fontWeight = if (isToday) FontWeight.Bold else FontWeight.Medium,
+                                            color = when {
+                                                isToday -> Blue
+                                                isFuture -> TextSecondary
+                                                else -> TextSecondary
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                            // 평균선 라벨 - 왼쪽
+                            Text(
+                                "평균",
+                                color = Color(0xFF4CAF50),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .padding(start = 2.dp)
+                                    .offset(y = yOffset+8.dp)
+                            )
+                            // 평균선 라벨 - 오른쪽
+                            Text(
+                                compactAverage,
+                                color = Color(0xFF4CAF50),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(end = 2.dp)
+                                    .offset(y = yOffset+8.dp)
+                            )
                         }
                     }
                 }
@@ -427,8 +437,14 @@ fun PayManagementScreen(
 
             // 4. 고정비/순이익 카드
             item {
-                Card(Modifier.fillMaxWidth().padding(bottom = 16.dp), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = CardWhite)) {
-                    Column(Modifier.padding(16.dp)) {
+                Card(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardWhite)
+                ) {
+                    Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 16.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -453,14 +469,14 @@ fun PayManagementScreen(
                                 Text(
                                     "₩ ${String.format("%,d", viewModel.fixedCost.collectAsState().value.toInt())}",
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
+                                    fontSize = 18.sp,
                                     color = TextPrimary
                                 )
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text("순이익", fontSize = 14.sp, color = TextSecondary)
                                 Spacer(Modifier.height(4.dp))
-                                Text("₩ 350,000", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Blue)
+                                Text("₩ 350,000", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Blue)
                             }
                         }
                     }
@@ -473,19 +489,23 @@ fun PayManagementScreen(
                 val dailyComparison by viewModel.dailyComparison.collectAsState()
                 val todaySales = salesSummary?.summary?.totalSales ?: 0.0
                 
-                Card(Modifier.fillMaxWidth().padding(bottom = 16.dp), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = CardWhite)) {
+                Card(
+                    Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardWhite)
+                ) {
                     Column(Modifier.padding(16.dp)) {
                         Text("오늘의 매출", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Spacer(Modifier.height(8.dp))
                         Text(
                             "₩ ${String.format("%,d", todaySales.toInt())}",
-                            fontSize = 24.sp,
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = Blue
                         )
                         Text(
                             "다른 요일 대비 ${if (dailyComparison >= 0) "+" else ""}${dailyComparison.toInt()}%",
-                            color = if (dailyComparison >= 0) Color(0xFF388E3C) else Color.Red,
+                            color = if (dailyComparison >= 0) Color(0xFF388E3C) else Color(0xFFE53935),
                             fontSize = 14.sp
                         )
                     }
@@ -650,7 +670,8 @@ fun PayManagementScreen(
                             .padding(bottom = 16.dp)
                             .width(200.dp),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Column {
                             DropdownMenuItem(
@@ -690,7 +711,8 @@ fun PayManagementScreen(
             }
             if (showBottomSheet) {
                 ModalBottomSheet(
-                    onDismissRequest = { showBottomSheet = false }
+                    onDismissRequest = { showBottomSheet = false },
+                    containerColor = Color.White
                 ) {
                     DailySalesBottomSheet(
                         onDismiss = { showBottomSheet = false },
@@ -774,9 +796,11 @@ fun TabButton(text: String, selected: Boolean, onClick: () -> Unit, modifier: Mo
 @Composable
 fun SalesSummaryCard(summary: SalesSummaryResponse) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
         colors = CardDefaults.cardColors(containerColor = CardWhite),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -785,7 +809,7 @@ fun SalesSummaryCard(summary: SalesSummaryResponse) {
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("전체 매출 현황", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = TextPrimary, modifier = Modifier.weight(1f))
+                Text("전체 매출 현황", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary, modifier = Modifier.weight(1f))
             }
             Spacer(Modifier.height(8.dp))
             summary.summary?.let { summaryData ->
@@ -831,15 +855,14 @@ fun SalesComparisonCard(comparison: SalesComparisonResponse) {
             .fillMaxWidth()
             .padding(bottom = 16.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = CardWhite),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(containerColor = CardWhite)
     ) {
         Column(Modifier.padding(16.dp)) {
             Text("매출 비교", fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Spacer(Modifier.height(16.dp))
             comparison.comparisons?.entries?.forEach { (period, data) ->
                 val isIncrease = data.isIncrease
-                val iconColor = if (isIncrease) Color(0xFF388E3C) else Color(0xFFD32F2F)
+                val iconColor = if (isIncrease) Color(0xFF4CAF50) else Color(0xFFD32F2F)
                 val textColor = iconColor
                 val label = when (period) {
                     "day" -> "전일 대비"
