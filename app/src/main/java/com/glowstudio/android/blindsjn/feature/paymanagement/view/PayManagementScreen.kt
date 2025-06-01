@@ -3,6 +3,7 @@ package com.glowstudio.android.blindsjn.feature.paymanagement.view
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,6 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.glowstudio.android.blindsjn.data.network.Network
 import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesComparisonResponse
 import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesSummaryResponse
+import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesComparison
 import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementApi
 import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementRepository
 import com.glowstudio.android.blindsjn.feature.paymanagement.viewmodel.PayManagementViewModel
@@ -431,6 +433,40 @@ fun PayManagementScreen(
                                     .offset(y = yOffset+8.dp)
                             )
                         }
+                        
+                        // 컴팩트 비교 섹션 추가
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Divider(color = DividerGray, thickness = 1.dp)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        // 비교 데이터 표시
+                        salesComparison?.comparisons?.let { comparisons ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                ComparisonItem(
+                                    label = "전일",
+                                    data = comparisons["day"],
+                                    modifier = Modifier.weight(1f)
+                                )
+                                ComparisonItem(
+                                    label = "전주",
+                                    data = comparisons["week"],
+                                    modifier = Modifier.weight(1f)
+                                )
+                                ComparisonItem(
+                                    label = "전월",
+                                    data = comparisons["month"],
+                                    modifier = Modifier.weight(1f)
+                                )
+                                ComparisonItem(
+                                    label = "전년",
+                                    data = comparisons["year"],
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -619,13 +655,13 @@ fun PayManagementScreen(
 //                }
 //            }
 
-            // 매출 비교 카드
-            salesComparison?.let { comparison ->
-                item {
-                    SalesComparisonCard(comparison)
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
+//            // 매출 비교 카드
+//            salesComparison?.let { comparison ->
+//                item {
+//                    SalesComparisonCard(comparison)
+//                    Spacer(modifier = Modifier.height(16.dp))
+//                }
+//            }
         }
 
         // 목표 설정 다이얼로그를 Box의 자식으로 이동
@@ -855,15 +891,22 @@ fun SalesComparisonCard(comparison: SalesComparisonResponse) {
             .fillMaxWidth()
             .padding(bottom = 16.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = CardWhite)
+        colors = CardDefaults.cardColors(containerColor = CardWhite),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text("매출 비교", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(
+                "매출 비교",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = TextPrimary
+            )
             Spacer(Modifier.height(16.dp))
+            
             comparison.comparisons?.entries?.forEach { (period, data) ->
                 val isIncrease = data.isIncrease
                 val iconColor = if (isIncrease) Color(0xFF4CAF50) else Color(0xFFD32F2F)
-                val textColor = iconColor
+                val backgroundColor = if (isIncrease) Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
                 val label = when (period) {
                     "day" -> "전일 대비"
                     "week" -> "전주 대비"
@@ -871,41 +914,120 @@ fun SalesComparisonCard(comparison: SalesComparisonResponse) {
                     "year" -> "전년 대비"
                     else -> period
                 }
-                val diffText = if (isIncrease) "상승" else "하락"
                 val diffRate = data.differenceRate.toInt()
                 val diffRateText = if (diffRate > 0) "+$diffRate%" else "$diffRate%"
-                Row(
+                
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = backgroundColor)
                 ) {
-                    Text(label, fontSize = 15.sp, fontWeight = FontWeight.Medium)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            if (isIncrease) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                            contentDescription = null,
-                            tint = iconColor,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            diffRateText,
-                            color = textColor,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            diffText,
-                            color = textColor,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text(
+                                label,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = TextPrimary
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    if (isIncrease) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                                    contentDescription = null,
+                                    tint = iconColor,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Text(
+                                    diffRateText,
+                                    color = iconColor,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 20.sp
+                                )
+                            }
+                        }
+                        
+                        // 원형 프로그레스 바
+                        Box(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .background(
+                                    color = if (isIncrease) Color(0xFF4CAF50) else Color(0xFFD32F2F),
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                diffRateText,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                        }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ComparisonItem(
+    label: String,
+    data: SalesComparison?,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            label,
+            fontSize = 12.sp,
+            color = TextSecondary
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        if (data != null) {
+            val isIncrease = data.isIncrease
+            val iconColor = if (isIncrease) Color(0xFF4CAF50) else Color(0xFFD32F2F)
+            val diffRate = data.differenceRate.toInt()
+            val diffRateText = if (diffRate > 0) "+$diffRate%" else "$diffRate%"
+            
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    if (isIncrease) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(2.dp))
+                Text(
+                    diffRateText,
+                    color = iconColor,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                )
+            }
+        } else {
+            Text(
+                "-",
+                color = TextSecondary,
+                fontSize = 14.sp
+            )
         }
     }
 }

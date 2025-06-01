@@ -133,14 +133,6 @@ fun RegisterRecipeScreen(
                 fontWeight = FontWeight.Medium,
                 color = TextPrimary
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "재료를 선택하세요",
-                fontWeight = FontWeight.Medium,
-                fontSize = 16.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
