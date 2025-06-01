@@ -29,14 +29,14 @@ fun BannerSection() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp)
+            .height(260.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
         HorizontalPager(
             count = 4,
             state = pagerState,
         ) { page ->
-            if (page == 0) {
+            if (page == 1) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -73,10 +73,10 @@ fun BannerSection() {
                 }
             } else {
                 Image(
-                    painter = painterResource(id = R.drawable.login_image),
+                    painter = painterResource(R.drawable.banner2_imag),
                     contentDescription = "배너 이미지 $page",
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.FillBounds
                 )
             }
         }

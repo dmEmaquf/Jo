@@ -45,6 +45,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,69 +83,65 @@ fun PostDetailScreen(navController: NavController, postId: String) {
         }
     }
 
-    Scaffold(
-        content = { paddingValues ->
-            PostDetailScreenContent(
-                post = post,
-                comments = comments,
-                newComment = newComment,
-                onCommentChange = { newComment = it },
-                onCommentSubmit = {
-                    if (newComment.isNotBlank() && userId > 0) {
-                        commentViewModel.saveComment(
-                            postId = safePostId,
-                            userId = userId,
-                            content = newComment
-                        )
-                        newComment = ""
-                    }
-                },
-                isLiked = isLiked,
-                onLikeClick = {
-                    if (!isLiking && userId > 0) {
-                        isLiking = true
-                        android.util.Log.d("PostDetailScreen", "Sending like request for postId: $safePostId")
-                        postViewModel.toggleLike(safePostId, userId) { success, newIsLiked, newLikeCount ->
-                            android.util.Log.d("PostDetailScreen", "Like response - success: $success, newIsLiked: $newIsLiked, newLikeCount: $newLikeCount")
-                            if (success) {
-                                isLiked = newIsLiked
-                                likeCount = newLikeCount
-                            }
-                            isLiking = false
-                        }
-                    } else {
-                        android.util.Log.d("PostDetailScreen", "Like request skipped - isLiking: $isLiking, userId: $userId")
-                    }
-                },
-                showReportDialog = showReportDialog,
-                onShowReportDialogChange = { showReportDialog = it },
-                reportReason = reportReason,
-                onReportReasonChange = { reportReason = it },
-                onReportSubmit = {
-                    if (userId > 0) {
-                        postViewModel.reportPost(postId = safePostId, userId = userId, reason = reportReason)
-                    showReportDialog = false
-                }
-                },
-                likeCount = likeCount,
-                isLiking = isLiking,
-                userId = userId,
-                modifier = Modifier.padding(paddingValues)
-            )
-
-            // 신고 결과 알림
-            reportResult?.let {
-                AlertDialog(
-                    onDismissRequest = { postViewModel.clearReportResult() },
-                    title = { Text("알림") },
-                    text = { Text(it) },
-                    confirmButton = {
-                        TextButton(onClick = { postViewModel.clearReportResult() }) { Text("확인") }
-                    }
+    PostDetailScreenContent(
+        post = post,
+        comments = comments,
+        newComment = newComment,
+        onCommentChange = { newComment = it },
+        onCommentSubmit = {
+            if (newComment.isNotBlank() && userId > 0) {
+                commentViewModel.saveComment(
+                    postId = safePostId,
+                    userId = userId,
+                    content = newComment
                 )
+                newComment = ""
             }
-        }
+        },
+        isLiked = isLiked,
+        onLikeClick = {
+            if (!isLiking && userId > 0) {
+                isLiking = true
+                android.util.Log.d("PostDetailScreen", "Sending like request for postId: $safePostId")
+                postViewModel.toggleLike(safePostId, userId) { success, newIsLiked, newLikeCount ->
+                    android.util.Log.d("PostDetailScreen", "Like response - success: $success, newIsLiked: $newIsLiked, newLikeCount: $newLikeCount")
+                    if (success) {
+                        isLiked = newIsLiked
+                        likeCount = newLikeCount
+                    }
+                    isLiking = false
+                }
+            } else {
+                android.util.Log.d("PostDetailScreen", "Like request skipped - isLiking: $isLiking, userId: $userId")
+            }
+        },
+        showReportDialog = showReportDialog,
+        onShowReportDialogChange = { showReportDialog = it },
+        reportReason = reportReason,
+        onReportReasonChange = { reportReason = it },
+        onReportSubmit = {
+            if (userId > 0) {
+                postViewModel.reportPost(postId = safePostId, userId = userId, reason = reportReason)
+                showReportDialog = false
+            }
+        },
+        likeCount = likeCount,
+        isLiking = isLiking,
+        userId = userId,
+        modifier = Modifier
     )
+
+    // 신고 결과 알림
+    reportResult?.let {
+        AlertDialog(
+            onDismissRequest = { postViewModel.clearReportResult() },
+            title = { Text("알림") },
+            text = { Text(it) },
+            confirmButton = {
+                TextButton(onClick = { postViewModel.clearReportResult() }) { Text("확인") }
+            }
+        )
+    }
 }
 
 @Composable
@@ -170,100 +168,136 @@ fun PostDetailScreenContent(
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
-        post?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            // 작성자 정보
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = Color.LightGray
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("익명", color = TextPrimary, style = MaterialTheme.typography.bodyMedium)
-                    Text(
-                        it.time,
-                        color = TextPrimary,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-                OutlinedButton(
-                    onClick = onLikeClick,
-                    enabled = !isLiking && userId != null,
-                    border = ButtonDefaults.outlinedButtonBorder,
-                    shape = MaterialTheme.shapes.small,
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                    modifier = Modifier.height(32.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        Icons.Default.ThumbUp,
-                        contentDescription = null,
-                        tint = if (isLiked) Error else DividerGray,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                            likeCount.toString(),
-                        color = if (isLiked) Error else DividerGray,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    }
-                }
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = it.title ?: "",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = it.content ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = Int.MAX_VALUE
-            )
-            
-            // 해시태그 표시
-            if (it.tags.isNotEmpty()) {
+        // 스크롤 가능한 게시글과 댓글 영역
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            post?.let {
                 Spacer(modifier = Modifier.height(8.dp))
-                Column(
+                // 작성자 정보
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    var currentRow = mutableListOf<String>()
-                    var currentRowWidth = 0
-                    val maxWidth = 300 // 예상 최대 너비
-                    
-                    it.tags.forEach { tag ->
-                        val tagWidth = tag.length * 8 + 24 // 대략적인 태그 너비 계산
-                        if (currentRowWidth + tagWidth > maxWidth) {
-                            // 현재 행이 가득 차면 새로운 행 시작
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = Color.LightGray
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("익명", color = TextPrimary, style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            it.time,
+                            color = TextPrimary,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    OutlinedButton(
+                        onClick = onLikeClick,
+                        enabled = !isLiking && userId != null,
+                        border = ButtonDefaults.outlinedButtonBorder,
+                        shape = MaterialTheme.shapes.small,
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                Icons.Default.ThumbUp,
+                                contentDescription = null,
+                                tint = if (isLiked) Error else DividerGray,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                likeCount.toString(),
+                                color = if (isLiked) Error else DividerGray,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = it.title ?: "",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = it.content ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = Int.MAX_VALUE
+                )
+                
+                // 해시태그 표시
+                if (it.tags.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        var currentRow = mutableListOf<String>()
+                        var currentRowWidth = 0
+                        val maxWidth = 300 // 예상 최대 너비
+                        
+                        it.tags.forEach { tag ->
+                            val tagWidth = tag.length * 8 + 24 // 대략적인 태그 너비 계산
+                            if (currentRowWidth + tagWidth > maxWidth) {
+                                // 현재 행이 가득 차면 새로운 행 시작
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    currentRow.forEach { rowTag ->
+                                        Surface(
+                                            shape = MaterialTheme.shapes.small,
+                                            color = Color.Gray.copy(alpha = 0.1f),
+                                            modifier = Modifier.padding(2.dp)
+                                        ) {
+                                            Text(
+                                                text = "#$rowTag",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = Color.Gray,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(4.dp))
+                                currentRow.clear()
+                                currentRowWidth = 0
+                            }
+                            currentRow.add(tag)
+                            currentRowWidth += tagWidth
+                        }
+                        
+                        // 마지막 행 표시
+                        if (currentRow.isNotEmpty()) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                currentRow.forEach { rowTag ->
+                                currentRow.forEach { tag ->
                                     Surface(
                                         shape = MaterialTheme.shapes.small,
                                         color = Color.Gray.copy(alpha = 0.1f),
                                         modifier = Modifier.padding(2.dp)
                                     ) {
                                         Text(
-                                            text = "#$rowTag",
+                                            text = "#$tag",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = Color.Gray,
                                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -271,136 +305,108 @@ fun PostDetailScreenContent(
                                     }
                                 }
                             }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            currentRow.clear()
-                            currentRowWidth = 0
-                        }
-                        currentRow.add(tag)
-                        currentRowWidth += tagWidth
-                    }
-                    
-                    // 마지막 행 표시
-                    if (currentRow.isNotEmpty()) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            currentRow.forEach { tag ->
-                                Surface(
-                                    shape = MaterialTheme.shapes.small,
-                                    color = Color.Gray.copy(alpha = 0.1f),
-                                    modifier = Modifier.padding(2.dp)
-                                ) {
-                                    Text(
-                                        text = "#$tag",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                    )
-                                }
-                            }
                         }
                     }
                 }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            // 좋아요/댓글 숫자
+                Spacer(modifier = Modifier.height(12.dp))
+                // 좋아요/댓글 숫자
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Divider(
-                color = DividerGray,
-                thickness = 1.dp,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
+                Spacer(modifier = Modifier.height(8.dp))
+                Divider(
+                    color = DividerGray,
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 0.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ThumbUp,
+                        contentDescription = "좋아요",
+                        tint = if (isLiked) Error else DividerGray,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        it.likeCount.toString(),
+                        color = if (isLiked) Error else DividerGray,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Icon(
+                        imageVector = Icons.Default.ChatBubbleOutline,
+                        contentDescription = "댓글",
+                        tint = ChatBlue,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        it.commentCount.toString(),
+                        color = ChatBlue,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    IconButton(onClick = { onShowReportDialogChange(true) }) {
+                        Icon(
+                            imageVector = Icons.Filled.Report,
+                            contentDescription = "신고",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+
+            // 댓글 목록
+            Spacer(modifier = Modifier.height(16.dp))
+            comments.forEach { comment ->
+                CommentItem(comment = comment)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // 고정된 댓글 입력창
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(20.dp)),
             verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.weight(1f)) {
+                if (newComment.isEmpty()) {
+                    Text(
+                        text = "댓글을 입력하세요.",
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+                BasicTextField(
+                    value = newComment,
+                    onValueChange = { onCommentChange(it) },
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            IconButton(
+                onClick = {
+                    if (newComment.isNotBlank()) onCommentSubmit()
+                },
+                modifier = Modifier.padding(end = 8.dp)
             ) {
-            Icon(
-                imageVector = Icons.Default.ThumbUp,
-                contentDescription = "좋아요",
-                tint = if (isLiked) Error else DividerGray,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                it.likeCount.toString(),
-                color = if (isLiked) Error else DividerGray,
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Icon(
-                imageVector = Icons.Default.ChatBubbleOutline,
-                contentDescription = "댓글",
-                tint = ChatBlue,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                it.commentCount.toString(),
-                color = ChatBlue,
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            IconButton(onClick = { onShowReportDialogChange(true) }) {
                 Icon(
-                    imageVector = Icons.Filled.Report,
-                    contentDescription = "신고",
-                    tint = MaterialTheme.colorScheme.error
+                    imageVector = Icons.Default.Send,
+                    contentDescription = "댓글 등록",
+                    tint = ChatBlue,
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }
-            // 댓글 목록
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(vertical = 8.dp)
-            ) {
-                items(comments) { comment ->
-                    CommentItem(comment = comment)
-                }
-            }
-            // 댓글 입력창
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(20.dp)),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    if (newComment.isEmpty()) {
-                        Text(
-                            text = "댓글을 입력하세요.",
-                            color = Color.Gray,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                    BasicTextField(
-                        value = newComment,
-                        onValueChange = { onCommentChange(it) },
-                        singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                IconButton(
-                    onClick = {
-                        if (newComment.isNotBlank()) onCommentSubmit()
-                    },
-                    modifier = Modifier.padding(end = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Send,
-                        contentDescription = "댓글 등록",
-                        tint = ChatBlue,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-            }
-        }
+
         if (showReportDialog) {
             AlertDialog(
                 onDismissRequest = { onShowReportDialogChange(false) },

@@ -492,112 +492,112 @@ fun PayManagementScreen(
                 }
             }
 
-            // 매출 TOP3 섹션
-            topItems?.let { items ->
-                item {
-                    SectionLayout(title = "매출 TOP3", onMoreClick = null) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(20.dp),
-                            colors = CardDefaults.cardColors(containerColor = CardWhite)
-                        ) {
-                            Column(Modifier.padding(16.dp)) {
-                                items.topItems?.forEachIndexed { idx, item ->
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text("${idx + 1}위", color = Blue, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                                        Spacer(Modifier.width(8.dp))
-                                        Text(item.recipeName, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                                        }
-                                    if (idx != (items.topItems?.size ?: 0) - 1) {
-                                        Divider(color = DividerGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
-
-            // 품목별 비중 섹션
-            topItems?.let { items ->
-                item {
-                    SectionLayout(title = "품목별 비중", onMoreClick = null) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(20.dp),
-                            colors = CardDefaults.cardColors(containerColor = CardWhite)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp)
-                            ) {
-                                // 기간 선택 탭 (일/주/월/연)
-                                Row {
-                                    periodTabs.forEachIndexed { idx, period ->
-                                        TextButton(
-                                            onClick = { viewModel.setPeriod(period) },
-                                            colors = ButtonDefaults.textButtonColors(
-                                                contentColor = if (selectedPeriod == period) Blue else TextSecondary
-                                            ),
-                                            modifier = Modifier
-                                                .height(32.dp)
-                                                .width(36.dp)
-                                        ) {
-                                            Text(period, fontWeight = if (selectedPeriod == period) FontWeight.Bold else FontWeight.Normal)
-                                        }
-                                        if (idx != periodTabs.lastIndex) {
-                                            Spacer(modifier = Modifier.width(2.dp))
-                                        }
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                // 원그래프 + 범례
-                                items.topItems?.let { topItems ->
-                                    val totalSales = topItems.sumOf { it.totalSales }
-                                    val proportions = topItems.map { (it.totalSales / totalSales).toFloat() }
-                                    val colors = listOf(LightBlue, Color(0xFFB3E5FC), Color(0xFF81D4FA), Color(0xFF4FC3F7))
-                                    
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth()
-                                            .height(200.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Box(
-                                            modifier = Modifier.size(140.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            PieChart(
-                                                proportions = proportions,
-                                                colors = colors,
-                                                startAnimation = startAnimation
-                                            )
-                                        }
-                                        Spacer(modifier = Modifier.width(24.dp))
-                                        Column {
-                                            topItems.forEachIndexed { idx, item ->
-                                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .size(20.dp)
-                                                            .background(colors[idx], RoundedCornerShape(10.dp))
-                                                    )
-                                                    Spacer(modifier = Modifier.width(8.dp))
-                                                    Text(item.recipeName, fontSize = 15.sp, color = TextPrimary)
-                                                }
-                                                Spacer(modifier = Modifier.height(8.dp))
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
+//            // 매출 TOP3 섹션
+//            topItems?.let { items ->
+//                item {
+//                    SectionLayout(title = "매출 TOP3", onMoreClick = null) {
+//                        Card(
+//                            modifier = Modifier.fillMaxWidth(),
+//                            shape = RoundedCornerShape(20.dp),
+//                            colors = CardDefaults.cardColors(containerColor = CardWhite)
+//                        ) {
+//                            Column(Modifier.padding(16.dp)) {
+//                                items.topItems?.forEachIndexed { idx, item ->
+//                                    Row(
+//                                        modifier = Modifier.fillMaxWidth(),
+//                                        verticalAlignment = Alignment.CenterVertically
+//                                    ) {
+//                                        Text("${idx + 1}위", color = Blue, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+//                                        Spacer(Modifier.width(8.dp))
+//                                        Text(item.recipeName, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+//                                        }
+//                                    if (idx != (items.topItems?.size ?: 0) - 1) {
+//                                        Divider(color = DividerGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                    Spacer(modifier = Modifier.height(16.dp))
+//                }
+//            }
+//
+//            // 품목별 비중 섹션
+//            topItems?.let { items ->
+//                item {
+//                    SectionLayout(title = "품목별 비중", onMoreClick = null) {
+//                        Card(
+//                            modifier = Modifier.fillMaxWidth(),
+//                            shape = RoundedCornerShape(20.dp),
+//                            colors = CardDefaults.cardColors(containerColor = CardWhite)
+//                        ) {
+//                            Column(
+//                                modifier = Modifier.padding(16.dp)
+//                            ) {
+//                                // 기간 선택 탭 (일/주/월/연)
+//                                Row {
+//                                    periodTabs.forEachIndexed { idx, period ->
+//                                        TextButton(
+//                                            onClick = { viewModel.setPeriod(period) },
+//                                            colors = ButtonDefaults.textButtonColors(
+//                                                contentColor = if (selectedPeriod == period) Blue else TextSecondary
+//                                            ),
+//                                            modifier = Modifier
+//                                                .height(32.dp)
+//                                                .width(36.dp)
+//                                        ) {
+//                                            Text(period, fontWeight = if (selectedPeriod == period) FontWeight.Bold else FontWeight.Normal)
+//                                        }
+//                                        if (idx != periodTabs.lastIndex) {
+//                                            Spacer(modifier = Modifier.width(2.dp))
+//                                        }
+//                                    }
+//                                }
+//                                Spacer(modifier = Modifier.height(8.dp))
+//                                // 원그래프 + 범례
+//                                items.topItems?.let { topItems ->
+//                                    val totalSales = topItems.sumOf { it.totalSales }
+//                                    val proportions = topItems.map { (it.totalSales / totalSales).toFloat() }
+//                                    val colors = listOf(LightBlue, Color(0xFFB3E5FC), Color(0xFF81D4FA), Color(0xFF4FC3F7))
+//
+//                                    Row(
+//                                        modifier = Modifier.fillMaxWidth()
+//                                            .height(200.dp),
+//                                        verticalAlignment = Alignment.CenterVertically
+//                                    ) {
+//                                        Box(
+//                                            modifier = Modifier.size(140.dp),
+//                                            contentAlignment = Alignment.Center
+//                                        ) {
+//                                            PieChart(
+//                                                proportions = proportions,
+//                                                colors = colors,
+//                                                startAnimation = startAnimation
+//                                            )
+//                                        }
+//                                        Spacer(modifier = Modifier.width(24.dp))
+//                                        Column {
+//                                            topItems.forEachIndexed { idx, item ->
+//                                                Row(verticalAlignment = Alignment.CenterVertically) {
+//                                                    Box(
+//                                                        modifier = Modifier
+//                                                            .size(20.dp)
+//                                                            .background(colors[idx], RoundedCornerShape(10.dp))
+//                                                    )
+//                                                    Spacer(modifier = Modifier.width(8.dp))
+//                                                    Text(item.recipeName, fontSize = 15.sp, color = TextPrimary)
+//                                                }
+//                                                Spacer(modifier = Modifier.height(8.dp))
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                    Spacer(modifier = Modifier.height(16.dp))
+//                }
+//            }
 
             // 매출 비교 카드
             salesComparison?.let { comparison ->
@@ -827,52 +827,59 @@ fun SummaryStatItem(label: String, value: Int, suffix: String = "원") {
 @Composable
 fun SalesComparisonCard(comparison: SalesComparisonResponse) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = CardWhite)
+        colors = CardDefaults.cardColors(containerColor = CardWhite),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(Modifier.padding(16.dp)) {
             Text("매출 비교", fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Spacer(Modifier.height(16.dp))
-            comparison.comparisons?.forEach { (period, data) ->
+            comparison.comparisons?.entries?.forEach { (period, data) ->
+                val isIncrease = data.isIncrease
+                val iconColor = if (isIncrease) Color(0xFF388E3C) else Color(0xFFD32F2F)
+                val textColor = iconColor
+                val label = when (period) {
+                    "day" -> "전일 대비"
+                    "week" -> "전주 대비"
+                    "month" -> "전월 대비"
+                    "year" -> "전년 대비"
+                    else -> period
+                }
+                val diffText = if (isIncrease) "상승" else "하락"
+                val diffRate = data.differenceRate.toInt()
+                val diffRateText = if (diffRate > 0) "+$diffRate%" else "$diffRate%"
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        when (period) {
-                            "day" -> "전일 대비"
-                            "week" -> "전주 대비"
-                            "month" -> "전월 대비"
-                            "year" -> "전년 대비"
-                            else -> period
-                        },
-                        fontSize = 14.sp
-                    )
+                    Text(label, fontSize = 15.sp, fontWeight = FontWeight.Medium)
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (period == "day" && data.previousSales == 0.0 && data.currentSales > 0.0) {
-                            // 전일 매출 0에서 증가한 경우 현재 매출 금액과 '신규' 표시
-                            Text(
-                                "₩ ${data.currentSales.toInt()} (신규)",
-                                color = Color.Green,
-                                fontWeight = FontWeight.Bold
-                            )
-                        } else {
-                            // 그 외 일반적인 경우 (증감률 표시)
-                            Icon(
-                                if (data.isIncrease) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                                contentDescription = null,
-                                tint = if (data.isIncrease) Color.Green else Color.Red
-                            )
-                            Text(
-                                "${data.differenceRate.toInt()}%",
-                                color = if (data.isIncrease) Color.Green else Color.Red,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Icon(
+                            if (isIncrease) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                            contentDescription = null,
+                            tint = iconColor,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            diffRateText,
+                            color = textColor,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            diffText,
+                            color = textColor,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }
