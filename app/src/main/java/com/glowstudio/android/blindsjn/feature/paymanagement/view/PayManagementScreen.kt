@@ -512,7 +512,7 @@ fun PayManagementScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text("순이익", fontSize = 14.sp, color = TextSecondary)
                                 Spacer(Modifier.height(4.dp))
-                                Text("₩ 350,000", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Blue)
+                                Text("₩ -650,000", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Blue)
                             }
                         }
                     }
@@ -845,7 +845,7 @@ fun SalesSummaryCard(summary: SalesSummaryResponse) {
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("전체 매출 현황", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary, modifier = Modifier.weight(1f))
+                Text("당월 매출 현황", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary, modifier = Modifier.weight(1f))
             }
             Spacer(Modifier.height(8.dp))
             summary.summary?.let { summaryData ->

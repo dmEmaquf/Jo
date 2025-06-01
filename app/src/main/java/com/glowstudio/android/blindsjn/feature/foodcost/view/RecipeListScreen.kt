@@ -145,13 +145,13 @@ fun RecipeListScreen(
                         color = TextPrimary
                     )
                     Text(
-                        text = "%,d원".format(recipe.price),
+                        text = "%,d".format(recipe.price),
                         modifier = Modifier.weight(1f).padding(start = 8.dp),
                         fontSize = 14.sp,
                         color = TextPrimary
                     )
                     Text(
-                        text = "%,d원".format(recipe.margin_info.total_ingredient_price.toInt()),
+                        text = "%,d".format(recipe.margin_info.total_ingredient_price.toInt()),
                         modifier = Modifier.weight(1f).padding(start = 8.dp),
                         fontSize = 14.sp,
                         color = TextPrimary

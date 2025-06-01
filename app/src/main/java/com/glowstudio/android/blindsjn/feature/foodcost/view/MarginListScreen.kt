@@ -180,6 +180,7 @@ private fun MarginSummaryCard(recipes: List<MarginItem>) {
     val totalCost = recipes.sumOf { it.cost }
     val totalMargin = totalSales - totalCost
     val marginRate = if (totalSales > 0) (totalMargin * 100f / totalSales).toInt() else 0
+    val averagePrice = if (recipes.isNotEmpty()) totalSales / recipes.size else 0
 
     Card(
         modifier = Modifier
@@ -202,8 +203,8 @@ private fun MarginSummaryCard(recipes: List<MarginItem>) {
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                MarginStatItem("총 판매가", totalSales)
-                MarginStatItem("제품 개수", totalCost)
+                MarginStatItem("제품 개수", recipes.size, "개")
+                MarginStatItem("평균 판매가", averagePrice)
                 MarginStatItem("평균 마진율", marginRate, "%")
             }
         }

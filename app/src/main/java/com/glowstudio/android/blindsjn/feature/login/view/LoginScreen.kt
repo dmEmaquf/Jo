@@ -77,19 +77,17 @@ fun LoginScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.45f)
+                .fillMaxHeight(0.5f)
                 .padding(0.dp),
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_logo),
+                painter = painterResource(R.drawable.info_1),
                 contentDescription = "Login Image",
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.FillBounds   ,
                 modifier = Modifier.fillMaxSize()
             )
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
 
         // 환영 메시지
         Text(
