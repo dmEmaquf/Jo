@@ -45,6 +45,7 @@ import com.glowstudio.android.blindsjn.feature.board.view.CategoryBottomSheet
 import com.glowstudio.android.blindsjn.data.network.UserManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import com.glowstudio.android.blindsjn.data.model.IndustryData
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -379,8 +380,11 @@ fun PostItem(
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
             modifier = Modifier.padding(bottom = 4.dp)
         ) {
+            val industryName = post.industryId?.let { id ->
+                IndustryData.getIndustryName(id)
+            } ?: post.category
             Text(
-                text = post.category,
+                text = industryName,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
@@ -544,8 +548,11 @@ fun PostItem(
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
             modifier = Modifier.padding(bottom = 4.dp)
         ) {
+            val industryName = post.industryId?.let { id ->
+                IndustryData.getIndustryName(id)
+            } ?: post.category
             Text(
-                text = post.category,
+                text = industryName,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,

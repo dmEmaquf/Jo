@@ -18,7 +18,7 @@ import com.glowstudio.android.blindsjn.feature.board.view.PostDetailScreen
 import com.glowstudio.android.blindsjn.feature.calendar.MessageScreen
 import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
 import com.glowstudio.android.blindsjn.feature.home.view.HomeScreen
-import com.glowstudio.android.blindsjn.feature.home.view.NewsDetailScreen
+import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
 import com.glowstudio.android.blindsjn.feature.home.NewsListScreen
 import com.glowstudio.android.blindsjn.feature.popular.PopularScreen
 import com.glowstudio.android.blindsjn.feature.profile.ProfileScreen

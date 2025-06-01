@@ -44,6 +44,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
 import kotlinx.coroutines.delay
+import androidx.compose.material3.ModalBottomSheet
+import com.glowstudio.android.blindsjn.feature.ocr.view.DailySalesBottomSheet
+import androidx.compose.material3.ExperimentalMaterial3Api
 
 @Composable
 private fun GoalSettingDialog(
@@ -129,6 +132,7 @@ private fun FixedCostSettingDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PayManagementScreen(
     viewModel: PayManagementViewModel,
@@ -635,7 +639,7 @@ fun PayManagementScreen(
             contentAlignment = Alignment.BottomEnd
         ) {
             var expanded by remember { mutableStateOf(false) }
-            
+            var showBottomSheet by remember { mutableStateOf(false) }
             Column(
                 horizontalAlignment = Alignment.End,
                 modifier = Modifier.padding(16.dp)
@@ -662,7 +666,7 @@ fun PayManagementScreen(
                             DropdownMenuItem(
                                 text = { Text("수동으로 매출 입력") },
                                 onClick = {
-                                    onNavigateToSalesInput()
+                                    showBottomSheet = true
                                     expanded = false
                                 },
                                 leadingIcon = {
@@ -681,6 +685,16 @@ fun PayManagementScreen(
                     Icon(
                         if (expanded) Icons.Default.ArrowUpward else Icons.Default.Edit,
                         contentDescription = "매출 입력"
+                    )
+                }
+            }
+            if (showBottomSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { showBottomSheet = false }
+                ) {
+                    DailySalesBottomSheet(
+                        onDismiss = { showBottomSheet = false },
+                        onSaved = { showBottomSheet = false }
                     )
                 }
             }

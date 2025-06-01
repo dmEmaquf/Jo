@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.glowstudio.android.blindsjn.feature.board.model.*
 import com.glowstudio.android.blindsjn.feature.board.repository.PostRepository
 import com.glowstudio.android.blindsjn.data.network.Network
+import com.glowstudio.android.blindsjn.data.model.IndustryData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -41,20 +42,57 @@ class PostViewModel : ViewModel() {
     fun loadPosts() {
         viewModelScope.launch {
             try {
+                android.util.Log.d("PostViewModel", "Starting to load posts")
                 val response = PostRepository.loadPosts()
-                android.util.Log.d("PostViewModel", "Load posts response: ${response.body()}")
+                android.util.Log.d("PostViewModel", "Load posts response code: ${response.code()}")
+                android.util.Log.d("PostViewModel", "Load posts raw response: ${response.raw()}")
+                android.util.Log.d("PostViewModel", "Load posts response body: ${response.body()}")
+                
                 if (response.isSuccessful) {
                     response.body()?.let { apiResponse ->
+                        android.util.Log.d("PostViewModel", "API Response status: ${apiResponse.status}")
                         apiResponse.data?.let { posts ->
-                            android.util.Log.d("PostViewModel", "Loaded posts: $posts")
-                            _posts.value = posts
+                            android.util.Log.d("PostViewModel", "Number of posts loaded: ${posts.size}")
+                            _posts.value = posts.map { post ->
+                                android.util.Log.d("PostViewModel", "Processing post: id=${post.id}, category=${post.category}, industryId=${post.industryId}")
+                                
+                                // 서버에서 받은 industry_id를 그대로 사용
+                                val industryName = if (post.industryId != null) {
+                                    IndustryData.getIndustryName(post.industryId)
+                                } else {
+                                    post.category
+                                }
+                                
+                                android.util.Log.d("PostViewModel", "Using industryId: ${post.industryId}, category: ${post.category}, industryName: $industryName")
+                                
+                                post.copy(
+                                    category = post.category,
+                                    industry = industryName,
+                                    industryId = post.industryId,
+                                    title = post.title ?: "",
+                                    content = post.content ?: "",
+                                    experience = post.experience ?: "",
+                                    time = post.time ?: ""
+                                )
+                            }
+                            android.util.Log.d("PostViewModel", "Posts after processing: ${_posts.value}")
+                        } ?: run {
+                            android.util.Log.e("PostViewModel", "Posts data is null in API response")
+                            _posts.value = emptyList()
                         }
+                    } ?: run {
+                        android.util.Log.e("PostViewModel", "API response body is null")
+                        _posts.value = emptyList()
                     }
                 } else {
+                    android.util.Log.e("PostViewModel", "Failed to load posts: ${response.code()} - ${response.message()}")
                     _statusMessage.value = "불러오기 실패: ${response.message()}"
+                    _posts.value = emptyList()
                 }
             } catch (e: Exception) {
+                android.util.Log.e("PostViewModel", "Error loading posts", e)
                 _statusMessage.value = "에러: ${e.message}"
+                _posts.value = emptyList()
             }
         }
     }
@@ -126,29 +164,52 @@ class PostViewModel : ViewModel() {
         }
     }
 
-    fun savePost(title: String, content: String, userId: Int, industry: String, industryId: Int? = null, phoneNumber: String, experience: String = "", tags: List<String> = emptyList()) {
+    fun savePost(title: String, content: String, userId: Int, industry: String, industryId: Int? = null, tags: List<String> = emptyList()) {
         viewModelScope.launch {
             try {
-                android.util.Log.d("PostViewModel", "Starting to save post with tags: $tags")
+                // 필수 입력값 검증
+                if (title.isBlank()) {
+                    _statusMessage.value = "제목을 입력해주세요."
+                    return@launch
+                }
+                if (content.isBlank()) {
+                    _statusMessage.value = "내용을 입력해주세요."
+                    return@launch
+                }
+                if (industry.isBlank()) {
+                    _statusMessage.value = "카테고리를 선택해주세요."
+                    return@launch
+                }
+
+                android.util.Log.d("PostViewModel", "Starting to save post with industry: $industry, industryId: $industryId")
                 val postRequest = PostRequest(
                     title = title,
                     content = content,
                     userId = userId,
                     category = industry,
                     industryId = industryId,
-                    phoneNumber = phoneNumber,
-                    experience = experience,
                     tags = tags
                 )
-                android.util.Log.d("PostViewModel", "Created PostRequest with tags: ${postRequest.tags}")
+                android.util.Log.d("PostViewModel", "Created PostRequest with industry: ${postRequest.industry}, industryId: ${postRequest.industryId}")
                 val response = PostRepository.savePost(postRequest)
                 android.util.Log.d("PostViewModel", "Save post response: ${response.body()}")
+                
                 if (response.isSuccessful) {
-                    android.util.Log.d("PostViewModel", "Post saved successfully, reloading posts")
-                    loadPosts()
-                    _shouldNavigateBack.value = true
+                    response.body()?.let { apiResponse ->
+                        if (apiResponse.status == "success") {
+                            android.util.Log.d("PostViewModel", "Post saved successfully, reloading posts")
+                            loadPosts()
+                            _shouldNavigateBack.value = true
+                        } else {
+                            android.util.Log.e("PostViewModel", "Failed to save post: ${apiResponse.message}")
+                            _statusMessage.value = apiResponse.message ?: "저장 실패"
+                        }
+                    } ?: run {
+                        android.util.Log.e("PostViewModel", "Response body is null")
+                        _statusMessage.value = "서버 응답이 비어있습니다."
+                    }
                 } else {
-                    android.util.Log.e("PostViewModel", "Failed to save post: ${response.message()}")
+                    android.util.Log.e("PostViewModel", "Failed to save post: ${response.code()} - ${response.message()}")
                     _statusMessage.value = "저장 실패: ${response.message()}"
                 }
             } catch (e: Exception) {

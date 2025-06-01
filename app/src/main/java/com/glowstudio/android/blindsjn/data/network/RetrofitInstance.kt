@@ -7,6 +7,7 @@ package com.glowstudio.android.blindsjn.data.network
  **/
 
 import com.glowstudio.android.blindsjn.data.network.ApiService
+import com.glowstudio.android.blindsjn.data.model.*
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -16,6 +17,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import retrofit2.http.GET
 import retrofit2.http.Query
+import retrofit2.http.POST
+import retrofit2.http.Body
 
 // 네이버 뉴스 응답 모델
 data class NaverNewsItem(
@@ -40,6 +43,16 @@ interface NaverNewsApiService {
     ): Response<NaverNewsResponse>
 }
 
+// 공공데이터 API 서비스 인터페이스
+interface PublicApiService {
+    @POST("nts-businessman/v1/status")
+    suspend fun checkBusinessStatus(
+        @Query("serviceKey") serviceKey: String,
+        @Query("returnType") returnType: String,
+        @Body request: BusinessStatusRequest
+    ): Response<BusinessStatusResponse>
+}
+
 // 공통 네트워크 설정
 object NetworkConfig {
     const val INTERNAL_BASE_URL = "http://wonrdc.iptime.org/"
@@ -50,10 +63,10 @@ object NetworkConfig {
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         })
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .build()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
 
     private val naverClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
@@ -78,10 +91,10 @@ object NetworkConfig {
 // 네이버 뉴스 서버용 Retrofit 인스턴스
 object NaverNewsServer {
     private val retrofit = Retrofit.Builder()
-            .baseUrl(NetworkConfig.NAVER_BASE_URL)
+        .baseUrl(NetworkConfig.NAVER_BASE_URL)
         .client(NetworkConfig.naverClientInstance)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
 
     val apiService: NaverNewsApiService = retrofit.create(NaverNewsApiService::class.java)
 }
@@ -89,10 +102,10 @@ object NaverNewsServer {
 // 내부 서버
 object InternalServer {
     private val retrofit = Retrofit.Builder()
-            .baseUrl(NetworkConfig.INTERNAL_BASE_URL)
+        .baseUrl(NetworkConfig.INTERNAL_BASE_URL)
         .client(NetworkConfig.defaultClientInstance)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
-            .build()
+        .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
+        .build()
 
     val api: ApiService = retrofit.create(ApiService::class.java)
 }
@@ -100,10 +113,10 @@ object InternalServer {
 // 공공 API 서버용 Retrofit 인스턴스
 object PublicApiRetrofitInstance {
     private val retrofit = Retrofit.Builder()
-            .baseUrl(NetworkConfig.PUBLIC_API_BASE_URL)
+        .baseUrl(NetworkConfig.PUBLIC_API_BASE_URL)
         .client(NetworkConfig.defaultClientInstance)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
 
-    val api: ApiService = retrofit.create(ApiService::class.java)
+    val api: PublicApiService = retrofit.create(PublicApiService::class.java)
 }

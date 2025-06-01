@@ -33,26 +33,29 @@ class BoardViewModel : ViewModel() {
                 val phoneNumber = UserManager.getPhoneNumber(context)
                 Log.d("BoardViewModel", "Phone number: $phoneNumber")
                 if (phoneNumber != null) {
-                    _isCertified.value = repository.checkAlreadyCertified(phoneNumber)
-                    Log.d("BoardViewModel", "Is certified: ${_isCertified.value}")
-                    if (_isCertified.value) {
-                        val certification = repository.getBusinessCertification(phoneNumber)
-                        if (certification.isSuccessful) {
-                            certification.body()?.data?.let { cert ->
-                                val response = repository.getIndustries()
-                                if (response.isSuccessful) {
-                                    response.body()?.data?.let { industries ->
-                                        val industry = industries.find { it.id == cert.industryId }
-                                        _certifiedIndustry.value = industry?.name
-                                        Log.d("BoardViewModel", "Certified industry: ${_certifiedIndustry.value}")
-                                    }
+                    // 사업자 인증 정보 조회
+                    val certification = repository.getBusinessCertification(phoneNumber)
+                    if (certification.isSuccessful) {
+                        certification.body()?.data?.let { cert ->
+                            _isCertified.value = true
+                            val response = repository.getIndustries()
+                            if (response.isSuccessful) {
+                                response.body()?.data?.let { industries ->
+                                    val industry = industries.find { it.id == cert.industryId }
+                                    _certifiedIndustry.value = industry?.name
+                                    Log.d("BoardViewModel", "Certified industry: ${_certifiedIndustry.value}")
                                 }
                             }
                         }
+                    } else {
+                        _isCertified.value = false
+                        _certifiedIndustry.value = null
                     }
                 }
             } catch (e: Exception) {
                 Log.e("BoardViewModel", "Error checking certification", e)
+                _isCertified.value = false
+                _certifiedIndustry.value = null
             }
         }
     }
@@ -60,12 +63,12 @@ class BoardViewModel : ViewModel() {
     fun isCategoryEnabled(category: BoardCategory): Boolean {
         val enabled = when {
             category.title == "인기 게시판" -> false // 인기 게시판은 선택 불가
-            category.group == "소통" -> true // 소통 카테고리(자유게시판)는 항상 활성화
-            !_isCertified.value -> false // 인증되지 않은 사용자는 업종별 게시판 선택 불가
+            !_isCertified.value -> category.group == "소통" // 인증되지 않은 사용자는 자유게시판만 선택 가능
+            category.title == "자유게시판" -> true // 인증된 사용자는 자유게시판 선택 가능
             category.title == _certifiedIndustry.value -> true // 인증된 사용자는 자신의 업종만 선택 가능
             else -> false // 그 외의 경우 선택 불가
         }
-        Log.d("BoardViewModel", "Category ${category.title} enabled: $enabled")
+        Log.d("BoardViewModel", "Category ${category.title} enabled: $enabled (isCertified: ${_isCertified.value}, certifiedIndustry: ${_certifiedIndustry.value})")
         return enabled
     }
 }

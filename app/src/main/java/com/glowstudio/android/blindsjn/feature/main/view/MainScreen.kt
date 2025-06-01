@@ -26,7 +26,7 @@ import androidx.navigation.navArgument
 import java.net.URLDecoder
 import com.google.gson.Gson
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
-import com.glowstudio.android.blindsjn.feature.home.view.NewsDetailScreen
+import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
 import com.glowstudio.android.blindsjn.data.model.Article
 import com.glowstudio.android.blindsjn.data.network.Network
 import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementRepository
@@ -255,7 +255,8 @@ fun MainScreen(
                     }
                     composable("news_detail/{articleJson}") { backStackEntry ->
                         val articleJson = backStackEntry.arguments?.getString("articleJson") ?: ""
-                        val article = Gson().fromJson(articleJson, Article::class.java)
+                        val decodedArticleJson = URLDecoder.decode(articleJson, "UTF-8")
+                        val article = Gson().fromJson(decodedArticleJson, Article::class.java)
                         NewsDetailScreen(
                             title = article.title ?: "",
                             content = article.content,

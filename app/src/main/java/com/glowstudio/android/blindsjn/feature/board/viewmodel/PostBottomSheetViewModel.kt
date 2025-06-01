@@ -49,7 +49,7 @@ class PostBottomSheetViewModel : ViewModel() {
                 // 1. 사업자 인증 상태 확인
                 val phoneNumber = UserManager.getPhoneNumber(context)
                 if (phoneNumber != null) {
-                    val isCertified = repository.checkAlreadyCertified(phoneNumber)
+                    val (isCertified, _) = repository.checkAlreadyCertified(phoneNumber, "")
                     if (isCertified) {
                         val certification = repository.getBusinessCertification(phoneNumber)
                         if (certification.isSuccessful) {
