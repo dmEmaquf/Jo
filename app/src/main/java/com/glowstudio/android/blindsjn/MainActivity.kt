@@ -15,14 +15,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.glowstudio.android.blindsjn.ui.navigation.AppNavHost
+import com.glowstudio.android.blindsjn.ui.navigation.Navigation
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 import com.glowstudio.android.blindsjn.feature.splash.SplashScreen
-import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.LaunchedEffect
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.core.content.ContextCompat
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -52,20 +52,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    var showSplash by remember { mutableStateOf(true) }
-                    if (showSplash) {
-                        SplashScreen(
-                            onSplashFinished = {
-                                showSplash = false
-                            }
-                        )
-                    } else {
-                        val navController = rememberNavController()
-                        val topBarViewModel: TopBarViewModel = viewModel()
-                        AppNavHost(
-                            navController = navController
-                        )
-                    }
+                    Navigation()
                 }
             }
         }

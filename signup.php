@@ -13,20 +13,40 @@ header("Access-Control-Allow-Headers: Content-Type");
 // DB 연결
 require_once "db.php";
 
+// 요청 데이터 파싱
+$data = json_decode(file_get_contents("php://input"));
+
+// 입력값 추출
+$phone = $data->phoneNumber ?? "";
+$password = $data->password ?? "";
+$verificationCode = $data->verificationCode ?? "";
+
+// 입력값 검증
+if (empty($phone) || empty($password) || empty($verificationCode)) {
+    echo json_encode([
+        "status" => "error",
+        "message" => "전화번호, 비밀번호, 인증번호가 필요합니다."
+    ]);
+    exit;
+}
+
+// 중복 체크: 이미 존재하는 전화번호인지 확인
+$checkStmt = $mysqli->prepare("SELECT user_id FROM SimpleUsers WHERE phonenumber = ?");
+$checkStmt->bind_param("s", $phone);
+$checkStmt->execute();
+$checkResult = $checkStmt->get_result();
+
+if ($checkResult->num_rows > 0) {
+    echo json_encode([
+        "status" => "error",
+        "message" => "이미 가입된 전화번호입니다. 로그인을 시도해주세요.",
+        "errorCode" => "DUPLICATE_PHONE"
+    ]);
+    exit;
+}
+$checkStmt->close();
+
 try {
-    // 요청 데이터 파싱
-    $data = json_decode(file_get_contents("php://input"));
-
-    // 입력값 추출
-    $phone = $data->phoneNumber ?? "";
-    $password = $data->password ?? "";
-    $verificationCode = $data->verificationCode ?? "";
-
-    // 입력값 검증
-    if (empty($phone) || empty($password) || empty($verificationCode)) {
-        throw new Exception("전화번호, 비밀번호, 인증번호가 필요합니다.");
-    }
-
     // 비밀번호 유효성 검사
     if (strlen($password) < 8) {
         throw new Exception("비밀번호는 8자 이상이어야 합니다.");
@@ -49,17 +69,6 @@ try {
     if ($result->num_rows === 0) {
         throw new Exception("유효하지 않은 인증번호입니다.");
     }
-
-    // 중복 체크: 이미 존재하는 전화번호인지 확인
-    $checkStmt = $mysqli->prepare("SELECT user_id FROM SimpleUsers WHERE phonenumber = ?");
-    $checkStmt->bind_param("s", $phone);
-    $checkStmt->execute();
-    $checkResult = $checkStmt->get_result();
-
-    if ($checkResult->num_rows > 0) {
-        throw new Exception("이미 등록된 전화번호입니다.");
-    }
-    $checkStmt->close();
 
     // 비밀번호 해싱
     $hashed = password_hash($password, PASSWORD_DEFAULT);
@@ -96,9 +105,6 @@ try {
     // 연결 종료
     if (isset($stmt)) {
         $stmt->close();
-    }
-    if (isset($checkStmt)) {
-        $checkStmt->close();
     }
     if (isset($mysqli)) {
         $mysqli->close();

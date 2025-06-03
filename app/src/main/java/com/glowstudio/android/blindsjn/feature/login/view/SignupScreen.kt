@@ -28,7 +28,7 @@ import com.glowstudio.android.blindsjn.data.repository.PhoneVerificationReposito
 import kotlinx.coroutines.launch
 
 //서버 클라이언트 간 회원가입 실행 함수
-suspend fun signup(request: SignupRequest): Boolean {
+suspend fun signup(request: SignupRequest): Result<Boolean> {
     return try {
         // 서버에 회원가입 요청
         val response = Network.apiService.signup(request)
@@ -40,23 +40,41 @@ suspend fun signup(request: SignupRequest): Boolean {
         if (response.isSuccessful) {
             val result = response.body()
             Log.d("SignupScreen", "Signup response: $result")
-            result?.status == "success"
+            
+            if (result?.status == "success") {
+                Result.success(true)
+            } else {
+                // 서버에서 보낸 에러 메시지 사용
+                Result.failure(Exception(result?.message ?: "회원가입에 실패했습니다."))
+            }
         } else {
-            // 오류 로그 출력
-            Log.e("SignupScreen", "Signup failed: ${response.errorBody()?.string()}")
-            false
+            // 오류 응답 파싱
+            val errorBody = response.errorBody()?.string()
+            Log.e("SignupScreen", "Signup failed: $errorBody")
+            
+            // JSON 파싱
+            val errorJson = org.json.JSONObject(errorBody ?: "{}")
+            val errorCode = errorJson.optString("errorCode")
+            val errorMessage = errorJson.optString("message")
+            
+            if (errorCode == "DUPLICATE_PHONE") {
+                Result.failure(Exception("이미 가입된 전화번호입니다. 로그인을 시도해주세요."))
+            } else {
+                Result.failure(Exception(errorMessage.ifEmpty { "회원가입에 실패했습니다. 다시 시도해주세요." }))
+            }
         }
     } catch (e: Exception) {
         // 네트워크 오류 처리
         Log.e("SignupScreen", "Error during signup: ${e.message}", e)
-        false
+        Result.failure(e)
     }
 }
 
 @Composable
 fun SignupScreen(
     onSignupClick: (String, String) -> Unit,
-    onBackToLoginClick: () -> Unit
+    onBackToLoginClick: () -> Unit,
+    onForgotPasswordClick: () -> Unit
 ) {
     // 상태 변수
     var phoneNumber by remember { mutableStateOf("") }
@@ -252,16 +270,22 @@ fun SignupScreen(
                     isLoading = true
                     errorMessage = ""
                     try {
-                        val request = SignupRequest(phoneNumber, password)
-                        val success = signup(request)
-                    if (success) {
-                            onSignupClick(phoneNumber, password)
-                    } else {
-                            errorMessage = "회원가입에 실패했습니다. 다시 시도해주세요."
-                        }
+                        val request = SignupRequest(
+                            phoneNumber = phoneNumber,
+                            password = password,
+                            verificationCode = verificationCode
+                        )
+                        signup(request)
+                            .onSuccess { success ->
+                                if (success) {
+                                    onSignupClick(phoneNumber, password)
+                                }
+                            }
+                            .onFailure { e ->
+                                errorMessage = e.message ?: "회원가입에 실패했습니다. 다시 시도해주세요."
+                            }
                     } catch (e: Exception) {
-                        errorMessage = "네트워크 오류가 발생했습니다. 다시 시도해주세요."
-                        Log.e("SignupScreen", "Error during signup: ${e.message}", e)
+                        errorMessage = e.message ?: "회원가입에 실패했습니다. 다시 시도해주세요."
                     } finally {
                         isLoading = false
                     }
@@ -277,7 +301,7 @@ fun SignupScreen(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-            Text("회원가입")
+                Text("회원가입")
             }
         }
 
@@ -286,6 +310,11 @@ fun SignupScreen(
         // 로그인 화면으로 돌아가기
         TextButton(onClick = onBackToLoginClick) {
             Text("이미 계정이 있으신가요? 로그인")
+        }
+
+        // 비밀번호 찾기 링크 추가
+        TextButton(onClick = onForgotPasswordClick) {
+            Text("비밀번호를 잊어버리셨나요?")
         }
     }
 }

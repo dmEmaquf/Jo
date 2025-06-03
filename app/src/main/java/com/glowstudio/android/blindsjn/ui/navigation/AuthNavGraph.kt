@@ -1,41 +1,41 @@
 package com.glowstudio.android.blindsjn.ui.navigation
 
-import androidx.navigation.NavGraphBuilder
+import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import com.glowstudio.android.blindsjn.feature.login.view.LoginScreen
 import com.glowstudio.android.blindsjn.feature.login.view.SignupScreen
 
-fun NavGraphBuilder.authNavGraph(
+@Composable
+fun AuthNavGraph(
     navController: NavHostController,
-    onAuthSuccess: () -> Unit
+    onLoginSuccess: (String, String) -> Unit,
+    onForgotPasswordClick: () -> Unit
 ) {
-    navigation(
-        startDestination = "login",
-        route = "auth"
-    ) {
-        composable("login") {
+    when (navController.currentBackStackEntry?.destination?.route) {
+        "login" -> {
             LoginScreen(
-                onLoginClick = { success ->
-                    if (success) onAuthSuccess()
+                onLoginClick = { phone, password ->
+                    onLoginSuccess(phone, password)
                 },
-                onSignupClick = { navController.navigate("signup") },
-                onForgotPasswordClick = { navController.navigate("forgot") }
+                onSignupClick = {
+                    navController.navigate("signup")
+                },
+                onForgotPasswordClick = onForgotPasswordClick
             )
         }
-
-        composable("signup") {
+        "signup" -> {
             SignupScreen(
-                onSignupClick = { phoneNumber, password ->
-                    onAuthSuccess()
+                onSignupClick = { phone, password ->
+                    navController.navigate("login") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                    onLoginSuccess(phone, password)
                 },
-                onBackToLoginClick = { navController.navigateUp() }
+                onBackToLoginClick = {
+                    navController.navigateUp()
+                },
+                onForgotPasswordClick = onForgotPasswordClick
             )
-        }
-
-        composable("forgot") {
-            // TODO: ForgotPasswordScreen 구현
         }
     }
 } 
