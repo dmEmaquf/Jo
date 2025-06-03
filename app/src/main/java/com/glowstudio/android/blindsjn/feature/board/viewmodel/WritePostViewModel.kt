@@ -46,8 +46,8 @@ class WritePostViewModel(
         return _selectedCategory.value?.let { category ->
             android.util.Log.d("WritePostViewModel", "Getting industry ID for category: ${category.title}")
             if (category.title == "자유게시판") {
-                android.util.Log.d("WritePostViewModel", "Category is 자유게시판, returning null")
-                null
+                android.util.Log.d("WritePostViewModel", "Category is 자유게시판, returning 9")
+                9
             } else {
                 // 카테고리 제목과 일치하는 업종 ID 찾기
                 val industryId = IndustryData.industries.entries

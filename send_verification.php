@@ -25,16 +25,14 @@ error_log("Request received: " . $rawInput);
 
 // 필수 파일 포함
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
-// Twilio SDK 사용 가능 여부 확인
-$useTwilio = false;
-if (file_exists(__DIR__ . '/vendor/autoload.php')) {
-    require_once __DIR__ . '/vendor/autoload.php';
-    $useTwilio = true;
-}
+use Twilio\Rest\Client;
 
-// 디버깅: 파일 포함 확인
-error_log("Required files included");
+// Twilio 계정 정보
+$account_sid = 'YOUR_ACCOUNT_SID';
+$auth_token = 'YOUR_AUTH_TOKEN';
+$twilio_number = 'YOUR_TWILIO_PHONE_NUMBER';
 
 try {
     // JSON 요청 데이터 파싱
@@ -81,23 +79,16 @@ try {
     // 디버깅: DB 저장 확인
     error_log("Verification code saved to database");
     
-    // SMS 발송 처리
-    if ($useTwilio) {
-        // Twilio를 사용한 SMS 발송
-        $client = new Twilio\Rest\Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-        $message = $client->messages->create(
-            $phoneNumber,
-            [
-                'from' => TWILIO_PHONE_NUMBER,
-                'body' => "인증번호: $verificationCode"
-            ]
-        );
-        error_log("SMS sent via Twilio");
-    } else {
-        // Twilio 없이 임시로 콘솔에 출력 (개발 환경에서만 사용)
-        error_log("SMS would be sent to: $phoneNumber with code: $verificationCode");
-        // TODO: 여기에 다른 SMS 서비스 연동 코드 추가 가능
-    }
+    // Twilio를 사용한 SMS 발송
+    $client = new Client($account_sid, $auth_token);
+    $message = $client->messages->create(
+        $phoneNumber,
+        [
+            'from' => $twilio_number,
+            'body' => "인증번호: $verificationCode"
+        ]
+    );
+    error_log("SMS sent via Twilio");
     
     // 모든 출력 버퍼 비우기
     ob_clean();
