@@ -11,6 +11,7 @@ import com.glowstudio.android.blindsjn.feature.foodcost.model.Ingredient
 import com.glowstudio.android.blindsjn.feature.foodcost.model.IngredientRequest
 import com.glowstudio.android.blindsjn.feature.foodcost.model.MarginData
 import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementApi
+import com.glowstudio.android.blindsjn.data.api.PhoneVerificationService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
@@ -79,6 +80,7 @@ object Network {
     val apiService: ApiService = retrofit.create(ApiService::class.java)
     val foodCostApiService: FoodCostApiService = retrofit.create(FoodCostApiService::class.java)
     val payManagementApiService: PayManagementApi = retrofit.create(PayManagementApi::class.java)
+    val phoneVerificationService: PhoneVerificationService = retrofit.create(PhoneVerificationService::class.java)
 }
 
 // ✅ Retrofit API 인터페이스
