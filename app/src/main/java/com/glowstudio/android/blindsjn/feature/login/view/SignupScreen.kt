@@ -277,13 +277,13 @@ fun SignupScreen(
                         )
                         signup(request)
                             .onSuccess { success ->
-                                if (success) {
-                                    onSignupClick(phoneNumber, password)
+                    if (success) {
+                            onSignupClick(phoneNumber, password)
                                 }
                             }
                             .onFailure { e ->
                                 errorMessage = e.message ?: "회원가입에 실패했습니다. 다시 시도해주세요."
-                            }
+                        }
                     } catch (e: Exception) {
                         errorMessage = e.message ?: "회원가입에 실패했습니다. 다시 시도해주세요."
                     } finally {
@@ -301,7 +301,7 @@ fun SignupScreen(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Text("회원가입")
+            Text("회원가입")
             }
         }
 

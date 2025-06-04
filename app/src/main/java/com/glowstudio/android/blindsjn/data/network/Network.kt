@@ -32,11 +32,9 @@ fun isNetworkAvailable(context: Context): Boolean {
     return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
 
-object Network {
-    private const val BASE_URL = "http://wonrdc.iptime.org/"
-    private const val TIMEOUT_SECONDS = 30L
-
-    private val responseInterceptor = Interceptor { chain ->
+// 응답 인터셉터 클래스
+class ResponseInterceptor : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
         val response = chain.proceed(chain.request())
         val responseBody = response.body?.string()
         
@@ -52,16 +50,34 @@ object Network {
         } ?: "{}"
 
         // Create new response with cleaned body
-        response.newBuilder()
+        return response.newBuilder()
             .body(ResponseBody.create(response.body?.contentType(), jsonResponse))
             .build()
     }
+}
+
+// POST 메소드 인터셉터 클래스
+class PostMethodInterceptor : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
+        val original = chain.request()
+        val request = original.newBuilder()
+            .header("Content-Type", "application/json")
+            .method("POST", original.body)
+            .build()
+        return chain.proceed(request)
+    }
+}
+
+object Network {
+    private const val BASE_URL = "http://wonrdc.iptime.org/"
+    private const val TIMEOUT_SECONDS = 30L
 
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         })
-        .addInterceptor(responseInterceptor)
+        .addInterceptor(ResponseInterceptor())
+        .addInterceptor(PostMethodInterceptor())
         .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)

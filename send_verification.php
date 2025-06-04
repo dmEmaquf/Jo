@@ -1,142 +1,208 @@
 <?php
-// 모든 출력 버퍼링 시작
+// 출력 버퍼링 시작
 ob_start();
 
-// 오류 로깅 설정
-ini_set('log_errors', 1);
-ini_set('error_log', 'php_errors.log');
+// ⚠️ 개발 중 디버깅 설정 (배포 시 제거 권장)
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// 디버깅: 시작 로그
-error_log("Script started");
+// 실행 시간 제한 설정
+set_time_limit(30); // 30초
+ini_set('max_execution_time', 30);
 
-// 모든 출력 버퍼 비우기
-ob_clean();
+// 로그 파일 설정 - 시스템 로그 디렉토리 사용
+ini_set('log_errors', 1);
+ini_set('error_log', '/tmp/sms_errors.log');
 
-// 헤더 설정
-header('Content-Type: application/json; charset=UTF-8');
+// 요청 정보 로깅
+error_log("Request Method: " . $_SERVER['REQUEST_METHOD']);
+error_log("Request Headers: " . print_r(getallheaders(), true));
+error_log("Raw Input: " . file_get_contents("php://input"));
+
+// JSON 응답 헤더 설정
+header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// 디버깅: 요청 정보 로깅
-$rawInput = file_get_contents("php://input");
-error_log("Request received: " . $rawInput);
-
-// 필수 파일 포함
-require_once __DIR__ . '/db.php';
-require_once __DIR__ . '/vendor/autoload.php';
-
-use Twilio\Rest\Client;
-
-// Twilio 계정 정보
-$account_sid = 'YOUR_ACCOUNT_SID';
-$auth_token = 'YOUR_AUTH_TOKEN';
-$twilio_number = 'YOUR_TWILIO_PHONE_NUMBER';
+// 기본 응답 변수 초기화
+$response = [
+    "status" => "error",
+    "message" => "알 수 없는 오류가 발생했습니다."
+];
 
 try {
-    // JSON 요청 데이터 파싱
-    $data = json_decode($rawInput);
-    
+    // OPTIONS 요청 처리
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        http_response_code(200);
+        $response = [
+            "status" => "success",
+            "message" => "OK"
+        ];
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
+        ob_end_flush();
+        exit();
+    }
+
+    // POST 요청이 아닌 경우 오류 반환
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        $response = [
+            "status" => "error",
+            "message" => "잘못된 요청 메소드입니다. (현재 메소드: " . $_SERVER['REQUEST_METHOD'] . ")"
+        ];
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
+        ob_end_flush();
+        exit();
+    }
+
+    // DB 연결
+    require_once "db.php";
+
+    // JSON 요청 데이터 읽기
+    $json = file_get_contents("php://input");
+    $data = json_decode($json, true);
+
+    // JSON 파싱 오류 처리
     if (json_last_error() !== JSON_ERROR_NONE) {
-        throw new Exception('잘못된 JSON 형식입니다: ' . json_last_error_msg());
-    }
-    
-    // 전화번호 검증
-    $phoneNumber = $data->phoneNumber ?? '';
-    if (empty($phoneNumber)) {
-        throw new Exception('전화번호가 필요합니다.');
+        throw new Exception("잘못된 JSON 형식입니다.");
     }
 
-    // 디버깅: 전화번호 확인
-    error_log("Phone number received: " . $phoneNumber);
+    // 전화번호 필드 검증
+    if (!isset($data['phoneNumber'])) {
+        throw new Exception("전화번호가 필요합니다.");
+    }
 
-    // 이전 인증번호 만료 처리
-    $stmt = $mysqli->prepare("
-        UPDATE sms_verifications 
-        SET is_verified = TRUE 
-        WHERE phone_number = ? AND expires_at < NOW()
-    ");
-    $stmt->bind_param("s", $phoneNumber);
-    $stmt->execute();
-    
-    // 새로운 인증번호 생성 (6자리)
+    // 전화번호 형식 검증
+    $phone = preg_replace('/[^0-9]/', '', $data['phoneNumber']);
+    if (!preg_match('/^01[016789][0-9]{7,8}$/', $phone)) {
+        throw new Exception('유효하지 않은 전화번호 형식입니다.');
+    }
+
+    // 6자리 랜덤 인증번호 생성
     $verificationCode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-    $expiresAt = date('Y-m-d H:i:s', strtotime('+3 minutes'));
-    
-    // 디버깅: 인증번호 생성 확인
-    error_log("Generated verification code: " . $verificationCode);
-    
+
     // 인증번호 저장
     $stmt = $mysqli->prepare("
-        INSERT INTO sms_verifications 
-        (phone_number, verification_code, expires_at) 
-        VALUES (?, ?, ?)
+        INSERT INTO sms_verifications (
+            phone_number,
+            verification_code,
+            is_verified,
+            created_at,
+            expires_at
+        ) VALUES (?, ?, 0, NOW(), DATE_ADD(NOW(), INTERVAL 5 MINUTE))
     ");
-    $stmt->bind_param("sss", $phoneNumber, $verificationCode, $expiresAt);
-    $stmt->execute();
+    $stmt->bind_param("ss", $phone, $verificationCode);
     
-    // 디버깅: DB 저장 확인
-    error_log("Verification code saved to database");
-    
-    // Twilio를 사용한 SMS 발송
-    $client = new Client($account_sid, $auth_token);
-    $message = $client->messages->create(
-        $phoneNumber,
-        [
-            'from' => $twilio_number,
-            'body' => "인증번호: $verificationCode"
-        ]
-    );
-    error_log("SMS sent via Twilio");
-    
-    // 모든 출력 버퍼 비우기
-    ob_clean();
-    
-    // 성공 응답
-    $response = [
-        'status' => 'success',
-        'message' => '인증번호가 발송되었습니다.'
-    ];
-    $jsonResponse = json_encode($response, JSON_UNESCAPED_UNICODE);
-    error_log("Sending response: " . $jsonResponse);
-    
-    // 응답 전송
-    echo $jsonResponse;
-    exit;
+    if (!$stmt->execute()) {
+        throw new Exception("인증번호 저장 실패: " . $stmt->error);
+    }
+
+    // Twilio 설정
+    $account_sid = 'AC864c28e02855be96b986e7d2b48e93b7';
+    $auth_token = 'bc4582bf70c4d675cb3d45a39b68c67a';
+    $twilio_number = '+14155238886'; // 미국 Twilio 번호로 변경
+
+    // 국제 형식으로 변환 (+82)
+    $internationalPhone = '+82' . substr($phone, 1);
+
+    try {
+        // cURL 사용 가능 여부 확인
+        if (!function_exists('curl_init')) {
+            throw new Exception("cURL이 설치되어 있지 않습니다.");
+        }
+
+        // Twilio API 엔드포인트
+        $url = "https://api.twilio.com/2010-04-01/Accounts/{$account_sid}/Messages.json";
+        
+        // 요청 데이터 준비
+        $postData = http_build_query([
+            'To' => $internationalPhone,
+            'From' => $twilio_number,
+            'Body' => "[GrowStudio] 인증번호: {$verificationCode}"
+        ]);
+
+        error_log("Twilio Request URL: " . $url);
+        error_log("Twilio Request Data: " . $postData);
+
+        // cURL 초기화
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERPWD, "{$account_sid}:{$auth_token}");
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/x-www-form-urlencoded'
+        ]);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // SSL 인증서 검증 비활성화 (개발 환경에서만)
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false); // SSL 호스트 검증 비활성화 (개발 환경에서만)
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10); // 10초 타임아웃 설정
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // 5초 연결 타임아웃 설정
+
+        // 요청 실행
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        $info = curl_getinfo($ch);
+        
+        error_log("Twilio Response Code: " . $httpCode);
+        error_log("Twilio Response: " . $response);
+        error_log("Twilio Error: " . $error);
+        error_log("Twilio Info: " . print_r($info, true));
+        
+        curl_close($ch);
+
+        if ($httpCode !== 201) {
+            throw new Exception("SMS 전송 실패 (HTTP {$httpCode}): " . $error . "\nResponse: " . $response);
+        }
+
+        $response = [
+            "status" => "success",
+            "message" => "인증번호가 전송되었습니다.",
+            "data" => [
+                "phoneNumber" => $phone,
+                "verificationCode" => $verificationCode // 개발 중에만 표시
+            ]
+        ];
+
+    } catch (Exception $e) {
+        throw new Exception("SMS 전송 실패: " . $e->getMessage());
+    }
 
 } catch (Exception $e) {
-    // 디버깅: 예외 발생 로그
-    error_log("Exception occurred: " . $e->getMessage());
-    error_log("Stack trace: " . $e->getTraceAsString());
-    
-    // 모든 출력 버퍼 비우기
-    ob_clean();
-    
-    // 에러 응답
-    $error = [
-        'status' => 'error',
-        'message' => $e->getMessage()
+    error_log("Error: " . $e->getMessage());
+    http_response_code(400);
+    $response = [
+        "status" => "error",
+        "message" => $e->getMessage(),
+        "debug" => [
+            "file" => $e->getFile(),
+            "line" => $e->getLine(),
+            "trace" => $e->getTraceAsString()
+        ]
     ];
-    $jsonError = json_encode($error, JSON_UNESCAPED_UNICODE);
-    error_log("Sending error response: " . $jsonError);
-    
-    // 응답 전송
-    http_response_code(500);
-    echo $jsonError;
-    exit;
 } finally {
-    // 리소스 정리
     if (isset($stmt)) {
         $stmt->close();
     }
     if (isset($mysqli)) {
         $mysqli->close();
     }
-    
-    // 디버깅: 스크립트 종료 로그
-    error_log("Script ended");
-    
-    // 출력 버퍼 종료
-    ob_end_flush();
-} 
+}
+
+// 출력 버퍼 비우기
+ob_clean();
+
+// JSON 응답 생성
+$jsonResponse = json_encode($response, JSON_UNESCAPED_UNICODE);
+
+// 응답 길이 설정
+header('Content-Length: ' . strlen($jsonResponse));
+
+// 응답 전송
+echo $jsonResponse;
+
+// 출력 버퍼 종료
+ob_end_flush(); 

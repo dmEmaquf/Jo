@@ -14,26 +14,65 @@ ini_set('error_log', 'signup_errors.log');
 // JSON 응답 헤더 설정
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
+
+// OPTIONS 요청 처리
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    ob_end_flush();
+    exit();
+}
+
+// POST 요청이 아닌 경우 오류 반환
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode([
+        "status" => "error",
+        "message" => "잘못된 요청 메소드입니다."
+    ]);
+    ob_end_flush();
+    exit();
+}
 
 // DB 연결
 require_once "db.php";
 
 try {
-    // 요청 데이터 파싱
-    $rawInput = file_get_contents("php://input");
-    error_log("Received signup request: " . $rawInput);
-    
-    $data = json_decode($rawInput);
+    // JSON 요청 데이터 읽기
+    $json = file_get_contents("php://input");
+    $data = json_decode($json, true);
+
+    // JSON 파싱 오류 처리
     if (json_last_error() !== JSON_ERROR_NONE) {
-        throw new Exception("잘못된 JSON 형식입니다: " . json_last_error_msg());
+        http_response_code(400);
+        echo json_encode([
+            "status" => "error",
+            "message" => "잘못된 JSON 형식입니다.",
+            "debug" => [
+                "json_error" => json_last_error_msg(),
+                "raw_input" => $json
+            ]
+        ]);
+        ob_end_flush();
+        exit();
+    }
+
+    // 필수 필드 검증
+    if (!isset($data['phoneNumber']) || !isset($data['password']) || !isset($data['verificationCode'])) {
+        http_response_code(400);
+        echo json_encode([
+            "status" => "error",
+            "message" => "전화번호, 비밀번호, 인증번호가 필요합니다."
+        ]);
+        ob_end_flush();
+        exit();
     }
 
     // 입력값 추출
-    $phone = $data->phoneNumber ?? "";
-    $password = $data->password ?? "";
-    $verificationCode = $data->verificationCode ?? "";
+    $phone = $data['phoneNumber'];
+    $password = $data['password'];
+    $verificationCode = $data['verificationCode'];
 
     error_log("Phone: " . $phone . ", Verification Code: " . $verificationCode);
 
@@ -42,16 +81,11 @@ try {
         throw new Exception("전화번호, 비밀번호, 인증번호가 필요합니다.");
     }
 
-    // 중복 체크: 이미 존재하는 전화번호인지 확인
-    $checkStmt = $mysqli->prepare("SELECT user_id FROM SimpleUsers WHERE phonenumber = ?");
-    $checkStmt->bind_param("s", $phone);
-    $checkStmt->execute();
-    $checkResult = $checkStmt->get_result();
-
-    if ($checkResult->num_rows > 0) {
-        throw new Exception("이미 가입된 전화번호입니다. 로그인을 시도해주세요.");
+    // 전화번호 형식 검증 (한국 휴대폰 번호)
+    $phone = preg_replace('/[^0-9]/', '', $phone); // 숫자만 추출
+    if (!preg_match('/^01[016789][0-9]{7,8}$/', $phone)) {
+        throw new Exception('유효하지 않은 전화번호 형식입니다.');
     }
-    $checkStmt->close();
 
     // 비밀번호 유효성 검사
     if (strlen($password) < 8) {
@@ -94,6 +128,16 @@ try {
     // 만료 시간 확인
     if (strtotime($verification['expires_at']) < time()) {
         throw new Exception("인증번호가 만료되었습니다. 새로운 인증번호를 발급받아주세요.");
+    }
+
+    // 이미 가입된 전화번호인지 확인
+    $stmt = $mysqli->prepare("SELECT user_id FROM SimpleUsers WHERE phonenumber = ?");
+    $stmt->bind_param("s", $phone);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        throw new Exception("이미 가입된 전화번호입니다.");
     }
 
     // 비밀번호 해싱

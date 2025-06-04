@@ -33,8 +33,13 @@ class PhoneVerificationRepository {
                         return@withContext Result.failure(Exception("서버 응답에 문제가 있습니다. 관리자에게 문의해주세요."))
                     }
 
+                    // JSON 파싱 시도
                     val verificationResponse = gson.fromJson(responseBody, PhoneVerificationResponse::class.java)
-                    Result.success(verificationResponse)
+                    if (verificationResponse.status == "success") {
+                        Result.success(verificationResponse)
+                    } else {
+                        Result.failure(Exception(verificationResponse.message))
+                    }
                 } catch (e: JsonSyntaxException) {
                     Log.e("PhoneVerification", "JSON parsing error: ${e.message}")
                     Log.e("PhoneVerification", "Error location: ${e.cause?.message}")
