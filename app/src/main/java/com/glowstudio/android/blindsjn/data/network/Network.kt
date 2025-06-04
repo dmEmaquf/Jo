@@ -36,23 +36,28 @@ fun isNetworkAvailable(context: Context): Boolean {
 class ResponseInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
         val response = chain.proceed(chain.request())
-        val responseBody = response.body?.string()
-        
-        // Extract JSON from response if it contains HTML warnings
-        val jsonResponse = responseBody?.let { body ->
-            val jsonStart = body.indexOf('{')
-            val jsonEnd = body.lastIndexOf('}')
-            if (jsonStart >= 0 && jsonEnd > jsonStart) {
-                body.substring(jsonStart, jsonEnd + 1)
-            } else {
-                body
-            }
-        } ?: "{}"
+        try {
+            val responseBody = response.body?.string()
+            
+            // Extract JSON from response if it contains HTML warnings
+            val jsonResponse = responseBody?.let { body ->
+                val jsonStart = body.indexOf('{')
+                val jsonEnd = body.lastIndexOf('}')
+                if (jsonStart >= 0 && jsonEnd > jsonStart) {
+                    body.substring(jsonStart, jsonEnd + 1)
+                } else {
+                    body
+                }
+            } ?: "{}"
 
-        // Create new response with cleaned body
-        return response.newBuilder()
-            .body(ResponseBody.create(response.body?.contentType(), jsonResponse))
-            .build()
+            // Create new response with cleaned body
+            return response.newBuilder()
+                .body(ResponseBody.create(response.body?.contentType(), jsonResponse))
+                .build()
+        } catch (e: Exception) {
+            // 오류 발생 시 원본 응답 반환
+            return response
+        }
     }
 }
 
@@ -62,7 +67,7 @@ class PostMethodInterceptor : Interceptor {
         val original = chain.request()
         val request = original.newBuilder()
             .header("Content-Type", "application/json")
-            .method("POST", original.body)
+            .method(original.method, original.body)
             .build()
         return chain.proceed(request)
     }
